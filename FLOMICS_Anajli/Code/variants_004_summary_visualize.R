@@ -36,7 +36,7 @@ setwd("/Users/kisaev/FLOMICS_Anjali/FLOMICS_Anajli/Data")
 #data 
 #----------------------------------------------------------------------
 
-variant_files = list.files(pattern="VCFs_.rds")
+variant_files = list.files(pattern="_.rds")
 
 #gene annotations
 genes = unique(fread("ucsc_table_browser_gene_IDs.txt"))
@@ -52,18 +52,20 @@ summary_vars = function(variants){
   
   #extract name of tool that was used to call variants and whether they are INDELs or SNPs
   variants_callers=paste(unlist(strsplit(variants, "_"))[3:5], collapse=" ")
+  print(variants_callers)
   
   #read in file 
   var_dat = readRDS(variants)
   
   #remove population variants via snpdb 
+  var_dat$avsnp142 = as.character(var_dat$avsnp142)
   z = which(str_detect(var_dat$avsnp142, "rs"))
   if(!(length(z)==0)){
     var_dat = var_dat[-z,]
   }
 
   #remove potential population variants with high popluation allele frequencies 
-  var_dat$AF_popmax = as.numeric(unlist(var_dat$AF_popmax))
+  var_dat$AF_popmax = as.numeric(as.character(var_dat$AF_popmax))
   var_dat = as.data.table(filter(var_dat, ((is.na(AF_popmax) )| AF_popmax < 0.05)))
   
   #get gene names 
@@ -72,6 +74,7 @@ summary_vars = function(variants){
   #if multiple genes mapped to variant (usually if in between genes or upstream of genes, or if gene has multiple ENSG ids)
   #keep id of first gene
   var_dat$Gene.ensGene = sapply(var_dat$Gene.ensGene, function(t){unlist(strsplit(t, '\\x', fixed=TRUE))[1]})
+  var_dat$Gene.ensGene = as.character(var_dat$Gene.ensGene)
   var_dat = merge(var_dat, genes , by = "Gene.ensGene", allow.cartesian=TRUE)
   var_dat = as.data.table(filter(var_dat, !(is.na(hg19.ensemblToGeneName.value))))
   

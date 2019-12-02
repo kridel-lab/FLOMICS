@@ -18,7 +18,7 @@ date = Sys.Date()
 print(date)
 args = commandArgs(trailingOnly = TRUE)
 index = args[1]
-print(index) #index is the name of the algorithm that was used 
+print(index) #index is the name of the algorithm that was used, loFreq_VCFs for example
 
 setwd(paste("/cluster/projects/kridelgroup/FLOMICS/variant_analysis_folder/", index, sep=""))
 
