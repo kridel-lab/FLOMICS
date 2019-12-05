@@ -66,7 +66,15 @@ summary_vars = function(variants){
 
   #remove potential population variants with high popluation allele frequencies 
   var_dat$AF_popmax = as.numeric(as.character(var_dat$AF_popmax))
-  var_dat = as.data.table(filter(var_dat, ((is.na(AF_popmax) )| AF_popmax < 0.05)))
+  var_dat = as.data.table(filter(var_dat, ((is.na(AF_popmax) )| AF_popmax < 0.005)))
+  
+  #check if some mutations are potentially artifacts
+  #summary of actual mutations 
+  freq_muts = as.data.table(filter(as.data.table(table(var_dat$patient, var_dat$id, var_dat$hg19.ensemblToGeneName.value)), N >=1))
+  freq_muts$combo = paste(freq_muts$V2, freq_muts$V3)
+  freq_muts = as.data.table(table(freq_muts$combo))
+  freq_muts = freq_muts[order(-N)]
+  
   
   #get gene names 
   #ensembl to gene ID
@@ -95,13 +103,12 @@ summary_vars = function(variants){
   print(ggbarplot(freq_genes, x = "V1", y="N", fill="grey") +theme_bw() + 
     rotate_x_text(65) + ylab("Number of patients with mutation") + xlab("Patient") + ggtitle(paste(variants_callers, ",n=", dim(freq_pats)[1], "at least 1 mutation")))
   
-  #2. summary of actual mutations 
-  freq_muts = as.data.table(filter(as.data.table(table(var_dat$patient, var_dat$id)), N >=1))
-  freq_muts = as.data.table(table(freq_muts$V2))
-  freq_muts = freq_muts[order(-N)]
+  #3. summary of where in genome mutations fall 
+  table(as.character(var_dat$Func.ensGene))
   
-  print(ggbarplot(freq_muts, x = "V1", y="N", fill="grey") +theme_bw() + 
-    rotate_x_text(90) + ylab("Number of patients with mutation") + xlab("Patient") + ggtitle(paste(variants_callers, ",n=", dim(freq_pats)[1], "at least 1 mutation")))
+  
+  #print(ggbarplot(freq_muts, x = "V1", y="N", fill="grey") +theme_bw() + 
+  #  rotate_x_text(90) + ylab("Number of patients with mutation") + xlab("Patient") + ggtitle(paste(variants_callers, ",n=", dim(freq_pats)[1], "at least 1 mutation")))
  
   dev.off() 
   
