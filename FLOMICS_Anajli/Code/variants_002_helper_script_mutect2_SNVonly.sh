@@ -39,13 +39,14 @@ out_dir=/cluster/projects/kridelgroup/FLOMICS/variant_analysis_folder
 
 #now normalize VCF coordinates 
 input_vcf=${index}.filtered.selectSNP.PASS.vcf
-cd $out_dir
 
 #[4]
 
 #normalize variants, send to standard out and remove duplicates.
 ref=/cluster/projects/kridelgroup/RAP_ANALYSIS/human_g1k_v37_decoy.fasta #fasta file for hg19 from previous work 
 vt normalize ${input_vcf} -r $ref -o $out_dir/normalized_${input_vcf}
+
+cd $out_dir
  
 #[5]
 
@@ -71,7 +72,6 @@ table_annovar.pl --buildver hg19 retagged_$anno_input /cluster/tools/software/an
 
 #remove original AF column
 vt rminfo ${index}_${algo}_norm_anno.vcf.hg19_multianno.vcf -t AF -o ${index}_${algo}_norm_anno.vcf.hg19_multianno.vcf
-mkdir ${algo}_VCFs
 mv ${index}_${algo}_norm_anno.vcf.hg19_multianno.vcf ${algo}_VCFs
 rm *${index}*
 

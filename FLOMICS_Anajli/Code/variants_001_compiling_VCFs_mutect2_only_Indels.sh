@@ -17,7 +17,7 @@ wd=/cluster/projects/kridelgroup/FLOMICS/TargetedDNAseq/DATA-157/variants
 cd $wd 
 
 #generate text file with names of all samples 
-ls > /cluster/projects/kridelgroup/FLOMICS/variant_analysis_folder/samples_names.txt
+#ls > /cluster/projects/kridelgroup/FLOMICS/variant_analysis_folder/samples_names.txt
 
 #go into analysis folder where we have writing permissions
 cd /cluster/projects/kridelgroup/FLOMICS/variant_analysis_folder
