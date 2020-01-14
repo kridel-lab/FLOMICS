@@ -83,7 +83,7 @@ summary_vars = function(variants){
   freq_muts$combo = paste(freq_muts$V2, freq_muts$V3)
   freq_muts = as.data.table(table(freq_muts$combo))
   freq_muts = freq_muts[order(-N)]
-  freq_muts$tag[freq_muts$N > 0.05 * length(unique(var_dat$patient))] = "tagged"
+  freq_muts$tag[freq_muts$N > 0.1 * 131] = "tagged"
   var_dat$combo = paste(var_dat$id, var_dat$Gene.ensGene)
   z = which(var_dat$combo %in% freq_muts$V1[freq_muts$tag=="tagged"])
   var_dat$tag = ""
@@ -143,14 +143,25 @@ all_muts$combo = paste(all_muts$id, all_muts$hg19.ensemblToGeneName.value)
 all_muts_sum = as.data.table(table(all_muts$combo, all_muts$data_type, all_muts$mut_type))
 all_muts_sum = as.data.table(filter(all_muts_sum, N >0))
 colnames(all_muts_sum) = c("mut_id", "mutation_caller", "type_mut", "num_patients")
+z = which(all_muts_sum$mut_id %in% all_muts$combo[all_muts$tag=="tagged"])
+all_muts_sum$tagged = ""
+all_muts_sum$tagged[z] = "more_t10perc_patients_wmut"
+write.csv(all_muts_sum, file=paste(date, "summary_muts_across_platforms_FLOMICS_BC_datat.csv", sep="_"), quote=F, row.names=F)
 
+#total muts by algorithm and how many in common
+algo_sum = as.data.table(table(all_muts$combo, all_muts$data_type)) ; algo_sum = algo_sum[order(-N)]
+algo_sum = as.data.table(filter(algo_sum, N >0))
 
+#plot how many muts in diff combinations of algos 
+t =as.data.table(dcast(algo_sum, V1 ~ V2, value.var = "N"))
+colnames(t)=c("MutationID", "loFreq_SNVs", "loFreq_Indels", "loFreq_platypus_Indels", 
+              "loFreq_platypus_SNVs", "mutect2_SNVs", "mutect2_Indels")
 
-
-
-
-
-
+t[is.na(t)] <- 0
+z = which(t$MutationID %in% all_muts$combo[all_muts$tag=="tagged"])
+t$tagged = ""
+t$tagged[z] = "more_t10perc_patients_wmut"
+write.csv(t, file=paste(date, "summary_muts_across_platforms_FLOMICS_BC_datat.csv", sep="_"), quote=F, row.names=F)
 
 
 
