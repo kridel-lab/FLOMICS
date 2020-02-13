@@ -23,18 +23,22 @@ get_cov = function(file){
 all_covs = as.data.table(ldply(llply(files, get_cov)))
 
 #are there regions that are never covered in anyone?
-all_covs$region_pres = ""
-all_covs$region_pres[all_covs$value == 0] = "NoCov"
-all_covs$region_pres[all_covs$value >= 100] = "HighCov"
-all_covs$region_pres[all_covs$region_pres == ""] = "SomeCov"
 mean_cov = filter(all_covs, type_measure == "Mean_Coverage")
-write.table(mean_cov, file="BC_TargetedSeq_summary_coverage_regions.csv", quote=F, row.names=F, sep=";")
+mean_cov$region_pres = ""
+mean_cov$region_pres[mean_cov$value == 0] = "NoCov" #100 is median value overall
+mean_cov$region_pres[mean_cov$value >= 101.37] = "HighCov"
+mean_cov$region_pres[mean_cov$region_pres == ""] = "SomeCov"
+write.table(mean_cov, file="BC_TargetedSeq_summary_coverage_regions_mean_cov.csv", quote=F, row.names=F, sep=";")
 
 #---------------------
 #PATIENT BASED SUMMARY#
 #---------------------
 
 #summarize type of coverage per sample
+all_covs$region_pres = ""
+all_covs$region_pres[all_covs$value == 0] = "NoCov" #100 is median value overall
+all_covs$region_pres[all_covs$value >= 101.37] = "HighCov"
+all_covs$region_pres[all_covs$region_pres == ""] = "SomeCov"
 pats_sum = as.data.table(table(all_covs$pats, all_covs$region_pres, all_covs$type_measure))
 colnames(pats_sum) = c("Patient", "Type_Coverage", "Measure_Cov", "Number_regions")
 pats_sum$Type_Coverage = factor(pats_sum$Type_Coverage, levels = c("NoCov", "SomeCov", "HighCov"))
@@ -59,7 +63,7 @@ dev.off()
 #REGION BASED SUMMARY#
 #---------------------
 
-#summarize type of coverage per sample
+#summarize type of coverage per gene
 reg_sum = as.data.table(table(all_covs$Exon_Genomic_Coordinates, all_covs$region_pres, all_covs$type_measure))
 colnames(reg_sum) = c("Region", "Type_Coverage", "Measure_Cov", "Number_regions")
 reg_sum$Type_Coverage = factor(reg_sum$Type_Coverage, levels = c("NoCov", "SomeCov", "HighCov"))
