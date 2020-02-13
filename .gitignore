@@ -1,3 +1,4 @@
 #exclude text files for now
 *.txt
 .Rproj.user
+*.rds
