@@ -1,4 +1,4 @@
-# Follicular Lymphoma - integrating data from gene expression, methylome and mutation profiling to discover new subtypes 
+# Follicular Lymphoma - integrating data from genome, transcriptome and methylome to discover new subtypes 
 
 ## Analysis breakdown 
 
