@@ -1,6 +1,6 @@
 rule all:
     input:
-        "/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/opossum_platypus/{sample}.clean.vcf"
+        "/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/opossum_platypus/{sample}.vcf"
 
 rule samtools_md:
     input:

@@ -21,4 +21,4 @@ echo $index
 #submit patient specific job
 #here the input to the job is the patient name...
 
-Rscript /cluster/home/kisaev/bioinformatics_misc/RNASEQ_TGL_ALIGNMENT_VARIANT_CALLING/opossum_platypus_snakemake/variant_annotation_process.R  $index
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/VariantCalling/003_soft_variant_filtering_process.R  $index
