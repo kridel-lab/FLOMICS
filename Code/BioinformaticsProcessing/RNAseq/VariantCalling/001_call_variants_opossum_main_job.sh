@@ -16,7 +16,6 @@ module load annovar
 
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STAR/
 #ls  *Aligned.sortedByCoord.out.bam  > all_star_files
-#ls  *.vcf  > all_vcf_files
 
 for sample in $(cat all_star_files)    #for each patient sample...
 do

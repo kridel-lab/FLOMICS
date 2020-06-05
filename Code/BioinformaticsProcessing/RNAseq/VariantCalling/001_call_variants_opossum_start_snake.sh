@@ -25,6 +25,6 @@ echo $sample
 
 out=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/opossum_platypus
 
-snakemake -s /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/VariantCalling/get_variants.snakefile/001_call_variants_snakemake.snakefile $out/${sample}.vcf --rerun-incomplete --nolock
+snakemake -s /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/VariantCalling/001_call_variants_snakemake.snakefile $out/${sample}.vcf --rerun-incomplete --nolock
 
 echo $index    #print folder or patient name...
