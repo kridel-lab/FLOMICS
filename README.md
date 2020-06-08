@@ -4,7 +4,8 @@
 
 ## Gene expression 
 
-- Alignment from RNA-seq and extracting gene counts [code]
+- Alignment from RNA-seq and extracting gene counts (/Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/
+)
 - Differential gene expression analysis [code]
 - Pathway enrichment analysis [code] 
 
