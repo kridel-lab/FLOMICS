@@ -34,9 +34,6 @@ lapply(packages, require, character.only = TRUE)
 #data
 #----------------------------------------------------------------------
 
-paired = list.files(pattern=".clean.chrs.vcf.hg19_multianno.sorted.reheader.vcf.gz.gz")
-print(paired)
-
 args = commandArgs(trailingOnly = TRUE) #patient ID
 index = args[1]
 print(index)

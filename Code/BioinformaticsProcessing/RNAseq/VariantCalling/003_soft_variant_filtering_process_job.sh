@@ -14,13 +14,13 @@ module load gatk
 module load annovar
 
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/annovar
-#ls *.clean.chrs.vcf.hg19_multianno.sorted.reheader.filtered.vcf.gz > all_vcf_files
+#ls *.clean.chrs.vcf.hg19_multianno.sorted.reheader.vcf.gz > all_vcf_files
 
 for sample in $(cat all_vcf_files)    #for each patient sample...
 do
     #submit patient specific job
     #here the input to the job is the patient name...
-    sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/VariantCalling/002_variant_annotation_cleanup.sh  $sample
+    sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/VariantCalling/003_soft_variant_filtering_process.sh  $sample
     echo $sample    #print folder or patient name...
 
 done
