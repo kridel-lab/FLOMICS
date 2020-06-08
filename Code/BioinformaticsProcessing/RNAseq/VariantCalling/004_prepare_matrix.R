@@ -81,19 +81,3 @@ all_dat$mut_found_rnaseq = ""
 all_dat$mut_found_rnaseq[z] = "yes"
 
 write.table(all_dat, file=paste(date, "opossum_variant_FL_rna-seq_filtered.txt", sep="_"), sep="\t", quote=F, row.names=F)
-
-#----------------------------------------------------------------------
-#analysis
-#----------------------------------------------------------------------
-
-#convert to maftools object
-#path to TCGA LAML MAF file
-
-maff = read.maf(maf = "maftools_file_all_samples.txt", vc_nonSyn=c(
- "exonic nonsynonymous_SNV" ,
- "exonic nonframeshift_deletion",
- "exonic frameshift_deletion" ,
-  "exonic frameshift_insertion"   ,
-"splicing ."  , "exonic stopgain"   ,
-"exonic unknown" , "exonic nonframeshift_insertion",
-"exonic stoploss"))
