@@ -4,12 +4,14 @@
 
 ## Gene expression 
 
-- Alignment from RNA-seq and extracting gene counts [code]
-- Differential gene expression analysis [code]
-- Pathway enrichment analysis [code] 
+- Alignment from RNA-seq and extracting gene counts [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/
+)
+- Differential gene expression analysis [Code]
+- Pathway enrichment analysis [Code] 
 
 ## Mutation profiling 
 
-- Variant calling and annotation from RNA-seq alignments [code]
-- Mutation calling and annotatio from targeted DNA sequencing [code]
-- Visualization of mutations across clusters and stages [code] 
+- Variant calling and annotation from RNA-seq alignments [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
+)
+- Mutation calling and annotation from targeted DNA sequencing [Code]
+- Visualization of mutations across clusters and stages [Code] 
