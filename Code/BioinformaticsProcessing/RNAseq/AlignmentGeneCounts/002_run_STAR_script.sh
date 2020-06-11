@@ -27,10 +27,14 @@ echo $index
 path1=${index}_R1.fastq
 path2=${index}_R2.fastq
 genome=/cluster/projects/kridelgroup/FLOMICS/genome_files
-out=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ
+out=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ
+
+#sort FASTQ files by their sequence identifier
+cat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R1_sorted.fastq
+cat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R2_sorted.fastq
 
 #two pass mapping + get gene counts
 STAR --genomeDir /cluster/projects/kridelgroup/FLOMICS/genome_files/ \
---readFilesIn $path1 $path2 --outSAMtype BAM SortedByCoordinate \
+--readFilesIn ${index}_R1_sorted.fastq ${index}_R2_sorted.fastq --outSAMtype BAM SortedByCoordinate \
 --outSAMunmapped None --outFileNamePrefix $out/${index} --quantMode GeneCounts \
 --twopassMode Basic --readFilesCommand zcat

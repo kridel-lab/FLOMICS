@@ -14,7 +14,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/annovar")
 
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "vcfR", "tidyr", "mclust", "data.table", "plyr",
-	"ggrepel", "stringr", "maftools")
+	"ggrepel", "stringr", "maftools", "readxl")
 lapply(packages, require, character.only = TRUE)
 library("readxl")
 
@@ -58,7 +58,7 @@ all_dat = as.data.table(ldply(llply(paired, read_f)))
 #write.table(all_dat, file="maftools_file_all_samples.txt", quote=F, row.names=F, sep="\t")
 
 pats = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-05-13_summary_KI_ClusterContamAdded.xlsx"))
-colnames(pats)[3] = "Tumor_Sample_Barcode"
+colnames(pats)[3] = "Tumor_Sample_Barcode" #132 here
 
 all_dat = merge(all_dat, pats, by = "Tumor_Sample_Barcode")
 
