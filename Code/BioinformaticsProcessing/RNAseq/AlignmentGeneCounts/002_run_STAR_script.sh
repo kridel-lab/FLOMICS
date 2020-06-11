@@ -32,13 +32,13 @@ out=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ
 #sort FASTQ files by their sequence identifier
 zcat $path1 \
 | paste - - - - \
-| sort -k1,1 -S \
+| sort -k1,1 -t " " \
 | tr '\t' '\n' \
 | gzip > ${index}_R1_sorted.fastq.gz
 
 zcat $path2 \
 | paste - - - - \
-| sort -k1,1 -S \
+| sort -k1,1 -t " " \
 | tr '\t' '\n' \
 | gzip > ${index}_R2_sorted.fastq.gz
 
