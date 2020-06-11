@@ -47,6 +47,6 @@ zcat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R2_sor
 
 #two pass mapping + get gene counts
 STAR --genomeDir /cluster/projects/kridelgroup/FLOMICS/genome_files/ \
---readFilesIn ${index}_R1_sorted.fastq.gz ${index}_R2_sorted.fastq.gz --outSAMtype BAM SortedByCoordinate \
+--readFilesIn ${index}_R1_sorted.fastq ${index}_R2_sorted.fastq --outSAMtype BAM SortedByCoordinate \
 --outSAMunmapped None --outFileNamePrefix $out/${index} --quantMode GeneCounts \
 --twopassMode Basic
