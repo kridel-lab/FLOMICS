@@ -30,8 +30,8 @@ genome=/cluster/projects/kridelgroup/FLOMICS/genome_files
 out=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ
 
 #sort FASTQ files by their sequence identifier
-cat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R1_sorted.fastq
-cat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R2_sorted.fastq
+zcat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R1_sorted.fastq
+zcat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R2_sorted.fastq
 
 #two pass mapping + get gene counts
 STAR --genomeDir /cluster/projects/kridelgroup/FLOMICS/genome_files/ \
