@@ -43,6 +43,8 @@ out=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ
 #| gzip > ${index}_R2_sorted.fastq.gz
 
 export TMPDIR=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+export TEMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+export TMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
 
 zcat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R1_sorted.fastq
 zcat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${index}_R2_sorted.fastq

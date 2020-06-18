@@ -12,7 +12,7 @@ module load samtools
 module load gatk
 module load annovar
 
-cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STAR
+cd /cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ
 
 #submit patient specific job
 #here the input to the job is the patient name...

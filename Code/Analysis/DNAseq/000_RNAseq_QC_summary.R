@@ -25,6 +25,11 @@ setwd("/Users/kisaev/github/FLOMICS/Data")
 
 qc = as.data.table(read_excel("FL_TGL_STAR_logQC_2020-05-13_summary_KI_ClusterContamAdded.xlsx"))
 
+#qc post sorting FASTQ files first
+qc_sort = fread("FL_TGL_STAR_logQC_2020-06-18_summary_KI.csv")
+
+#add clusters and rrna contamination 
+
 #generate report summarizing key variables
 
 vars = c("rrna_contam",

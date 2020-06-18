@@ -1,7 +1,7 @@
 library(data.table)
 library(plyr)
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ")
+setwd("/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_BAM_RNASEQ_sorted_FASTQ")
 
 count_files=list.files(pattern="ReadsPerGene.out.tab")
 
@@ -22,4 +22,6 @@ all_counts=as.data.table(ldply(llply(count_files, get_counts_clean, .progress="t
 #pull into one matrix
 mat=(dcast(all_counts, V1 ~ sample, value.var="V2"))
 colnames(mat)[1] = "gene"
-write.table(mat, paste(out,"STAR_quantmode_counts_matrix_FL_136_patients.txt",sep=""), quote=F, row.names=F, sep="\t")
+date=Sys.Date()
+
+write.table(mat, paste(out, date, "STAR_quantmode_counts_matrix_FL_136_patients.txt",sep=""), quote=F, row.names=F, sep="\t")
