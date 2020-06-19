@@ -41,4 +41,4 @@ star_summary_dcast$SAMPLE_ID[z] = paste(star_summary_dcast$SAMPLE_ID[z], "_T1", 
 
 star_summary_dcast = merge(star_summary_dcast, sample_info, by="SAMPLE_ID")
 
-write.table(star_summary_dcast, file=paste("/cluster/home/kisaev/data/FL_TGL_STAR_logQC", date, "summary_KI.csv", sep="_"), quote=F, row.names=F, sep=";")
+write.table(star_summary_dcast, file=paste("/cluster/home/kisaev/data/FL_TGL_STAR_logQC", date, "summary_KI.txt", sep="_"), quote=F, row.names=F, sep=";")

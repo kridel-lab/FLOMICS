@@ -27,20 +27,20 @@ setwd("/Users/kisaev/github/FLOMICS/Data")
 #----------------------------------------------------------------------
 
 #gene annotations
-#UCSC gene classes
+#UCSC gene classes - only protein coding genes 
 genes_class = as.data.table(grch37)
 genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
 genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
 genes_class = unique(genes_class[,c("ensgene", "symbol")])
 
-exp <- fread("STAR_quantmode_counts_matrix_FL_136_patients.txt")
+exp <- fread("2020-06-18STAR_quantmode_counts_matrix_FL_136_patients.txt")
 #exp = as.data.table(filter(exp, gene %in% genes_class$ensgene))
 
 #these are raw counts
 #normalize gene counts using EdgeR
 
 muts <- fread("2020-06-08_opossum_variant_FL_rna-seq_filtered.txt")
-qc = as.data.table(read_excel("FL_TGL_STAR_logQC_2020-05-13_summary_KI_ClusterContamAdded.xlsx"))
+qc = as.data.table(read_excel("FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
 length(unique(muts$SAMPLE_ID))
 muts = as.data.table(filter(muts, Tumor_Sample_Barcode %in% qc$rna_seq_file_sample_ID))
