@@ -58,7 +58,7 @@ all_dat = as.data.table(ldply(llply(paired, read_f)))
 #write.table(all_dat, file="maftools_file_all_samples.txt", quote=F, row.names=F, sep="\t")
 
 pats = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
-colnames(pats)[3] = "Tumor_Sample_Barcode" #132 here
+colnames(pats)[2] = "Tumor_Sample_Barcode" #132 here
 
 all_dat = merge(all_dat, pats, by = "Tumor_Sample_Barcode")
 
