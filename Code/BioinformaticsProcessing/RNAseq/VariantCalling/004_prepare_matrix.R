@@ -69,7 +69,6 @@ all_dat = as.data.table(filter(all_dat, Hugo_Symbol %in% genes$symbol, !(Variant
 
 length(unique(all_dat$Tumor_Sample_Barcode)) #128
 
-
 #add BC data - check if mutations present
 bc_dat$pat_mut = paste(bc_dat$SAMPLE_ID, bc_dat$Hugo_Symbol, bc_dat$Chromosome, bc_dat$Start_Position, sep="_")
 all_dat$chr = sapply(all_dat$Chromosome, function(x){unlist(strsplit(x, "chr"))[2]})
