@@ -30,7 +30,7 @@ setwd("/Users/kisaev/github/FLOMICS/Data")
 #data filtering
 #----------------------------------------------------------------------
 
-muts <- fread("2020-06-22_opossum_variant_FL_rna-seq_filtered.txt")
+muts <- fread("2020-06-23_opossum_variant_FL_rna-seq_filtered.txt")
 qc = as.data.table(read_excel("FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
 muts = as.data.table(filter(muts, Tumor_Sample_Barcode %in% qc$rna_seq_file_sample_ID))
@@ -50,16 +50,16 @@ get_comp = function(gene, dat, clusts_tot){
 	print(gene)
 	gene_dat = as.data.table(filter(dat, Hugo_Symbol == gene))
 	#only count gene being mutated once per patient
-	gene_dat = unique(gene_dat[,c("SAMPLE_ID", "STAGE", "CLUSTER_InfiniumClust")])
+	gene_dat = unique(gene_dat[,c("SAMPLE_ID", "STAGE", "Cluster")])
 
 	gene_dat$STAGE[which(str_detect(gene_dat$SAMPLE_ID, "RLN"))] = "RLN"
 	gene_dat$STAGE[which(str_detect(gene_dat$SAMPLE_ID, "DLC"))] = "DLBCL"
-	gene_dat$CLUSTER_InfiniumClust = factor(gene_dat$CLUSTER_InfiniumClust)
+	gene_dat$Cluster = factor(gene_dat$Cluster)
 
 	#plot summary
-	plotsum = as.data.table(table(gene_dat$CLUSTER_InfiniumClust))
+	plotsum = as.data.table(table(gene_dat$Cluster))
 	g = ggbarplot(plotsum, x="V1", y="N", fill="grey", title=paste("mutations in", gene)) + xlab("cluster") +
-	ylab("# of patients with at least 1 mutation") + stat_n_text()
+	ylab("# of patients with at least 1 mutation") 
 	print(g)
 
 	#make matrix for fishers test
@@ -112,7 +112,7 @@ get_tier_mut_summary = function(tier){
     #----------------------------------------------------------------------
 
     #[1] which genes are most often mutated in one of two clusters
-    clusters <- as.data.table(table(dat$Hugo_Symbol, dat$CLUSTER_InfiniumClust))
+    clusters <- as.data.table(table(dat$Hugo_Symbol, dat$Cluster))
     colnames(clusters) <- c("gene", "cluster", "num_muts")
     clusters <- clusters[order(-num_muts)]
 
@@ -124,10 +124,10 @@ get_tier_mut_summary = function(tier){
 
     genes = unique(genes_sum$V1)
 
-    dat$CLUSTER_InfiniumClust = factor(dat$CLUSTER_InfiniumClust, levels=c(1,2))
+    dat$Cluster = factor(dat$Cluster, levels=c(1,2))
     #get num unique patients in each cluster
     clusts_tot = as.data.table(table(unique(dat[,c("SAMPLE_ID", "STAGE",
-    "CLUSTER_InfiniumClust")])$CLUSTER_InfiniumClust))
+    "Cluster")])$Cluster))
     colnames(clusts_tot)[2] = "tot_pats"
 
     pdf(paste(date, tier, "Gene_based_rnaseq_variants_summary.pdf", sep="_"))
