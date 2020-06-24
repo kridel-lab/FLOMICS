@@ -23,7 +23,7 @@ module load vcftools
 
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/opossum_platypus
 
-#ls *.vcf > all_vcf_files
+ls *.vcf > all_vcf_files
 
 samples=all_vcf_files
 names=($(cat $samples))

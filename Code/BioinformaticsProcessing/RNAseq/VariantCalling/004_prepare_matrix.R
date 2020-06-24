@@ -57,16 +57,18 @@ read_f = function(f){
 all_dat = as.data.table(ldply(llply(paired, read_f)))
 #write.table(all_dat, file="maftools_file_all_samples.txt", quote=F, row.names=F, sep="\t")
 
-pats = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-05-13_summary_KI_ClusterContamAdded.xlsx"))
+pats = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 colnames(pats)[3] = "Tumor_Sample_Barcode" #132 here
 
 all_dat = merge(all_dat, pats, by = "Tumor_Sample_Barcode")
 
 length(unique(all_dat$Tumor_Sample_Barcode)) #132
 
-#all_dat = as.data.table(filter(all_dat, !(Hugo_Symbol == "TTN")))
 all_dat = as.data.table(filter(all_dat, Hugo_Symbol %in% genes$symbol, !(Variant_Classification %in% c("intronic .", "ncRNA_intronic .", "exonic synonymous_SNV",
 "ncRNA_exonic .", "ncRNA_splicing ."))))
+
+length(unique(all_dat$Tumor_Sample_Barcode)) #128
+
 
 #add BC data - check if mutations present
 bc_dat$pat_mut = paste(bc_dat$SAMPLE_ID, bc_dat$Hugo_Symbol, bc_dat$Chromosome, bc_dat$Start_Position, sep="_")

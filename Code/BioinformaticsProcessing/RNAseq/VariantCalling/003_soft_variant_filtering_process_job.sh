@@ -14,7 +14,7 @@ module load gatk
 module load annovar
 
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/annovar
-#ls *.clean.chrs.vcf.hg19_multianno.sorted.reheader.vcf.gz > all_vcf_files
+ls *.clean.chrs.vcf.hg19_multianno.sorted.reheader.vcf.gz > all_vcf_files
 
 for sample in $(cat all_vcf_files)    #for each patient sample...
 do

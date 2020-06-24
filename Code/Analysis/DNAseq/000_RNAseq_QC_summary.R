@@ -114,8 +114,8 @@ dev.off()
 #summarize how many patients lose from each filter
 z1 = which(qc$rRNAcontam > 40) # 3
 z2 = which(qc$Uniquely.mapped < 10000000) # 0
-z3 = which(qc$'Uniquely.mapped.reads..' < 70) # 51 if 70, 45 if 65, 36 if 60
-z4 = which(qc$'X..of.reads.mapped.to.multiple.loci' > 25) # 12
+z3 = which(qc$'Uniquely.mapped.reads..' < 50) # 51 if 70, 45 if 65, 36 if 60
+z4 = which(qc$'X..of.reads.mapped.to.multiple.loci' > 20) # 12
 
 total_lost = unique(c(z1, z2, z3, z4))
 length(total_lost)
