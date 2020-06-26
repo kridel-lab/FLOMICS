@@ -59,7 +59,7 @@ dim(AnnotationFile) # 866836     47
 
 # SurvivalFile <- data.table::fread(file = "/Users/anjalisilva/Desktop/UHN/FLOMICS/Data_Survival/clinical_data_rcd17Jan2020.txt")
 # cat("\n Dimension of SurvivalFile is", dim(SurvivalFile)) # 496 23
-SurvivalFile <- readRDS(file = paste0(MethylationDirPath, "/SurvivalFile.rds"))
+SurvivalFile <- readRDS(file = paste0(MethylationDirPath, "/SurvivalFile_rcd17Jan2020.rds"))
 dim(SurvivalFile) # 496  23
 
 
@@ -71,7 +71,7 @@ dim(sheet) #  170   8
 # Altered location of clinical file on 10 Oct 2019 
 # ClinicalFile <- data.table::fread(file = "/Users/anjalisilva/Desktop/UHN/FLOMICS/Data_Clinical/sample_annotations_rcd16Oct2019.txt")
 # The following file was generated from PipelineStep1
-ClinicalFile_T1 <- readRDS(file = paste0(MethylationDirPath, "/1_ClinicalFile_updSamples_Ordered_T1.rds"))
+ClinicalFile_T1 <- readRDS(file = paste0(MethylationDirPath, "/1_ClinicalFile_rcd16Oct2019_updSamples_Ordered_T1.rds"))
 dim(ClinicalFile_T1) # 170  25
 
 BetaMatrix_T1 <- readRDS(file = paste0(MethylationDirPath, "/2_BetaMatrix_updSamples_Ordered_T1_FilteredProbes.rds"))
