@@ -2,10 +2,10 @@
 #
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH -p himem
-#SBATCH --mem=61440M
+#SBATCH --mem=21440M
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
-#SBATCH -J bam_sum
-#SBATCH --array=0-146 # job array index
+#SBATCH -J telescope_summary
+#SBATCH --array=0-135 # job array index
 
 module load java/8  #8
 module load samtools
