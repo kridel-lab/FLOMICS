@@ -40,7 +40,7 @@ mkdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results #make directory
 #samtools view -f 2 -o ${names[${SLURM_ARRAY_TASK_ID}]}_fixed_reads.bam ${names[${SLURM_ARRAY_TASK_ID}]} #already done DO NOT RUN
 
 #collate BAM files and read pairs will be sequential
-${names[${SLURM_ARRAY_TASK_ID}]} -o ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam
+samtools ${names[${SLURM_ARRAY_TASK_ID}]} -o ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam
 
 #***fragment count estimates are available in the report***
 telescope assign ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam $annotation --outdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results --tempdir temp
