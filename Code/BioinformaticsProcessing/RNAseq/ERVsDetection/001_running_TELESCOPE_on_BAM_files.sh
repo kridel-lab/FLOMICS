@@ -39,6 +39,11 @@ mkdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results #make directory
 #to overcome this, run this command
 #samtools view -f 2 -o ${names[${SLURM_ARRAY_TASK_ID}]}_fixed_reads.bam ${names[${SLURM_ARRAY_TASK_ID}]} #already done DO NOT RUN
 
+#make temp directory for collated files
+export TMPDIR=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS
+export TEMP=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS
+export TMP=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS
+
 #collate BAM files and read pairs will be sequential
 samtools collate ${names[${SLURM_ARRAY_TASK_ID}]} -o ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam
 
