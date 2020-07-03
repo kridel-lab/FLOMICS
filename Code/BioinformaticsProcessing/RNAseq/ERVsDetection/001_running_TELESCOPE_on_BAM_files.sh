@@ -31,7 +31,7 @@ output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS
 names=($(cat summarize_bams_files))
 echo ${names[${SLURM_ARRAY_TASK_ID}]}
 
-annotation=/cluster/home/kisaev/data/GRCh37_GENCODE_rmsk_TE.gtf #downloaded from ucsc table browser
+annotation=/cluster/projects/kridelgroup/FLOMICS/DATA/GRCh37_GENCODE_rmsk_TE.gtf #downloaded from ucsc table browser
 
 mkdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results #make directory to store report for each sample, later will concattenate them all somehow
 
