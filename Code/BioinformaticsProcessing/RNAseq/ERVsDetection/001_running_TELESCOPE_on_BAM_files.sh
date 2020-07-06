@@ -45,9 +45,11 @@ export TEMP=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS
 export TMP=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS
 
 #collate BAM files and read pairs will be sequential
-samtools collate ${names[${SLURM_ARRAY_TASK_ID}]} -o ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam
+#keeps redirecting to /tmp - do not run!
+#samtools collate ${names[${SLURM_ARRAY_TASK_ID}]} -o ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam
+
 
 #***fragment count estimates are available in the report***
-telescope assign ${names[${SLURM_ARRAY_TASK_ID}]}.collate.bam $annotation --outdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results --tempdir temp
+telescope assign ${names[${SLURM_ARRAY_TASK_ID}]} $annotation --outdir $output/${names[${SLURM_ARRAY_TASK_ID}]}_telescope_results --tempdir $TMPDIR --attribute transcript_id
 
 echo done
