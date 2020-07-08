@@ -31,16 +31,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concate
 #The file below was created by script 003_A_get_ERV_counts_into_matrix.R
 #It read in all 136 tsv files and put it together into one dataframe
 #which we can use further
-all_telescope = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/_2020-07-08_all_telescope_results_matrix.rds")
-
-#information regarding each sample and which stage of disease and cluster they are part of
-sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
-
-#telescope annotation file cleaned up - ERVs family only
-telescope_annotations = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/hg19_clean_repeatmasker_annotations.bed")
-
-#only keep ERVs from Telescope Annotation file in the main Telescope results
-all_telescope = as.data.table(filter(all_telescope, transcript %in% telescope_annotations$V10))
+all_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/_2020-07-08_TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv")
 
 #re-arrange so that samples are in COLUMNS and transcript names are in one column
 all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample, value.var = "final_count"))
@@ -48,8 +39,8 @@ all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample,
 rownames(all_telescope_vertical) = all_telescope_vertical$transcript
 all_telescope_vertical$transcript = NULL
 
-#save final pre-differential expression analysis ERV count matrix for all 136 samples
-write.csv(all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
+#information regarding each sample and which stage of disease and cluster they are part of
+sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
@@ -64,16 +55,16 @@ x <- all_telescope_vertical
 x[is.na(x)] <- 0
 
 #get groups
-sample_info = as.data.table(filter(sample_info, SAMPLE_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
-z = which(colnames(x) %in% sample_info$SAMPLE_ID)
+sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
 x = x[,z]
 
 #reorder so same order of patients as in counts matrix
-sample_info = sample_info[order(match(SAMPLE_ID, colnames(x)))]
+sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
 group= sample_info$STAGE
 
 #confirm everything is in right order
-sample_info$SAMPLE_ID == colnames(x)
+sample_info$rna_seq_file_sample_ID == colnames(x)
 
 #create DGEList object
 df <- DGEList(counts=x,group=group)
@@ -86,14 +77,9 @@ summary(df_samples$lib.size)
 # have sample-specific effects.
 df <- calcNormFactors(df)
 
-# Examine the samples for outliers:
-# Plot in which distances between samples correspond to leading biological
-# coefficient of variation (BCV) between those samples.
-pdf("MDS.pdf")
-plotMDS(df)
-dev.off()
+# Filter out lowly expressed genes - feel free to change this
+#this isn't necessarily best way to do it
 
-# Filter out lowly expressed genes
 sums = apply(df$counts, 1, sum)
 z1 = which(sums > 1000)
 z2 = which(sums < 25000)
@@ -135,7 +121,7 @@ my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
 
 # Set cut-offs for logFC and FDR
 x <- 1 # logFCx
-y <- 0.1 #FDR value
+y <- 1 #keep all p-values for now can filter significant hits later 
 
 #get differential expression results summary from all contrasts
 all_contrasts = colnames(my.contrasts)

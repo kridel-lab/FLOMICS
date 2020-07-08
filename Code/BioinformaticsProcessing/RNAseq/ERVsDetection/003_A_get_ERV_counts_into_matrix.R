@@ -48,11 +48,5 @@ telescope_annotations = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/hg19_c
 #only keep ERVs from Telescope Annotation file in the main Telescope results
 all_telescope = as.data.table(filter(all_telescope, transcript %in% telescope_annotations$V10))
 
-#re-arrange so that samples are in COLUMNS and transcript names are in one column
-all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample, value.var = "final_count"))
-#all_telescope = join(all_telescope, sample_info)
-rownames(all_telescope_vertical) = all_telescope_vertical$transcript
-all_telescope_vertical$transcript = NULL
-
 #save final pre-differential expression analysis ERV count matrix for all 136 samples
 write.csv(all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
