@@ -26,7 +26,7 @@ cd $output
 
 new_output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results
 
-ls -d  *sortedByCoord.out.bam_telescope_results > indiv_telescope_results
+#ls -d  *sortedByCoord.out.bam_telescope_results > indiv_telescope_results
 
 names=($(cat indiv_telescope_results))
 echo ${names[${SLURM_ARRAY_TASK_ID}]}
@@ -36,3 +36,5 @@ mv ${names[${SLURM_ARRAY_TASK_ID}]}.tsv $new_output
 
 #cd ..
 #rm -r ${names[${SLURM_ARRAY_TASK_ID}]}
+
+
