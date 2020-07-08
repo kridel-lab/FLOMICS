@@ -20,6 +20,7 @@ library(plyr)
 library(reshape2)
 library(edgeR)
 library(tidyverse)
+library(readxl)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
 
@@ -55,8 +56,3 @@ all_telescope_vertical$transcript = NULL
 
 #save final pre-differential expression analysis ERV count matrix for all 136 samples
 write.csv(all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
-
-
-
-
-saveRDS(all_telescope, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "all_telescope_results_matrix.rds", sep="_"))
