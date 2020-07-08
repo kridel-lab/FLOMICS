@@ -37,4 +37,26 @@ get_res = function(file){
 }
 
 all_telescope = as.data.table(ldply(llply(results, get_res)))
+
+#information regarding each sample and which stage of disease and cluster they are part of
+sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
+
+#telescope annotation file cleaned up - ERVs family only
+telescope_annotations = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/hg19_clean_repeatmasker_annotations.bed")
+
+#only keep ERVs from Telescope Annotation file in the main Telescope results
+all_telescope = as.data.table(filter(all_telescope, transcript %in% telescope_annotations$V10))
+
+#re-arrange so that samples are in COLUMNS and transcript names are in one column
+all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample, value.var = "final_count"))
+#all_telescope = join(all_telescope, sample_info)
+rownames(all_telescope_vertical) = all_telescope_vertical$transcript
+all_telescope_vertical$transcript = NULL
+
+#save final pre-differential expression analysis ERV count matrix for all 136 samples
+write.csv(all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
+
+
+
+
 saveRDS(all_telescope, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "all_telescope_results_matrix.rds", sep="_"))

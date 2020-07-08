@@ -20,6 +20,7 @@ library(plyr)
 library(reshape2)
 library(edgeR)
 library(tidyverse)
+library(readxl)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
 
@@ -27,35 +28,28 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concate
 #DATA
 #----------------------------------------------------------------------------------
 
-results = list.files(pattern=".tsv")
-#read-in all files and assemble into one data-table
-get_res = function(file){
-	f=fread(file)
-	f$sample = unlist(strsplit(file, "Aligned"))[1]
-  print("done")
-	return(f)
-}
-
-all_telescope = as.data.table(ldply(llply(results, get_res)))
-all_telescope = as.data.table(ldply(llply(results, get_res))) #1561039 unique ERVs detected in at least one sample
-saveRDS(all_telescope, file=paste(date, "all_telescope_results_matrix.rds", sep="_"))
+#The file below was created by script 003_A_get_ERV_counts_into_matrix.R
+#It read in all 136 tsv files and put it together into one dataframe
+#which we can use further
+all_telescope = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/_2020-07-08_all_telescope_results_matrix.rds")
 
 #information regarding each sample and which stage of disease and cluster they are part of
-sample_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.txt")
+sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
 #telescope annotation file cleaned up - ERVs family only
 telescope_annotations = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/hg19_clean_repeatmasker_annotations.bed")
 
 #only keep ERVs from Telescope Annotation file in the main Telescope results
-all_telescope = as.data.table(filter(all_telescope, transcript %in% summ$V1))
+all_telescope = as.data.table(filter(all_telescope, transcript %in% telescope_annotations$V10))
 
 #re-arrange so that samples are in COLUMNS and transcript names are in one column
-all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ SAMPLE_ID, value.var = "final_count"))
-all_telescope = join(all_telescope, sample_info)
-
+all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample, value.var = "final_count"))
+#all_telescope = join(all_telescope, sample_info)
 rownames(all_telescope_vertical) = all_telescope_vertical$transcript
 all_telescope_vertical$transcript = NULL
-write.csv(all_telescope, paste(date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
+
+#save final pre-differential expression analysis ERV count matrix for all 136 samples
+write.csv(all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv", sep="_"), quote=F, row.names=F)
 
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
@@ -109,8 +103,6 @@ df <- df[keep, keep.lib.sizes = FALSE]
 # Write out expression matrix, annotated with gene symbols rather than ENSG identifiers
 exprs.df <- data.frame(cpm(df, normalized.lib.sizes = FALSE, log = FALSE)) # Computes counts per million (CPM) values
 exprs.df$ERV_ids <- row.names(exprs.df)
-write.table(exprs.df, "CPM_exprs_matrix_norm_filt_ERVs_FL_109_cases.txt", sep = "\t", row.names = F, quote=F)
-write.csv(exprs.df, "CPM_exprs_matrix_norm_filt_ERVs_FL_109_cases.csv", row.names = F, quote=F)
 
 #---
 # Set up comparisons----
@@ -166,4 +158,4 @@ all_de_ervs = as.data.table(ldply(llply(all_contrasts, get_res)))
 colnames(all_de_ervs)[6] = "transcript"
 all_de_ervs = join(all_de_ervs,telescope_annotations)
 
-write.csv(all_de_ervs, file=paste(date, "Telescope_ERVs_differentially_ADVANCED_vs_LIMITED.csv", sep="_"), quote=F, row.names=F) #requierd columns 7, 1, 5
+#save results and upload to OneDrive
