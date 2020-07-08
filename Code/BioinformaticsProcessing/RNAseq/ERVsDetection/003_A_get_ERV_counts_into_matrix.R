@@ -37,4 +37,4 @@ get_res = function(file){
 }
 
 all_telescope = as.data.table(ldply(llply(results, get_res)))
-saveRDS(all_telescope, file=paste(date, "all_telescope_results_matrix.rds", sep="_"))
+saveRDS(all_telescope, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date, "all_telescope_results_matrix.rds", sep="_"))
