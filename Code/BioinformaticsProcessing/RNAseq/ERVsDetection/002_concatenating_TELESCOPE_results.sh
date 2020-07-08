@@ -20,15 +20,15 @@ module load bedtools
 #The output is TAB-delimited with each line consisting of reference sequence name,
 #sequence length, # mapped reads and # unmapped reads.
 
-output=/cluster/projects/kridelgroup/FLOMICS/TELESCOPE_ANALYSIS
+output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS
 
 cd $output
 
 new_output=/cluster/projects/kridelgroup/FLOMICS/TELESCOPE_ANALYSIS/concatenated_results
 
-ls -d  *sortedByCoord.out.bam_telescope_results > indiv_telescope_resultst
+ls -d  *sortedByCoord.out.bam_telescope_results > indiv_telescope_results
 
-names=($(cat indiv_telescope_resultst))
+names=($(cat indiv_telescope_results))
 echo ${names[${SLURM_ARRAY_TASK_ID}]}
 cd ${names[${SLURM_ARRAY_TASK_ID}]}
 scp *.tsv ${names[${SLURM_ARRAY_TASK_ID}]}.tsv
