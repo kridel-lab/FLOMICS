@@ -21,38 +21,32 @@ library(reshape2)
 library(edgeR)
 library(tidyverse)
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 147 tsv files are stored
+setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
 
 #----------------------------------------------------------------------------------
 #DATA
 #----------------------------------------------------------------------------------
 
 results = list.files(pattern=".tsv")
-
-sample_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.txt")
-telescope_annotations = fread("/cluster/home/kisaev/data/telescope_hg19.gtf.bed")
-
-#clean up 10th colunmn with ERV info
-telescope_annotations = telescope_annotations %>% separate("V10", into=c("x", "xb", "gene_id", "xx", "transcript_id",
-  "xxx", "locus", "xxxx", "repName", "xxxxx", "geneRegion", sep=" "))
-telescope_annotations = telescope_annotations[,c(1:4, 12:13)]
-colnames(telescope_annotations) = c("Chr", "Start", "End", "transcript", "ERV_ID", "locus")
-
 #read-in all files and assemble into one data-table
 get_res = function(file){
 	f=fread(file)
 	f$sample = unlist(strsplit(file, "Aligned"))[1]
+  print("done")
 	return(f)
 }
 
 all_telescope = as.data.table(ldply(llply(results, get_res)))
-all_telescope = as.data.table(filter(all_telescope, !(transcript== "__no_feature")))
-colnames(all_telescope)[12] = "SAMPLE_ID"
+all_telescope = as.data.table(ldply(llply(results, get_res))) #1561039 unique ERVs detected in at least one sample
+saveRDS(all_telescope, file=paste(date, "all_telescope_results_matrix.rds", sep="_"))
 
-#summary of how many ERVs were evaluated for each sample
-summ = as.data.table(table(all_telescope$transcript))
-summ = summ[order(-N)]
-#summ = as.data.table(filter(summ, N > 75)) #only keep those ERVs that have been detected in at least 55 samples
+#information regarding each sample and which stage of disease and cluster they are part of
+sample_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.txt")
+
+#telescope annotation file cleaned up - ERVs family only
+telescope_annotations = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/hg19_clean_repeatmasker_annotations.bed")
+
+#only keep ERVs from Telescope Annotation file in the main Telescope results
 all_telescope = as.data.table(filter(all_telescope, transcript %in% summ$V1))
 
 #re-arrange so that samples are in COLUMNS and transcript names are in one column
