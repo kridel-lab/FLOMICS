@@ -33,12 +33,6 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concate
 #which we can use further
 all_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/_2020-07-08_TELESCOPE_OUTPUT_WITH_SAMPLE_ANNOTATION.csv")
 
-#re-arrange so that samples are in COLUMNS and transcript names are in one column
-all_telescope_vertical = as.data.frame(dcast(all_telescope, transcript ~ sample, value.var = "final_count"))
-#all_telescope = join(all_telescope, sample_info)
-rownames(all_telescope_vertical) = all_telescope_vertical$transcript
-all_telescope_vertical$transcript = NULL
-
 #information regarding each sample and which stage of disease and cluster they are part of
 sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
@@ -50,7 +44,7 @@ get_tier_summary = function(tier){
     dat=sample_info
     print(length(unique(dat$SAMPLE_ID)))
     T3_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
   if(tier == "tier2"){
     dat=sample_info
     z1 = which(dat$rRNAcontam > 40)
@@ -61,7 +55,7 @@ get_tier_summary = function(tier){
     dat=sample_info[-total_lost]
     print(length(unique(dat$SAMPLE_ID)))
     T2_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
   if(tier == "tier1"){
     dat=sample_info
     z1 = which(dat$rRNAcontam > 40)
@@ -72,11 +66,26 @@ get_tier_summary = function(tier){
     dat=sample_info[-total_lost]
     print(length(unique(dat$SAMPLE_ID)))
     T1_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
     return(dat)
     print("done tier analysis")
 }
 all_tiers = as.data.table(ldply(llply(tiers, get_tier_summary)))
+
+T3_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T3_all_telescope.csv")
+T2_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T2_all_telescope.csv")
+T1_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T1_all_telescope.csv")
+
+#re-arrange so that samples are in COLUMNS and transcript names are in one column
+T3_telescope_vert = as.data.frame(dcast(T3_telescope, transcript ~ sample, value.var = "final_count"))
+T2_telescope_vert = as.data.frame(dcast(T2_telescope, transcript ~ sample, value.var = "final_count"))
+T1_telescope_vert = as.data.frame(dcast(T1_telescope, transcript ~ sample, value.var = "final_count"))
+
+
+all_telescope = as.data.table(ldply(llply(results, get_res)))
+#all_telescope = join(all_telescope, sample_info)
+rownames(all_telescope_vertical) = all_telescope_vertical$transcript
+all_telescope_vertical$transcript = NULL
 
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
