@@ -42,6 +42,42 @@ all_telescope_vertical$transcript = NULL
 #information regarding each sample and which stage of disease and cluster they are part of
 sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
+#subset telescope results based on QC tiers
+tiers=c("tier3", "tier2", "tier1")
+#apply downstream code to each tier and then compare results
+get_tier_summary = function(tier){
+  if(tier == "tier3"){
+    dat=sample_info
+    print(length(unique(dat$SAMPLE_ID)))
+    T3_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
+    write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+  if(tier == "tier2"){
+    dat=sample_info
+    z1 = which(dat$rRNAcontam > 40)
+    z2 = which(dat$Uniquely.mapped < 10000000)
+    z3 = which(dat$'Uniquely.mapped.reads..' < 50)
+    z4 = which(dat$'X..of.reads.mapped.to.multiple.loci' > 20)
+    total_lost = unique(c(z1, z2, z3, z4))
+    dat=sample_info[-total_lost]
+    print(length(unique(dat$SAMPLE_ID)))
+    T2_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
+    write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+  if(tier == "tier1"){
+    dat=sample_info
+    z1 = which(dat$rRNAcontam > 40)
+    z2 = which(dat$Uniquely.mapped < 10000000)
+    z3 = which(dat$'Uniquely.mapped.reads..' < 70)
+    z4 = which(dat$'X..of.reads.mapped.to.multiple.loci' > 20)
+    total_lost = unique(c(z1, z2, z3, z4))
+    dat=sample_info[-total_lost]
+    print(length(unique(dat$SAMPLE_ID)))
+    T1_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
+    write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/DATA/TELESCOPE", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    return(dat)
+    print("done tier analysis")
+}
+all_tiers = as.data.table(ldply(llply(tiers, get_tier_summary)))
+
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
 #----------------------------------------------------------------------------------
@@ -121,7 +157,7 @@ my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
 
 # Set cut-offs for logFC and FDR
 x <- 1 # logFCx
-y <- 1 #keep all p-values for now can filter significant hits later 
+y <- 1 #keep all p-values for now can filter significant hits later
 
 #get differential expression results summary from all contrasts
 all_contrasts = colnames(my.contrasts)
