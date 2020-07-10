@@ -19,7 +19,7 @@ library(dplyr)
 library(plyr)
 library(reshape2)
 library(edgeR)
-library(tidyverse)
+#library(tidyverse)
 library(readxl)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
@@ -37,14 +37,12 @@ all_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/_2020-07-08_TE
 sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
 
 #subset telescope results based on QC tiers
-tiers=c("tier3", "tier2", "tier1")
+tiers=c("tier1", "tier2", "tier3")
 #apply downstream code to each tier and then compare results
 get_tier_summary = function(tier){
   if(tier == "tier3"){
     dat=sample_info
-    print(length(unique(dat$SAMPLE_ID)))
-    T3_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    print(length(unique(dat$SAMPLE_ID)))}
   if(tier == "tier2"){
     dat=sample_info
     z1 = which(dat$rRNAcontam > 40)
@@ -53,9 +51,7 @@ get_tier_summary = function(tier){
     z4 = which(dat$'X..of.reads.mapped.to.multiple.loci' > 20)
     total_lost = unique(c(z1, z2, z3, z4))
     dat=sample_info[-total_lost]
-    print(length(unique(dat$SAMPLE_ID)))
-    T2_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    print(length(unique(dat$SAMPLE_ID)))}
   if(tier == "tier1"){
     dat=sample_info
     z1 = which(dat$rRNAcontam > 40)
@@ -64,53 +60,80 @@ get_tier_summary = function(tier){
     z4 = which(dat$'X..of.reads.mapped.to.multiple.loci' > 20)
     total_lost = unique(c(z1, z2, z3, z4))
     dat=sample_info[-total_lost]
-    print(length(unique(dat$SAMPLE_ID)))
-    T1_all_telescope=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+    print(length(unique(dat$SAMPLE_ID)))}
     return(dat)
     print("done tier analysis")
 }
-all_tiers = as.data.table(ldply(llply(tiers, get_tier_summary)))
+tier3_sampleinfo = as.data.table(ldply(llply(tiers[3], get_tier_summary)))
+tier2_sampleinfo = as.data.table(ldply(llply(tiers[2], get_tier_summary)))
+tier1_sampleinfo = as.data.table(ldply(llply(tiers[1], get_tier_summary)))
 
-T3_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T3_all_telescope.csv")
-T2_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T2_all_telescope.csv")
-T1_telescope = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers/T1_all_telescope.csv")
+T3_all_telescope=as.data.table(filter(all_telescope, sample %in% tier3_sampleinfo$rna_seq_file_sample_ID))
+T2_all_telescope=as.data.table(filter(all_telescope, sample %in% tier2_sampleinfo$rna_seq_file_sample_ID))
+T1_all_telescope=as.data.table(filter(all_telescope, sample %in% tier1_sampleinfo$rna_seq_file_sample_ID))
+
+write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
+write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
 
 #re-arrange so that samples are in COLUMNS and transcript names are in one column
-T3_telescope_vert = as.data.frame(dcast(T3_telescope, transcript ~ sample, value.var = "final_count"))
-T2_telescope_vert = as.data.frame(dcast(T2_telescope, transcript ~ sample, value.var = "final_count"))
-T1_telescope_vert = as.data.frame(dcast(T1_telescope, transcript ~ sample, value.var = "final_count"))
+T3_telescope_vert = as.data.frame(dcast(T3_all_telescope, transcript ~ sample, value.var = "final_count"))
+T2_telescope_vert = as.data.frame(dcast(T2_all_telescope, transcript ~ sample, value.var = "final_count"))
+T1_telescope_vert = as.data.frame(dcast(T1_all_telescope, transcript ~ sample, value.var = "final_count"))
 
-
-all_telescope = as.data.table(ldply(llply(results, get_res)))
 #all_telescope = join(all_telescope, sample_info)
-rownames(all_telescope_vertical) = all_telescope_vertical$transcript
-all_telescope_vertical$transcript = NULL
+rownames(T3_telescope_vert) = T3_telescope_vert$transcript
+T3_telescope_vert$transcript = NULL
 
+rownames(T2_telescope_vert) = T2_telescope_vert$transcript
+T2_telescope_vert$transcript = NULL
+
+rownames(T1_telescope_vert) = T1_telescope_vert$transcript
+T1_telescope_vert$transcript = NULL
+
+#should I write these files out too?
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
 #----------------------------------------------------------------------------------
 
-x <- all_telescope_vertical
+#should probably make this a function too
+#x <- all_telescope_vertical
 #for now replace all NAs with 0s so have full picture later reconsider if should actually remove those genes
 #with NA median values
 #meds = apply(x, 1, median)
 #z = which(is.na(meds)) #13636 transcripts had at least one NA in one sample so these were removed
 #x = x[-z,]
-x[is.na(x)] <- 0
+#x[is.na(x)] <- 0
 
 #get groups
-sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
-z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
-x = x[,z]
+#sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+#z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
+#x = x[,z]
 
 #reorder so same order of patients as in counts matrix
-sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
-group= sample_info$STAGE
+#sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+#group= sample_info$STAGE
 
 #confirm everything is in right order
-sample_info$rna_seq_file_sample_ID == colnames(x)
+#sample_info$rna_seq_file_sample_ID == colnames(x)
 
+#format for EdgeR
+edgeR_format = function(file){
+  x <- file
+  x[is.na(x)] <- 0
+  sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+  z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
+  x = x[,z]
+  sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+  group= sample_info$STAGE
+  print(sample_info$rna_seq_file_sample_ID == colnames(x))
+  return(x)
+}
+xt1=edgeR_format(T1_telescope_vert) #ncol 71, nrow 519257
+xt2=edgeR_format(T2_telescope_vert) #ncol 94, nrow 545956
+xt3=edgeR_format(T3_telescope_vert) #ncol 121, nrow 57988
+
+##################################################
 #create DGEList object
 df <- DGEList(counts=x,group=group)
 df_samples = as.data.frame(df$samples)
