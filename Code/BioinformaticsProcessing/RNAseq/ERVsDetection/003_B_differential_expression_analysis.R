@@ -39,7 +39,7 @@ sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DA
 #subset telescope results based on QC tiers
 tiers=c("tier1", "tier2", "tier3")
 #apply downstream code to each tier and then compare results
-get_tier_summary = function(tier){
+get_telescope_tier_summary = function(tier){
   if(tier == "tier3"){
     dat=sample_info
     print(length(unique(dat$SAMPLE_ID)))}
@@ -61,37 +61,29 @@ get_tier_summary = function(tier){
     total_lost = unique(c(z1, z2, z3, z4))
     dat=sample_info[-total_lost]
     print(length(unique(dat$SAMPLE_ID)))}
-    return(dat)
+    tier_telescope_filter=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
+    return(tier_telescope_filter)
     print("done tier analysis")
 }
-tier3_sampleinfo = as.data.table(ldply(llply(tiers[3], get_tier_summary)))
-tier2_sampleinfo = as.data.table(ldply(llply(tiers[2], get_tier_summary)))
-tier1_sampleinfo = as.data.table(ldply(llply(tiers[1], get_tier_summary)))
+alltiers_telescope = llply(tiers, get_telescope_tier_summary)
 
-T3_all_telescope=as.data.table(filter(all_telescope, sample %in% tier3_sampleinfo$rna_seq_file_sample_ID))
-T2_all_telescope=as.data.table(filter(all_telescope, sample %in% tier2_sampleinfo$rna_seq_file_sample_ID))
-T1_all_telescope=as.data.table(filter(all_telescope, sample %in% tier1_sampleinfo$rna_seq_file_sample_ID))
+#length(unique(alltiers_telescope[[1]]$sample))=81, ncol=13352988
+  #length(unique(alltiers_telescope[[1]]$transcript))=519257
+#length(unique(alltiers_telescope[[2]]$sample))=104, nol=14967961
+  #length(unique(alltiers_telescope[[1]]$transcript))=545956
+#length(unique(alltiers_telescope[[3]]$sample))=132, nocl=18300436
+  ##length(unique(alltiers_telescope[[1]]$transcript))=579881
 
-write.csv(T3_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T3_all_telescope.csv", sep="_"), quote=F, row.names=F)}
-write.csv(T2_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T2_all_telescope.csv", sep="_"), quote=F, row.names=F)}
-write.csv(T1_all_telescope, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/tiers", date,"T1_all_telescope.csv", sep="_"), quote=F, row.names=F)}
-
-#re-arrange so that samples are in COLUMNS and transcript names are in one column
-T3_telescope_vert = as.data.frame(dcast(T3_all_telescope, transcript ~ sample, value.var = "final_count"))
-T2_telescope_vert = as.data.frame(dcast(T2_all_telescope, transcript ~ sample, value.var = "final_count"))
-T1_telescope_vert = as.data.frame(dcast(T1_all_telescope, transcript ~ sample, value.var = "final_count"))
-
-#all_telescope = join(all_telescope, sample_info)
-rownames(T3_telescope_vert) = T3_telescope_vert$transcript
-T3_telescope_vert$transcript = NULL
-
-rownames(T2_telescope_vert) = T2_telescope_vert$transcript
-T2_telescope_vert$transcript = NULL
-
-rownames(T1_telescope_vert) = T1_telescope_vert$transcript
-T1_telescope_vert$transcript = NULL
-
-#should I write these files out too?
+vert_format=function(x){
+  telescope_vert = as.data.frame(dcast(x, transcript ~ sample, value.var = "final_count"))
+  rownames(telescope_vert) = telescope_vert$transcript
+  telescope_vert$transcript = NULL
+  return(telescope_vert)
+}
+vert_alltiers_telescope = llply(alltiers_telescope, vert_format)
+#ncol(vert_alltiers_telescope[[1]])=81, nrow(vert_alltiers_telescope[[1]])=519257
+#ncol(vert_alltiers_telescope[[2]])=104, nrow(vert_alltiers_telescope[[2]])=545956
+#ncol(vert_alltiers_telescope[[3]])=132, nrow(vert_alltiers_telescope[[3]])=579881
 #----------------------------------------------------------------------------------
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
 #----------------------------------------------------------------------------------
@@ -118,45 +110,104 @@ T1_telescope_vert$transcript = NULL
 #sample_info$rna_seq_file_sample_ID == colnames(x)
 
 #format for EdgeR
-edgeR_format = function(file){
+filter_removeNA = function(file){
   x <- file
   x[is.na(x)] <- 0
   sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
   z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
   x = x[,z]
   sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
-  group= sample_info$STAGE
+  group=sample_info$STAGE
   print(sample_info$rna_seq_file_sample_ID == colnames(x))
   return(x)
 }
-xt1=edgeR_format(T1_telescope_vert) #ncol 71, nrow 519257
-xt2=edgeR_format(T2_telescope_vert) #ncol 94, nrow 545956
-xt3=edgeR_format(T3_telescope_vert) #ncol 121, nrow 57988
+xtiers=llply(vert_alltiers_telescope,filter_removeNA)
+#ncol(xtiers[[1]]) = 71, nrow(xtiers[[1]])=519257
+#ncol(xtiers[[2]])= 94, nrow(xtiers[[2]])=545956
+#ncol(xtiers[[3]]) = 121, nrow(xtiers[3])=579881
 
+groups_on_tiers = function(file){
+  x <- file
+  x[is.na(x)] <- 0
+  sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+  z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
+  x = x[,z]
+  sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+  group=sample_info$STAGE
+  return(group)
+}
+group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
+#length(group_tiers[[1]])=71
+#length(group_tiers[[2]])=94
+#length(group_tiers[[3]])=121
 ##################################################
 #create DGEList object
-df <- DGEList(counts=x,group=group)
-df_samples = as.data.frame(df$samples)
-summary(df_samples$lib.size)
+#df <- DGEList(counts=x,group=group)
+#df_samples = as.data.frame(df$samples)
+#summary(df_samples$lib.size)
+
+#create DGEList object
+tier_numbers=c(1,2,3)
+make_DGEs = function(tier){
+  df = DGEList(counts=xtiers[[tier]],
+    group=group_tiers[[tier]])
+  df_samples=as.data.frame(df$samples)
+  print(summary(df_samples$lib.size))
+  return(df)
+  }
+df_tiers=llply(tier_numbers,make_DGEs)
+
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+# 815622 3718738 4160641 4031534 4421368 5490691
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+# 305584 2833351 3942428 3487440 4356880 7414654
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+#  67010 2170631 3767050 3233262 4246633 7414654
 
 # Normalize.
 # Normalization may not actually be required:
 # Normalization issues arise only to the extent that technical factors
 # have sample-specific effects.
-df <- calcNormFactors(df)
+#df <- calcNormFactors(df)
 
 # Filter out lowly expressed genes - feel free to change this
 #this isn't necessarily best way to do it
 
-sums = apply(df$counts, 1, sum)
-z1 = which(sums > 1000)
-z2 = which(sums < 25000)
-keep=unique(names(sums)[c(z1,z2)])
-df <- df[keep, keep.lib.sizes = FALSE]
+#sums = apply(df$counts, 1, sum)
+#z1 = which(sums > 1000)
+#z2 = which(sums < 25000)
+#keep=unique(names(sums)[c(z1,z2)])
+#df <- df[keep, keep.lib.sizes = FALSE]
 
-# Write out expression matrix, annotated with gene symbols rather than ENSG identifiers
-exprs.df <- data.frame(cpm(df, normalized.lib.sizes = FALSE, log = FALSE)) # Computes counts per million (CPM) values
-exprs.df$ERV_ids <- row.names(exprs.df)
+#normalize, filter lowly expressed genes
+norm_filterlowexpr=function(dftiers){
+    df <- calcNormFactors(dftiers)
+    sums = apply(df$counts, 1, sum)
+    z1 = which(sums > 1000)
+    z2 = which(sums < 25000)
+    keep=unique(names(sums)[c(z1,z2)])
+    df <- df[keep, keep.lib.sizes = FALSE]
+    return(df)
+}
+df_tiers=llply(df_tiers,norm_filterlowexpr)
+#nrow(df_tiers[[1]]$samples)=71,nrow(df_tiers[[3]]$counts)=519257
+#nrow(df_tiers[[2]]$samples)=94,nrow(df_tiers[[3]]$counts)=545956
+#nrow(df_tiers[[3]]$samples)=121, nrow(df_tiers[[3]]$counts)=579881
+
+#***realizing now that I could probably combine many of the functions into one?
+  #I will fix this in the future for clean code
+
+#Write out expression matrix, annotated with gene symbols rather than ENSG identifiers
+  #we don't need this since no ENSG identifiers - do we still want a write out of CPM conversion?
+#exprs.df <- data.frame(cpm(df, normalized.lib.sizes = FALSE, log = FALSE)) # Computes counts per million (CPM) values
+#exprs.df$ERV_ids <- row.names(exprs.df) # don't need this now
+
+convert_CPM=function(dftiers){
+  exprs.df <- data.frame(cpm(dftiers, normalized.lib.sizes = FALSE, log = FALSE))
+  return(exprs.df)
+  ###should I write this out and to what directory?
+}
+exprs.df_tiers=llply(df_tiers,convert_CPM)
 
 #---
 # Set up comparisons----
@@ -164,9 +215,19 @@ exprs.df$ERV_ids <- row.names(exprs.df)
 # ---
 
 # Construct design matrix
-design <- model.matrix(~0 + group, data = df$samples)
-colnames(design) <- levels(df$samples$group)
-design
+#design <- model.matrix(~0 + group, data = df$samples)
+#colnames(design) <- levels(df$samples$group)
+#design
+
+#construct design matrix
+#tier_numbers=c(1,2,3)
+design_matrix=function(tiernumbers){
+    design <- model.matrix(~0 + group_tiers[[tiernumbers]],
+      data=df_tiers[[tiernumbers]]$samples)
+    colnames(design)=levels(df_tiers[[tiernumbers]]$samples$group)
+    return(design)
+}
+design_tiers=llply(tier_numbers,design_matrix)
 
 # Estimate dispersion.
 # Allowing gene-specific dispersion is necessary in order that differential
@@ -174,25 +235,50 @@ design
 # strongly recommended in model fitting and testing for differential expression.
 # This method estimates common dispersion, trended dispersions and tagwise dispersions
 # in one run and is recommended.
-df <- estimateDisp(df, design)
+#df <- estimateDisp(df, design) #should we be using estimateTagwiseDisp(x)?
 
 # The dispersion estimates can be viewed in a BCV plot
 #plotBCV(df)
 
 # Fit generalized linear model
 # Such a model is an extension of classical linear models to non-normally distributed response data.
-fit <- glmQLFit(df, design)
+#fit <- glmQLFit(df, design)
+
+#estimate dispersion
+#tier_numbers=c(1,2,3)
+get_disp_fit=function(tiernumbers){
+  df_tiers[[tiernumbers]] <- estimateDisp(df_tiers[[tiernumbers]],
+    design_tiers[[tiernumbers]])
+  #plotBCV(df)
+  fit <- glmQLFit(df_tiers[[tiernumbers]], design_tiers[[tiernumbers]])
+  return(fit)}
+fit_tiers=llply(tier_numbers,get_disp_fit)
 
 # Make contrasts
-my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
+#my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
                               levels = design)
+
+#make contrasts
+get_myconstrasts=function(tier_numbers){
+  my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
+                              levels = design_tiers[[tier_numbers]])
+  return(my.contrasts)
+  }
+my.contrasts_tier=llply(tier_numbers,get_myconstrasts)
+
+#get differential expression results summary from all contrasts
+#all_contrasts = colnames(my.contrasts)
+
+#get differential expression results summary from all contrasts
+get_allcontrasts=function(tier_numbers){
+  all_contrasts = colnames(my.contrasts_tier[[tier_numbers]])
+  return(all_contrasts)
+}
+all_contrasts_tier = llply(tier_numbers,get_allcontrasts)
 
 # Set cut-offs for logFC and FDR
 x <- 1 # logFCx
 y <- 1 #keep all p-values for now can filter significant hits later
-
-#get differential expression results summary from all contrasts
-all_contrasts = colnames(my.contrasts)
 
 get_res = function(contrast){
 	print(contrast)
@@ -207,9 +293,15 @@ get_res = function(contrast){
 	return(contrast_dat)
 }
 }
+#could definitely clean up code above, condense functions
+  #also need to add in clusters
 
 all_de_ervs = as.data.table(ldply(llply(all_contrasts, get_res)))
 colnames(all_de_ervs)[6] = "transcript"
-all_de_ervs = join(all_de_ervs,telescope_annotations)
+#could just replace "mutate(ensembl_gene_id" with "mutate(transcript"
+ #and exclude the above line?
+
+#all_de_ervs = join(all_de_ervs,telescope_annotations)
+#not sure what is meant by "telescope_annotations" above
 
 #save results and upload to OneDrive
