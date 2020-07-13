@@ -88,7 +88,6 @@ vert_alltiers_telescope = llply(alltiers_telescope, vert_format)
 #Differential expression analysis using EdgeR adapted from RNA-Seq code
 #----------------------------------------------------------------------------------
 
-#should probably make this a function too
 #x <- all_telescope_vertical
 #for now replace all NAs with 0s so have full picture later reconsider if should actually remove those genes
 #with NA median values
@@ -126,6 +125,7 @@ xtiers=llply(vert_alltiers_telescope,filter_removeNA)
 #ncol(xtiers[[2]])= 94, nrow(xtiers[[2]])=545956
 #ncol(xtiers[[3]]) = 121, nrow(xtiers[3])=579881
 
+
 groups_on_tiers = function(file){
   x <- file
   x[is.na(x)] <- 0
@@ -133,10 +133,12 @@ groups_on_tiers = function(file){
   z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
   x = x[,z]
   sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
-  group=sample_info$STAGE
-  return(group)
+  group=sample_info$Cluster
+  return(as.character(group))
 }
 group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
+
+
 #length(group_tiers[[1]])=71
 #length(group_tiers[[2]])=94
 #length(group_tiers[[3]])=121
@@ -145,7 +147,6 @@ group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
 #df <- DGEList(counts=x,group=group)
 #df_samples = as.data.frame(df$samples)
 #summary(df_samples$lib.size)
-
 
 # Normalize.
 # Normalization may not actually be required:
@@ -187,10 +188,10 @@ df_tiers=llply(tier_numbers,make_DGEs)
 # 305584 2833351 3942428 3487440 4356880 7414654
 #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
 #  67010 2170631 3767050 3233262 4246633 7414654
+
 #nrow(df_tiers[[1]]$samples)=71,nrow(df_tiers[[3]]$counts)=519257
 #nrow(df_tiers[[2]]$samples)=94,nrow(df_tiers[[3]]$counts)=545956
 #nrow(df_tiers[[3]]$samples)=121, nrow(df_tiers[[3]]$counts)=579881
-
 
 #Write out expression matrix, annotated with gene symbols rather than ENSG identifiers
   #we don't need this since no ENSG identifiers - do we still want a write out of CPM conversion?
@@ -255,7 +256,7 @@ fit_tiers=llply(tier_numbers,get_disp_fit)
 
 #make contrasts
 get_myconstrasts=function(tier_numbers){
-  my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
+  my.contrasts <- makeContrasts(Cluster1_Cluster1 = Cluster1-Cluster2,
                               levels = design_tiers[[tier_numbers]])
   return(my.contrasts)
   }
@@ -277,19 +278,23 @@ y <- 1 #keep all p-values for now can filter significant hits later
 
 get_res = function(contrast){
 	print(contrast)
-	contrast_dat <- glmQLFTest(fit_tiers[[]], contrast = my.contrasts[[]][,1])
+	contrast_dat <- glmQLFTest(fit, contrast = my.contrasts[,contrast])
 
-	contrast_dat <- data.frame(topTags(contrast_dat, n = Inf)) %>%
-  		mutate(ensembl_gene_id = row.names(.)) %>%
-  			filter(abs(logFC) > x & FDR < y)
-  	if(!(dim(contrast_dat)[1] == 0)){
-	contrast_dat$contrast = contrast
-	print("done")
-	return(contrast_dat)
-}
-}
-all_de_ervs = as.data.table(ldply(llply(all_contrasts, get_res)))
+  get_res = function(tiernumber){
+          contrast_dat <- glmQLFTest(fit_tiers[[]], contrast = my.contrasts_tier[[]][,1])
+
+          contrast_dat <- data.frame(topTags(contrast_dat, n = Inf)) %>%
+                  mutate(ensembl_gene_id = row.names(.)) %>%
+                          filter(abs(logFC) > x & FDR < y)
+          if(!(dim(contrast_dat)[1] == 0)){
+          contrast_dat$contrast = contrast
+          print("done")
+          return(contrast_dat)
+  }
+  }
+all_de_ervs = as.data.table(llply(tier_numbers, get_res)))
 colnames(all_de_ervs)[6] = "transcript"
+
 #could just replace "mutate(ensembl_gene_id" with "mutate(transcript"
  #and exclude the above line?
 
@@ -299,7 +304,6 @@ colnames(all_de_ervs)[6] = "transcript"
 #but not necessary!
 
 #save results and upload to OneDrive
-
-write.csv(all_de_ervs_stage[[1]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier1_de_ervs_stage.csv", sep="_"), quote=F, row.names=F)
-write.csv(all_de_ervs_stage[[2]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier2_de_ervs_stage.csv", sep="_"), quote=F, row.names=F)
-write.csv(all_de_ervs_stage[[3]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier3_de_ervs_stage.csv", sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[1]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier1_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[2]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier2_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[3]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier3_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
