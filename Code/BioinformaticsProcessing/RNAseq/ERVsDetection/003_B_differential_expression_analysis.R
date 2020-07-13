@@ -256,7 +256,7 @@ fit_tiers=llply(tier_numbers,get_disp_fit)
 
 # Make contrasts
 #my.contrasts <- makeContrasts(ADVANCED_LIMITED = ADVANCED-LIMITED,
-                              levels = design)
+#                              levels = design)
 
 #make contrasts
 get_myconstrasts=function(tier_numbers){
@@ -302,6 +302,8 @@ colnames(all_de_ervs)[6] = "transcript"
  #and exclude the above line?
 
 #all_de_ervs = join(all_de_ervs,telescope_annotations)
-#not sure what is meant by "telescope_annotations" above
+#not sure what is meant by "telescope_annotations" above <-- this can be done
+#to add back all the ERV coordinates and transcript info to main result file
+#but not necessary!
 
 #save results and upload to OneDrive
