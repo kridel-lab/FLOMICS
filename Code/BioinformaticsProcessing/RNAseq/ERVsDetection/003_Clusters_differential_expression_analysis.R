@@ -62,8 +62,8 @@ get_telescope_tier_summary = function(tier){
     dat=sample_info[-total_lost]
     print(length(unique(dat$SAMPLE_ID)))}
     tier_telescope_filter=as.data.table(filter(all_telescope, sample %in% dat$rna_seq_file_sample_ID))
-    return(tier_telescope_filter)
     print("done tier analysis")
+    return(tier_telescope_filter)
 }
 alltiers_telescope = llply(tiers, get_telescope_tier_summary)
 
