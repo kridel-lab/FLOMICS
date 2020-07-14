@@ -220,7 +220,7 @@ exprs.df_tiers=llply(df_tiers,convert_CPM)
 design_matrix=function(tiernumbers){
     design <- model.matrix(~0 + group_tiers[[tiernumbers]],
       data=df_tiers[[tiernumbers]]$samples)
-    colnames(design)=levels(df_tiers[[tiernumbers]]$samples$group)
+    colnames(design)=c("Cluster1", "Cluster2")
     return(design)
 }
 design_tiers=llply(tier_numbers,design_matrix)
@@ -278,20 +278,18 @@ y <- 1 #keep all p-values for now can filter significant hits later
 
 get_res = function(contrast){
 	print(contrast)
-	contrast_dat <- glmQLFTest(fit, contrast = my.contrasts[,contrast])
+	contrast_dat <- glmQLFTest(fit_tiers[[]], contrast = my.contrasts[[]][,1])
 
-  get_res = function(tiernumber){
-          contrast_dat <- glmQLFTest(fit_tiers[[]], contrast = my.contrasts_tier[[]][,1])
+	contrast_dat <- data.frame(topTags(contrast_dat, n = Inf)) %>%
+  		mutate(ensembl_gene_id = row.names(.)) %>%
+  			filter(abs(logFC) > x & FDR < y)
+  	if(!(dim(contrast_dat)[1] == 0)){
+	contrast_dat$contrast = contrast
+	print("done")
+	return(contrast_dat)
+}
+}
 
-          contrast_dat <- data.frame(topTags(contrast_dat, n = Inf)) %>%
-                  mutate(ensembl_gene_id = row.names(.)) %>%
-                          filter(abs(logFC) > x & FDR < y)
-          if(!(dim(contrast_dat)[1] == 0)){
-          contrast_dat$contrast = contrast
-          print("done")
-          return(contrast_dat)
-  }
-  }
 all_de_ervs = as.data.table(llply(tier_numbers, get_res)))
 colnames(all_de_ervs)[6] = "transcript"
 
