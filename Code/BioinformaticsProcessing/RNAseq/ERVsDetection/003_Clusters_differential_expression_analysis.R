@@ -112,12 +112,22 @@ vert_alltiers_telescope = llply(alltiers_telescope, vert_format)
 filter_removeNA = function(file){
   x <- file
   x[is.na(x)] <- 0
-  sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
-  z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
+
+  #don't use the same name as the actual dataframe here  - sample info could run
+  #into trouble
+
+  #sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+  tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+  z = which(colnames(x) %in% tier_sample_info$rna_seq_file_sample_ID)
   x = x[,z]
-  sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
-  group=sample_info$STAGE
-  print(sample_info$rna_seq_file_sample_ID == colnames(x))
+
+  tier_sample_info = tier_sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+
+  ##
+  group=tier_sample_info$STAGE #group not really needed here because doesn't get used here
+  ##
+
+  print(tier_sample_info$rna_seq_file_sample_ID == colnames(x))
   return(x)
 }
 xtiers=llply(vert_alltiers_telescope,filter_removeNA)
@@ -129,11 +139,18 @@ xtiers=llply(vert_alltiers_telescope,filter_removeNA)
 groups_on_tiers = function(file){
   x <- file
   x[is.na(x)] <- 0
-  sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
-  z = which(colnames(x) %in% sample_info$rna_seq_file_sample_ID)
+
+  #don't use the same name as the actual dataframe here  - sample info could run
+  #into trouble
+
+  #sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+  tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
+
+  z = which(colnames(x) %in% tier_sample_info$rna_seq_file_sample_ID)
   x = x[,z]
-  sample_info = sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
-  group=sample_info$Cluster
+  tier_sample_info = tier_sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+
+  group=tier_sample_info$Cluster
   return(as.character(group))
 }
 group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
@@ -174,8 +191,8 @@ make_DGEs = function(tier){
  #normalize, filter lowly expressed genes
   df <- calcNormFactors(df)
   sums = apply(df$counts, 1, sum)
-  z1 = which(sums > 1000)
-  z2 = which(sums < 25000)
+  z1 = which(sums > 500) #this can be changed`
+  z2 = which(sums < 10000000) #this can be changed
   keep=unique(names(sums)[c(z1,z2)])
   df <- df[keep, keep.lib.sizes = FALSE]
   return(df)
@@ -255,7 +272,8 @@ fit_tiers=llply(tier_numbers,get_disp_fit)
 #                              levels = design)
 
 #make contrasts
-get_myconstrasts=function(tier_numbers){
+get_myconstrasts=function(tier_numbers){ #dont make input into function same
+  #as the list you are applying function to!
   my.contrasts <- makeContrasts(Cluster1_Cluster1 = Cluster1-Cluster2,
                               levels = design_tiers[[tier_numbers]])
   return(my.contrasts)
@@ -266,7 +284,7 @@ my.contrasts_tier=llply(tier_numbers,get_myconstrasts)
 #all_contrasts = colnames(my.contrasts)
 
 #get differential expression results summary from all contrasts
-get_allcontrasts=function(tier_numbers){
+get_allcontrasts=function(tier_numbers){ #same here 
   all_contrasts = colnames(my.contrasts_tier[[tier_numbers]])
   return(all_contrasts)
 }
@@ -302,6 +320,6 @@ colnames(all_de_ervs)[6] = "transcript"
 #but not necessary!
 
 #save results and upload to OneDrive
-write.csv(all_de_ervs_cluster[[1]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier1_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
-write.csv(all_de_ervs_cluster[[2]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier2_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
-write.csv(all_de_ervs_cluster[[3]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier3_de_ervs_cluster.csv, sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[1]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier1_de_ervs_cluster.csv", sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[2]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier2_de_ervs_cluster.csv", sep="_"), quote=F, row.names=F)
+write.csv(all_de_ervs_cluster[[3]], paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/edgeR_telescope", date, "tier3_de_ervs_cluster.csv", sep="_"), quote=F, row.names=F)
