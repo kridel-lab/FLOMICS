@@ -66,6 +66,3 @@ SummarizationBeta <- function(BetaMatrix,
   class(RESULTS) <- "SummarizationBeta_ASilva"
   return(RESULTS) 
 }
-
-
-
