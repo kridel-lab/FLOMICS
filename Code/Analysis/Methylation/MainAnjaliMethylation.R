@@ -18,7 +18,7 @@ source("10_BoxPlotsMethylation.R") # previously 10_ViolinPlotsMethylation.R.R
 source("11_HeatPlotMethylation.R")
 source("12_EstimateCellCountsMethylation.R")
 source("13_tSNEPlot.R")
-source("14_Clustering_RPMM_InfiniumClust.R")
+source("14_Clustering_Kmeans_Medoids_Hierarchical_RPMM_InfiniumClust.R")
 source("15_SurvivalAnalysis.R")
 source("16_Huet23GeneModel.R")
 #source("17_LinePlots.R") #* Under construction
