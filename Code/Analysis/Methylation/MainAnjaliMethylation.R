@@ -1,4 +1,4 @@
-# Updated on 25 June 2020
+# Updated on 15 July 2020
 # Author: Anjali Silva
 
 # Source files
@@ -21,17 +21,18 @@ source("13_tSNEPlot.R")
 source("14_Clustering_Kmeans_Medoids_Hierarchical_RPMM_InfiniumClust.R")
 source("15_SurvivalAnalysis.R")
 source("16_Huet23GeneModel.R")
-#source("17_LinePlots.R") #* Under construction
+source("17_LinePlots.R") #* Under construction
 source("18_StandardDeviation.R")
 source("19_IsolateEntries.R")
 source("20_GlmnetFeatureSelection.R")
 source("21_ProportionVisualization.R") #* Under construction with bumphunter
 source("22_MDSPlots.R")
-source("23_Barplot.R")
+source("23_BarplotMethylation.R")
 source("24_Tumor_purity_check.R")
 source("25_Variance.R")
 source("26_Gprofiler.R")
 source("27_CopyNumberAnalysis.R")
+source("28_VennDiagram_Eulerr.R")
 source("30_PieChart.R")
 source("31_MeanSDPlot.R")
 source("32_ClusterConfidencePlot.R")
