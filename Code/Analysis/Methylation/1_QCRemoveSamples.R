@@ -107,4 +107,3 @@ QCRemoveSamples <- function(ClinicalFile,
   class(RESULTS) <- "SamplesToRemove_ASilva"
   return(RESULTS)
 }
-
