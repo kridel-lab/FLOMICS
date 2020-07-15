@@ -9,7 +9,7 @@
 #and conducts EdgeR differential expression analysis of these trancripts
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
-source("/cluster/home/srussell/source_stages.R")
+source("/cluster/home/srussell/FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/003_B_Stages_DE_source.R")
 #----------------------------------------------------------------------------------
 #DATA
 #----------------------------------------------------------------------------------
