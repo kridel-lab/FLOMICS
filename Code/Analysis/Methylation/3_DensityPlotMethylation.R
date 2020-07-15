@@ -386,4 +386,3 @@ MethylationDensityPlot <- function(AnnotationCategoryToVisualize = "None",
   
   return(NULL)
 }
-
