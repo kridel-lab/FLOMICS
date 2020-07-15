@@ -407,5 +407,3 @@ LoadingMethylData <- function(Sheet,
   class(RESULTS) <- "LoadingMethylData_ASilva"
   return(RESULTS)
 }
-
-
