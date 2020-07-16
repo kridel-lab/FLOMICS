@@ -417,7 +417,7 @@ QCRNAseq <- function(RNAseqCountMatrix,
     targetToKeep <- c(paste0("chr", 1:22), NA) # keep these
     chrOfIDsTableAutosomesOnly <- chrOfIDsTable %>%
                                   rownames_to_column('gene') %>%
-                                  dplyr::filter(chromosome %in% target) %>%
+                                  dplyr::filter(chromosome %in% targetToKeep) %>%
                                   column_to_rownames('gene')
     cat("\n", nrow(chrOfIDsTable) - nrow(chrOfIDsTableAutosomesOnly),
         "ENSEMBL IDs corresponding to sex (and mitochondrial) chromosomes have been removed.")
@@ -451,9 +451,6 @@ QCRNAseq <- function(RNAseqCountMatrix,
                     TumorPurityMatchedSampleFiltered = TumorPurityMatchedSampleFiltered)
   }
   
-
-    
-    
 
 
   class(RESULTS) <- "QCRNAseq_ASilva"
