@@ -425,8 +425,8 @@ QCRNAseq <- function(RNAseqCountMatrix,
     # Saving results - if RNAseq annotation file is provided
     RESULTS <- list(RNASeqCountMatrixMatchedSampleFilteredNOFeatureFiltered = RNASeqCountMatrixMatchedSampleFilteredNOFeatureFiltered,
                     RNASeqCountMatrixMatchedSampleFilteredFeatureFiltered = RNASeqCountMatrixMatchedSampleFilteredFeatureFiltered,
-                    RNASeqCountMatrixMatchedSampleFilteredNOFeatureFilteredNoSexENSEMBLIDs = chrOfIDsTableAutosomesOnly[, c(4:ncol(chrOfIDsTableAutosomesOnly))],
-                    RNASeqCountMatrixMatchedSampleFilteredNOFeatureFilteredNoSexENSEMBLIDsWithAnnotations = chrOfIDsTableAutosomesOnly, 
+                    RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDs = chrOfIDsTableAutosomesOnly[, c(4:ncol(chrOfIDsTableAutosomesOnly))],
+                    RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations = chrOfIDsTableAutosomesOnly, 
                     RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNormalized = Data2RNAseqFilterededgeRNorm,
                     RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized = 
                       Data2RNAseqFilterededgeRNorm[match(rownames(chrOfIDsTableAutosomesOnly), rownames(Data2RNAseqFilterededgeRNorm)), ],
