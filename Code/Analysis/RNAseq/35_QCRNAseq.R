@@ -1,9 +1,9 @@
 # 19 May 2020
 # Function: Quality control of RNAseq count matrix using specified criteria. Return matrix
-# RNAseq counts matched to samples of BetaMatrix, removed of low quality samples, those with 
-# 0 library size. Also returns RNAseq counts with features (ENSEMBL IDs) removed. Finally
-# returns RNAseq matrix of normalized counts after above steps (removed low quality 
-# samples and features). 
+#           RNAseq counts matched to samples of BetaMatrix, removed of low quality samples, 
+#           those with 0 library size. Also returns RNAseq counts with features (ENSEMBL IDs) 
+#           removed. Finally returns RNAseq matrix of normalized counts after above steps  
+#           (removed low quality samples and features). 
 # Author: Anjali Silva
 
 
@@ -57,7 +57,7 @@
 #                            could only be used if RNAseqFeatureSelectionMethod is also set to "edgeR". 
 #                            Otherwise, StandardNormal will be used. Default method "edgeR".
 # ImageName: A character vector specifying a unique name for the images to be produced. 
-# PNGorPDF: Output format of the image, options = "png" or "pdf"
+# PNGorPDF: Output format of the image, options = "png" or "pdf".
 
 
 
