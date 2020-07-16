@@ -1,6 +1,7 @@
 # 11 March 2020
 # # Function: Produce violin plots of RNAseq counts of all samples against TYPE and 
 #             STAGE, including mean, median and variance. 
+# Author: Anjali Silva
 
 # Input
 # RNAseqCountMatrix: A matrix of RNAseq counts that has been NOT been normalized but 
@@ -29,7 +30,6 @@ ViolinPlotsRNAseq <- function(RNAseqCountMatrix,
                               PNGorPDF = "png") {
     
   # Loading needed packages
-  # LoadCheckPkg(RegularPckgs = c("tidyverse","ggplot2","ggpubr"))
   library(tidyverse)
   library(ggplot2)
   library(ggpubr)
@@ -238,5 +238,3 @@ ViolinPlotsRNAseq <- function(RNAseqCountMatrix,
   return(RESULTS)
 }
   
-
-
