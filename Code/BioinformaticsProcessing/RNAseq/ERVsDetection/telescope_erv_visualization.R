@@ -61,8 +61,6 @@ ggdensity(filter(ervs_de, transcript_id %in% ervs_de_sig), x = "logFC",
           add = "mean", rug = TRUE, alpha=0.1,
           color = "diff_exp", fill = "diff_exp") + ggtitle("Fold changes across QC tiers for DE ERVs (FDR < 0.05), n=X")+theme_bw()
 dev.off()
-#treatment=tier
-#cell_line=contrast
 
 #make comparison matrix
 ervs_de_dat = as.data.table(filter(ervs_de, FDR < 0.05))
@@ -111,23 +109,23 @@ plot_cons_cluster$tier = factor(plot_cons_cluster$tier, levels=c("Tier 1", "Tier
 #could probably put above in function
 
 
-pdf("stage_histo.pdf", width=7, height=4)
+pdf("/cluster/home/srussell/stage_histo.pdf", width=7, height=4)
 g=gghistogram(plot_cons_stage, x = "logFC",
    add = "median", alpha=0.5,
    color = "diff_exp",
    fill = "diff_exp", palette = c("red", "blue"),
    add_density = TRUE, ggtheme=theme_bw(),
-   facet.by = "tier")+xlim(0,15)+ylim(0,4000)
+   facet.by = "tier")+xlim(0,10)
 ggpar(g, legend="bottom")+theme(text = element_text(size=12))+ylab("Count")+xlab("logFC")
 dev.off()
 
-pdf("cluster_histo.pdf", width=7, height=4)
+pdf("/cluster/home/srussell/cluster_histo.pdf", width=7, height=4)
 g=gghistogram(plot_cons_cluster, x = "logFC",
    add = "median", alpha=0.5,
    color = "diff_exp",
    fill = "diff_exp", palette = c("red", "blue"),
    add_density = TRUE, ggtheme=theme_bw(),
-   facet.by = "contrast")+xlim(0,20)+ylim(0,4000)
+   facet.by = "tier")+xlim(0,10)
 ggpar(g, legend="bottom")+theme(text = element_text(size=12))+ylab("Count")+xlab("logFC")
 dev.off()
 # :::::::::::::::::::::::::::::::::::::::::::::::::::
