@@ -49,6 +49,7 @@ cat("\n Sourced files")
 MethylationDirPath <- "~/Desktop/UHN/FLOMICS/Methylation/Pipeline"
 RNAseqDirPath <- "~/Desktop/UHN/FLOMICS/RNAseq/ExtendedStudy2020/"
 TargetedDNAseqDirPath <- "~/Desktop/UHN/FLOMICS/TargetedSequencing"
+MainDirPath <- "~/Desktop/UHN/FLOMICS/"
 CodeDirPath <- "/Volumes/GoogleDrive/My Drive/UHN/FLOMICS/FLOMICS-Anjali/Methylation/Pipeline"
 
 
@@ -136,3 +137,6 @@ range(TargetSeqBC$Chromosome) # "1" "X"
 BC_Cancer_capseq_data_with01ClusterLabs <- readRDS(file = paste0(TargetedDNAseqDirPath, "/BC_Cancer_capseq_data_with01ClusterLabs_AS_2June2020.rds"))
 dim(BC_Cancer_capseq_data_with01ClusterLabs) # 31 67
 range(BC_Cancer_capseq_data_with01ClusterLabs) # 0 2
+
+
+AllSamples <- read.csv(file = paste0(MainDirPath, "/Patient_RNAseq_TDNAseq_Methylation_upd17July2020.csv"))
