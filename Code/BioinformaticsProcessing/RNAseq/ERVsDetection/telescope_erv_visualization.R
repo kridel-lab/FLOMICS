@@ -88,6 +88,7 @@ dev.off()
 
 #how did you get the N label for downregulated below the x axis?
 # :::::::::::::::::::::::::::::::::::::::::::::::::::
+#having an issue getting the distribution of this graph right.. any suggestions?
 
 #for all sig ERVs, make histo plot of FCs
 ervs_de_histo = ervs_de_dat
