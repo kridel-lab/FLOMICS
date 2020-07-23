@@ -59,74 +59,74 @@ DifferentialMethylation <- function(ClinicalFile,
   # Differential methylation between ADVANCED-LIMITED
   # Select advanced and limited stage cases only from the FL cases
   if(ContrastColumnName == "STAGE") {
-    stage_status <- factor(stri_trim( ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
                                                    which(colnames(ClinicalFile) == "STAGE")]), 
                            levels = c("ADVANCED", "LIMITED"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
     contrasts <- limma::makeContrasts("ADVANCED-LIMITED", levels = design_epic2)
   } else if(ContrastColumnName == "SEX") {
-    stage_status <- factor(stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
                                                   which(colnames(ClinicalFile) == "SEX")]), 
                            levels = c("M", "F"), labels = c("Male", "Female"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
     contrasts <- limma::makeContrasts("Female-Male", levels = design_epic2)
   } else if(ContrastColumnName == "SITE_BIOPSY") { 
-    stage_status <- factor(stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
                                                   which(colnames(ClinicalFile) == "SITE_BIOPSY")]), 
                            levels = c("EN", "LN"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE)))], 
                                 design_epic2)
     contrasts <- limma::makeContrasts("LN-EN", levels = design_epic2)
   } else if(ContrastColumnName == "TYPE_BIOPSY") {
-    stage_status <- factor(stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")),
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")),
                                                   which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
                            levels = c("CORE", "TISSUE"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE"))], 
                                 design_epic2)
     contrasts <- limma::makeContrasts("TISSUE-CORE", levels = design_epic2)
   } else if(ContrastColumnName == "INSTITUTION") { 
     # https://support.bioconductor.org/p/44216/
-    stage_status <- factor(stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "INSTITUTION")]), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "INSTITUTION")]), 
                            levels = c("BCCA", "UHN","JGH"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
     contrasts <- limma::makeContrasts("UHN-BCCA", "JGH-BCCA", "JGH-UHN", levels = design_epic2)
   } else if(ContrastColumnName == "EPIC_QC") { 
-    stage_status <- factor(stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "EPIC_QC")]), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "EPIC_QC")]), 
                            levels = c("Fair", "Good", "Poor"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
     contrasts <- limma::makeContrasts("Good-Fair", "Poor-Good", "Poor-Fair", levels = design_epic2)
   } else if(ContrastColumnName == "COO") { 
     # https://support.bioconductor.org/p/44216/ # contrasts for multiple comparisons
-    stage_status <- factor(stri_trim(ClinicalFile[which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
                                                   which(colnames(ClinicalFile) == "COO")]), levels = c("GCB", "ABC"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[, which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL")], design_epic2)
     contrasts <- limma::makeContrasts("ABC-GCB", levels = design_epic2)
   } else if(ContrastColumnName == "TYPE") {
-    stage_status <- factor(stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]), levels = c("DLBCL", "FL", "RLN"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]), levels = c("DLBCL", "FL", "RLN"))
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
     # contrasts <- limma::makeContrasts("FL-DLBCL", "RLN-DLBCL", "RLN-FL", levels = design_epic2)
     contrasts <- limma::makeContrasts("DLBCL-FL", "DLBCL-RLN", "FL-RLN", levels = design_epic2)
   } else if(ContrastColumnName == "TRANSLOC_14_18") { 
-    stage_status <- factor(stri_trim(ClinicalFile[which(!is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(!is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
                                                   which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
                            levels = c("0", "1"), labels = c("NoTranslocation", "Translocation"))
-    design_epic2 <- model.matrix (~ 0 + stage_status)
+    design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix[, which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)], 
                                 design_epic2)
@@ -280,7 +280,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size=15))
-        ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_topPValue.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_topPValue.", PNGorPDF))
         
         # Construct a Volcano plot for RLN-DLBCL
         volcanoplot <- ggplot2::ggplot(top_P_Coef2, aes(logFC, -log10(adj.P.Val))) +
@@ -304,7 +304,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size = 15))
-        ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_topPValue.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_topPValue.", PNGorPDF))
         
         # Construct a Volcano plot for RLN-FL
         volcanoplot <- ggplot2::ggplot(top_P_Coef3, aes(logFC, -log10(adj.P.Val))) +
@@ -330,7 +330,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                             panel.grid.minor = element_blank()) + 
                                       scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                       theme(aspect.ratio = 1, text = element_text(size=15))
-        ggsave(paste0(pathNow,"/img/7_VolcanoPlot_",ContrastColumnName,"_3rdComparison_topPValue.",PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow,"/img/7_VolcanoPlot_",ContrastColumnName,"_3rdComparison_topPValue.",PNGorPDF))
       }
     }
   } else if(length(levels(stage_status)) == 2) { 
@@ -453,7 +453,7 @@ DifferentialMethylation <- function(ClinicalFile,
       #     scale_color_manual(values=c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
       #     theme(aspect.ratio=1, text = element_text(size=15))
       if(ProduceImages == "Yes") {
-        ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_topPValue.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_topPValue.", PNGorPDF))
       }
     }
     
@@ -535,7 +535,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_FC.", PNGorPDF))
           
           
           volcanoplot <- ggplot2::ggplot(top_logFC_Coef2, aes(logFC, - log10(adj.P.Val) )) +
@@ -559,7 +559,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_FC.", PNGorPDF))
           
           
           volcanoplot <- ggplot2::ggplot(top_logFC_Coef3, aes(logFC, -log10(adj.P.Val) )) +
@@ -582,7 +582,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_3rdComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_3rdComparison_FC.", PNGorPDF))
         }
       }
     } else if (length(levels(stage_status)) == 2) {
@@ -609,7 +609,7 @@ DifferentialMethylation <- function(ClinicalFile,
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size=15))
-        ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, ProbeOrGene, "_toplogFC.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, ProbeOrGene, "_toplogFC.", PNGorPDF))
         
         # ggplot2::ggplot(top_logFC, aes(logFC, -log10(adj.P.Val) )) +
         #   geom_point(color="#e0e0e0") +
@@ -731,10 +731,10 @@ DifferentialMethylation <- function(ClinicalFile,
       # but are affected by unwanted variation. 
       
       # setup the factor of interest
-      stage_status <- factor(stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"),
+      stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"),
                                                      which(colnames(ClinicalFile) == "STAGE")]), 
                              levels = c("ADVANCED", "LIMITED"))
-      grp <- factor(stri_trim(ClinicalFile[which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "FL"),
+      grp <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "FL"),
                                             which(colnames(ClinicalFile) == "STAGE")]), labels = c(1, 0))
       
       # extract Illumina negative control data
@@ -918,4 +918,3 @@ DifferentialMethylation <- function(ClinicalFile,
     return(RESULTS)
     
   }
-  
