@@ -55,7 +55,7 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 - Preprocessing/QC [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/35_QCRNAseq.R)
 - Differential expression [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/36_DifferentialExpressionRNAseq.R)
 - SNF clustering [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/33_SNFClustering.R)
-- Pathway enrichment analysis [[Code]] 
+- Pathway enrichment analysis [Code]
 
 
 #### Mutation profiling 
@@ -83,4 +83,4 @@ With the 30 patients from pilot dataset, a total of x samples.
 )
 - Mutation calling and annotation from targeted DNA sequencing [Code]
 - Visualization of mutations across clusters and stages [Code]
-- Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [Code](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
+- Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
