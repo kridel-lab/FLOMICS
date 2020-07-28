@@ -31,6 +31,16 @@ VennDiagramAnalysis <- function(MainList,
   #
   if (length(MainList) == 2) {
     
+    # Venn diagram function require unique entries.
+    if(length(MainList[[1]]) != length(unique(MainList[[1]]))) {
+      MainList[[1]] <- unique(MainList[[1]])
+      cat("List", Labels[1], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[2]]) != length(unique(MainList[[2]]))) {
+      MainList[[2]] <- unique(MainList[[2]])
+      cat("List", Labels[2], "is not unique. Only unique entries used.")
+    }
+    
     VennSetUp <- list("A" = MainList[[1]], 
                       "B" = MainList[[2]])
     names(VennSetUp) <- Labels                           
@@ -40,13 +50,45 @@ VennDiagramAnalysis <- function(MainList,
     
   } else if (length(MainList) == 3) {
     
-      VennSetUp <- list("A" = MainList[[1]], 
-                        "B" = MainList[[2]],
-                        "C" = MainList[[3]])
-      names(VennSetUp) <- Labels                           
-      VennPlot <- plot(eulerr::venn(VennSetUp))
+    # Venn diagram function require unique entries.
+    if(length(MainList[[1]]) != length(unique(MainList[[1]]))) {
+      MainList[[1]] <- unique(MainList[[1]])
+      cat("List", Labels[1], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[2]]) != length(unique(MainList[[2]]))) {
+      MainList[[2]] <- unique(MainList[[2]])
+      cat("List", Labels[2], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[3]]) != length(unique(MainList[[3]]))) {
+      MainList[[3]] <- unique(MainList[[3]])
+      cat("List", Labels[3], "is not unique. Only unique entries used.")
+    }
+    
+    VennSetUp <- list("A" = MainList[[1]], 
+                       "B" = MainList[[2]],
+                       "C" = MainList[[3]])
+    names(VennSetUp) <- Labels                           
+    VennPlot <- plot(eulerr::venn(VennSetUp))
       
   } else if (length(MainList) == 4) { 
+    
+    # Venn diagram function require unique entries.
+    if(length(MainList[[1]]) != length(unique(MainList[[1]]))) {
+      MainList[[1]] <- unique(MainList[[1]])
+      cat("List", Labels[1], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[2]]) != length(unique(MainList[[2]]))) {
+      MainList[[2]] <- unique(MainList[[2]])
+      cat("List", Labels[2], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[3]]) != length(unique(MainList[[3]]))) {
+      MainList[[3]] <- unique(MainList[[3]])
+      cat("List", Labels[3], "is not unique. Only unique entries used.")
+    }
+    if(length(MainList[[4]]) != length(unique(MainList[[4]]))) {
+      MainList[[4]] <- unique(MainList[[4]])
+      cat("List", Labels[4], "is not unique. Only unique entries used.")
+    }
     
     VennSetUp <- list("A" = MainList[[1]], 
                       "B" = MainList[[2]],
@@ -69,7 +111,7 @@ VennDiagramAnalysis <- function(MainList,
     stop("\n length(MainList) only upto 5 is supported. Update code.")
   }
 
-  RESULTS <- list(VennDiagramOutput = VennDiagran_Euler,
+  RESULTS <- list(VennDiagramOutput = VennSetUp,
                   VennDiagram = VennPlot)
   
   class(RESULTS) <- "VennDiagramAnalysis_ASilva"
