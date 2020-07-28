@@ -36,18 +36,22 @@ GProfilerAnalysis <- function(GeneIDs,
   library(ggplot2)
   
   set.seed(1234)
-  TablePlot <- Table <- gprofiler2::gost(query = GeneIDs, 
+  Output <- gprofiler2::gost(query = GeneIDs, 
                                          organism = Organism, 
                                          ordered_query = OrderedQuery,
-                                         user_threshold = PvalAlphaLevel)  %>%
-                                         .$result %>%
-                                         arrange(p_value) %>%
-                                         mutate(log.p = -log10(p_value)) %>%
-                                         mutate(term.name = paste(term_id, term_name, sep = "\n")) %>%
-                                         mutate(term.name = fct_reorder(term.name, p_value, .desc = TRUE)) %>%
-                                         dplyr::select(term_name, term_size, 
-                                                       query_size, intersection_size, log.p) %>%
-                                         mutate(condition = ConditionName)
+                                         user_threshold = PvalAlphaLevel)
+  if(is.null(Output) == FALSE) {
+    TablePlot <- Table <- Output %>%
+                          .$result %>%
+                          arrange(p_value) %>%
+                          mutate(log.p = -log10(p_value)) %>%
+                          mutate(term.name = paste(term_id, term_name, sep = "\n")) %>%
+                          mutate(term.name = fct_reorder(term.name, p_value, .desc = TRUE)) %>%
+                          dplyr::select(term_name, term_size, 
+                                        query_size, intersection_size, log.p) %>%
+                          mutate(condition = ConditionName)
+  
+ 
   
   shortLink <- gprofiler2::gost(query = GeneIDs, 
                                 organism = Organism, 
@@ -96,10 +100,14 @@ GProfilerAnalysis <- function(GeneIDs,
   
     grDevices::dev.off()
     
-    
 
-   RESULTS <- list(shortLink = shortLink,
-                   TableAllValues = Table)
+    RESULTS <- list(shortLink = shortLink,
+                    TableAllValues = Table)
+   
+  } else {
+    RESULTS <- list(shortLink = "No results to show",
+                    TableAllValues = "No results to show")
+  }
    
    class(RESULTS) <- "GProfilerAnalysis_ASilva"
    return(RESULTS)
