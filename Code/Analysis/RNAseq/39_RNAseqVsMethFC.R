@@ -1,10 +1,10 @@
 # 24 July 2020
-# Function: In take differentially expressed probes along with fold change (FC) and differentially   
-#           methylated probes with FC OR genes falling within differentially methylated regions 
-#           and their Stouffer value. Use these to create a plot of expression FC against methylation 
-#           FC. A probe/gene is considered significant if P value is < 0.05. Gprofiler analysis is
-#           run for gene list falling in each of direction: NegMeth,NegExp; NegMeth,PosExp;
-#           PosMeth,NegExp; PosMeth,PosExp.
+# Function: In take 1) RNAseq ENSEMBL IDs along with fold change (FC) and 2) methylation probes 
+#           with FC OR genes falling within differentially methylated regions and their Stouffer
+#           value. Use these to create a plot of expression FC against methylation FC. A probe/gene
+#           is considered significant if P value is < 0.05. Gprofiler analysis is run for gene list falling 
+#           in each of direction: NegMeth,NegExp; NegMeth,PosExp; PosMeth,NegExp; PosMeth,PosExp.
+#           
 # Author: Anjali Silva
 
 # Input:
@@ -16,6 +16,8 @@
 #                      column names logFC, P.Value and CpG Probe names as row names.
 # MethylationAnnotationFile: Matrix of annotations for all the probes found in BetaMatrix. It is of size
 #                 probes x annotations.
+# MethylationRegionsFC: A dataframe such as the output from DMRcate::extractRanges() or similar containing
+#                       "no.cpgs" (per region), "meandiff", "Stouffer", and "overlapping.genes". Deafult NA. 
 # ProduceImages: Produce images or not, options = "Yes" or "No"
 # PNGorPDF: Output format of the image, options = "png" or "pdf"
 
@@ -284,37 +286,229 @@ RNAseqVsMethylationFC <- function(RNAseqProbesFC,
                                         PNGorPDF = "png")
     
     
+    RESULTS <- list(AllResultsWithDirection = combinedResultsCorrelation,
+                    DirectionWRTUCSCRefGene = t(table(combinedResultsCorrelation$direction, 
+                                                      combinedResultsCorrelation$MethylationUCSCRefGene))[, -3], 
+                    DirectionWRTRelationToIsland = t(table(combinedResultsCorrelation$direction, 
+                                                           combinedResultsCorrelation$MethylationRelationToIsland))[, -3],
+                    gprofilerPosMethPosExp = gprofilerPosMethPosExp,
+                    gprofilerPosMethNegExp = gprofilerPosMethNegExp, 
+                    gprofilerNegMethNegExp = gprofilerNegMethNegExp,
+                    gprofilerNegMethPosExp = gprofilerNegMethPosExp, 
+                    gprofilerNoSig = gprofilerNoSig)
     
+    class(RESULTS) <- "RNAseqVsMethylationFC_ASilva"
     
     
   } else if (all(is.na(MethylationRegionsFC)) == FALSE) {
+    
     # Comparing RNAseq expression FC against genes falling within DMRcate regions
     
+    # First take overlapping regions from DMRcate analysis and save them with respective meandiff
+    saveDetails <- matrix(NA, nrow = 1, ncol = 2)
+    for(i in 1:nrow(MethylationRegionsFC@elementMetadata)) {
+      if (MethylationRegionsFC@elementMetadata[i, ]$Stouffer < 0.05) {
+        geneNames <- unlist(strsplit(MethylationRegionsFC@elementMetadata[i, ]$overlapping.genes, ","))
+        Info <- cbind(geneNames, rep(MethylationRegionsFC@elementMetadata[i, ]$meandiff, length(geneNames)))
+        saveDetails <- rbind(saveDetails, Info)
+      }
+    }
+    saveDetails <- as.data.frame(saveDetails[- 1, ]) # Remove first row as it is empty 
+    colnames(saveDetails) <- c("GeneName", "MeanDiff")
+    saveDetails <- saveDetails[- which(is.na(saveDetails$GeneName) == TRUE), ] # Remove NA values
+    
+    
+    
+    # Create RNAseq data table with RNAseqProbesFC
+    RNAseqtoGene <- match(substr(RNAseqProbesFC$ensemblGeneId, 1, 15), RNAseqAnnotationFile$gene)
+    RNAseqresults <- data.table(RNAseqProbesFC, 
+                                GeneName = RNAseqAnnotationFile$name[RNAseqtoGene])
+    # Remove entries with no GeneName, i.e., NA
+    RNAseqresults <- RNAseqresults[- which(is.na(RNAseqresults$GeneName) == TRUE), ]
+    
+    
+    
+    
+    # Match RNAseq genes with genes from DMRcate via comparing gene names
+    compareRNAseqDMRcateGenes <- match(unfactor(RNAseqresults$GeneName), saveDetails$GeneName)
+    
+    # Final matched DMRcate analysis
+    matchedDMRcateResults <- saveDetails[compareRNAseqDMRcateGenes[! is.na(compareRNAseqDMRcateGenes)], ]
+
+    # Final matched RNAseq analysis
+    matchedRNAseqResults <- RNAseqresults[match(matchedDMRcateResults$Gene, RNAseqresults$GeneName), ]
+
+    
+    
+    
+    # Vector to determine if both pvalues are significant or not 
+    # Remember for DMRcate only  < 0.05 are already selected, so here only looking at RNAseq
+    colVectorDMRcate <- rep("NoSig", nrow(matchedDMRcateResults))
+    for(i in 1:nrow(matchedDMRcateResults)) {
+      if(matchedRNAseqResults$PValue[i] < 0.05) {
+        colVectorDMRcate[i] <- "Sig"
+      }
+    }
+    colVectorDMRcate <- relevel(factor(colVectorDMRcate), ref = "Sig")
+    cat("\n The number of significant and non significant entries, respectively: \n", table(colVectorDMRcate))
+    
+    # Obtaining path to save images
+    pathNow <- getwd()
+    
+    # Combine all results with significance 
+    combinedResults <- data.table(matchedDMRcateResults, matchedRNAseqresults, colVectorDMRcate)
+    colnames(combinedResults)[1:2] <- paste0("DMRcate", colnames(combinedResults)[1:2])
+    colnames(combinedResults)[3:9] <- paste0("RNAseq", colnames(combinedResults)[3:9])
+    # Save mean difference as numeric values
+    combinedResults$DMRcateMeanDiff <- round(as.numeric(unfactor(combinedResults$DMRcateMeanDiff)), 4)
+    
+    
+    
+    
+    if(ProduceImages == "Yes") {
+      # Plot of significant and non-siginficant entries, all values for DMRcate mean diff > 0.01
+      p2 <- ggplot2::ggplot(combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ], 
+                            aes(x = DMRcateMeanDiff, y = RNAseqlogFC, color = factor(colVectorDMRcate))) +
+                            geom_point(size = 2) +
+                            xlim(-0.12, 0.24) + 
+                            scale_y_continuous(name = "RNAseq logFC") +
+                            labs(x = "DMRcate Mean Difference")+
+                            theme_bw() + 
+                            theme(text = element_text(size=20), 
+                                  panel.grid.major = element_blank(),
+                                  panel.grid.minor = element_blank(),
+                                  axis.text.x = element_text(face = "bold"),
+                                  axis.text.y = element_text(face = "bold") ) +
+                            scale_color_manual(values = c("#b2182b", "#f0f0f0"),
+                                               name = "Significance")  +
+                            theme(aspect.ratio = 1, 
+                                  legend.position = "right", 
+                                  panel.background = element_rect(colour = "black", size = 1.5),  
+                                  axis.title =  element_text(face = "bold"))
+                          
+      
+      ggplot2::ggsave(paste0(pathNow, "/img/39_RNAseqVsMethDMRcateFC_SigNonsig.", PNGorPDF))
+    }
+    
+    
+    # Determine genes with inverse correlation 
+    # All values for DMRcate mean diff > 0.01
+    inverseCorVectorDMRcate <- rep("NoSig", nrow(combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]))
+    for(i in 1:nrow(combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ])) {
+      if(colVectorDMRcate[abs(combinedResults$DMRcateMeanDiff) > 0.01][i] == "Sig") {
+        if((combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$DMRcateMeanDiff[i] > 0) && 
+           (combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$RNAseqlogFC[i] < 0)) {
+          inverseCorVectorDMRcate[i] <- "PosMeth,NegExp"
+        }
+        
+        if((combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$DMRcateMeanDiff[i] < 0) && 
+           (combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$RNAseqlogFC[i] > 0)) {
+          inverseCorVectorDMRcate[i] <- "NegMeth,PosExp"
+        }
+        
+        if((combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$DMRcateMeanDiff[i] < 0) && 
+           (combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$RNAseqlogFC[i] < 0)) {
+          inverseCorVectorDMRcate[i] <- "NegMeth,NegExp"
+        }
+        if((combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$DMRcateMeanDiff[i] > 0) &&
+           (combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ]$RNAseqlogFC[i] > 0)) {
+          inverseCorVectorDMRcate[i] <- "PosMeth,PosExp"
+        }
+      }
+    }
+
+    
+    # Combine all results with direction 
+    combinedResultsCorrelation <- data.table(combinedResults[abs(combinedResults$DMRcateMeanDiff) > 0.01, ],
+                                             "direction" = inverseCorVectorDMRcate)
+    
+    
+    if(ProduceImages == "Yes") {
+      # Plot only significant entries with direction
+      
+      p3 <- ggplot2::ggplot(combinedResultsCorrelation[- which(combinedResultsCorrelation$direction == "NoSig"), ], 
+                           aes(x = DMRcateMeanDiff, y = RNAseqlogFC, color = factor(direction))) +
+                           geom_point(size = 2) +
+                           xlim(- 0.12, 0.24) + 
+                           scale_y_continuous(name = "RNAseq logFC") +
+                           labs(x = "DMRcate Mean Difference") +
+                           theme_bw() + 
+                           theme(text = element_text(size = 20), 
+                                panel.grid.major = element_blank(),
+                                panel.grid.minor = element_blank(),
+                                axis.text.x = element_text(face = "bold"),
+                                axis.text.y = element_text(face = "bold")) +
+                           scale_color_manual(values = c("#4292c6", "#de2d26", "#41ab5d", "#9970ab"),
+                                              name = "Significance") +
+                           theme(aspect.ratio = 1, 
+                                legend.position = "right", 
+                                panel.background = element_rect(colour = "black", size = 1.5),  
+                                axis.title =  element_text(face = "bold"))
+      
+      ggplot2::ggsave(paste0(pathNow, "/img/39_RNAseqVsMethDMRcateFC_Direction.", PNGorPDF))
+    }
+    
+    # Running gprofiler analysis
+    A <- unfactor(combinedResultsCorrelation[which(combinedResultsCorrelation$direction == "PosMeth,PosExp"), ]$RNAseqGeneName) 
+    B <- unfactor(combinedResultsCorrelation[which(combinedResultsCorrelation$direction == "PosMeth,NegExp"), ]$RNAseqGeneName)
+    C <- unfactor(combinedResultsCorrelation[which(combinedResultsCorrelation$direction == "NegMeth,NegExp"), ]$RNAseqGeneName)
+    D <- unfactor(combinedResultsCorrelation[which(combinedResultsCorrelation$direction == "NegMeth,PosExp"), ]$RNAseqGeneName)
+    E <-  unfactor(combinedResultsCorrelation[which(combinedResultsCorrelation$direction == "NoSig"), ]$RNAseqGeneName)
+    
+    gprofilerPosMethPosExp <- GProfilerAnalysis(GeneIDs = list(A),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = "positive", # with respect to expression
+                                                ConditionName = "PosMeth,PosExp",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+    gprofilerPosMethNegExp <- GProfilerAnalysis(GeneIDs = list(B),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = "negative", # with respect to expression
+                                                ConditionName = "PosMeth,NegExp",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+    gprofilerNegMethNegExp <- GProfilerAnalysis(GeneIDs = list(C),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = "negative", # with respect to expression
+                                                ConditionName = "NegMeth,NegExp",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+    gprofilerNegMethPosExp <- GProfilerAnalysis(GeneIDs = list(D),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = "positive", # with respect to expression
+                                                ConditionName = "NegMeth,PosExp",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+    gprofilerNoSig <- GProfilerAnalysis(GeneIDs = list(E),
+                                        Organism = "hsapiens",
+                                        OrderedQuery = TRUE,
+                                        PvalAlphaLevel = 0.01,
+                                        PositiveorNegFC = NA, # with respect to expression
+                                        ConditionName = "NoSig",
+                                        ProduceImages = "Yes", 
+                                        PNGorPDF = "png")
+    
+    
+    RESULTS <- list(AllResultsWithDirection = combinedResultsCorrelation,
+                    gprofilerPosMethPosExp = gprofilerPosMethPosExp,
+                    gprofilerPosMethNegExp = gprofilerPosMethNegExp, 
+                    gprofilerNegMethNegExp = gprofilerNegMethNegExp,
+                    gprofilerNegMethPosExp = gprofilerNegMethPosExp, 
+                    gprofilerNoSig = gprofilerNoSig)
+    
+    class(RESULTS) <- "RNAseqVsMethylationDMRcateFC_ASilva"
+    
+  } else {
+    stop("MethylationRegionsFC argument should either contain values or NA.")
   }
   
-  
-  RESULTS <- list(AllResultsWithDirection = combinedResultsCorrelation,
-                  DirectionWRTUCSCRefGene = t(table(combinedResultsCorrelation$direction, 
-                                                    combinedResultsCorrelation$MethylationUCSCRefGene))[, -3], 
-                  DirectionWRTRelationToIsland = t(table(combinedResultsCorrelation$direction, 
-                                                         combinedResultsCorrelation$MethylationRelationToIsland))[, -3],
-                  gprofilerPosMethPosExp = gprofilerPosMethPosExp,
-                  gprofilerPosMethNegExp = gprofilerPosMethNegExp, 
-                  gprofilerNegMethNegExp = gprofilerNegMethNegExp,
-                  gprofilerNegMethPosExp = gprofilerNegMethPosExp, 
-                  gprofilerNoSig = gprofilerNoSig)
-  
-  class(RESULTS) <- "RNAseqVsMethylationFC_ASilva"
   return(RESULTS)
-  
 }
-
-
-
-
-
-
-
-
-
-
