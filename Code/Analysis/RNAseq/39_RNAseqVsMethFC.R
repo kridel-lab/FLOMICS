@@ -242,7 +242,7 @@ RNAseqVsMethylationFC <- function(RNAseqProbesFC,
     B <- unfactor(combinedResults[which(inverseCorVector == "PosMeth,NegExp"), ]$RNAseqGeneName)
     C <- unfactor(combinedResults[which(inverseCorVector == "NegMeth,NegExp"), ]$RNAseqGeneName)
     D <- unfactor(combinedResults[which(inverseCorVector == "NegMeth,PosExp"), ]$RNAseqGeneName)
-    E <-  unfactor(combinedResults[which(inverseCorVector == "NoSig"), ]$RNAseqGeneName)
+    E <- unfactor(combinedResults[which(inverseCorVector == "NoSig"), ]$RNAseqGeneName)
     
     gprofilerPosMethPosExp <- GProfilerAnalysis(GeneIDs = list(A),
                                                 Organism = "hsapiens",
@@ -356,7 +356,7 @@ RNAseqVsMethylationFC <- function(RNAseqProbesFC,
     pathNow <- getwd()
     
     # Combine all results with significance 
-    combinedResults <- data.table(matchedDMRcateResults, matchedRNAseqresults, colVectorDMRcate)
+    combinedResults <- data.table(matchedDMRcateResults, matchedRNAseqResults, colVectorDMRcate)
     colnames(combinedResults)[1:2] <- paste0("DMRcate", colnames(combinedResults)[1:2])
     colnames(combinedResults)[3:9] <- paste0("RNAseq", colnames(combinedResults)[3:9])
     # Save mean difference as numeric values
@@ -511,4 +511,5 @@ RNAseqVsMethylationFC <- function(RNAseqProbesFC,
   }
   
   return(RESULTS)
+  
 }
