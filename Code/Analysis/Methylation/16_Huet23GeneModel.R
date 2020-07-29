@@ -1,3 +1,4 @@
+# Updated 28 July 2020
 # Updated 12 April 2019
 # Function: Huet23GeneModel
 # Author: Anjali Silva
@@ -7,6 +8,7 @@
 #                       rows and patients as columns.
 # MvalueMatrixSummarized: A matrix of M values for genes (ONLY) x patients, with genes in 
 #                         rows and patients as columns.
+# RNAseqCountMatrixNormalized: 
 # ClinicalFile: File with patient sample names, and categories. 
 # FigureGenerate: Produce images or not, options = "Yes" or "No"; default "Yes".
 # PNGorPDF: Output format of the image, options = "png" or "pdf"; default "png".
@@ -24,6 +26,9 @@
 Huet23GeneModel <- function(BetaMatrixSummarized, 
                             BetaMatrixNotSummarized, 
                             MvalueMatrixSummarized, 
+                            MethylationAnnotationFile,
+                            RNAseqCountMatrixNormalized,
+                            RNAseqAnnotationFile,
                             ClinicalFile, 
                             FigureGenerate = "Yes", 
                             PNGorPDF = "png") {
@@ -41,12 +46,14 @@ Huet23GeneModel <- function(BetaMatrixSummarized,
   pathNow <- getwd()
   
   # Based on Huet et al., 2018 paper 
-  Good <- c("SHISA8","ABCB1","METRNL","VCL","ALDH2","RGS10")
-  Bad <- c("GADD45A","FOXO1","DCAF12","CXCR4","AFF3","ORAI2","E2F5","KIAA0040","TAGAP","TCF4","SEMA4B","FCRL2","PRDM15","EML6","USP44","RASSF6","VPREB1")
+  goodGenes <- c("SHISA8", "ABCB1", "METRNL", "VCL", "ALDH2", "RGS10")
+  badGenes <- c("GADD45A", "FOXO1", "DCAF12", "CXCR4", "AFF3", "ORAI2", 
+           "E2F5", "KIAA0040", "TAGAP", "TCF4", "SEMA4B", "FCRL2", "PRDM15", 
+           "EML6", "USP44", "RASSF6", "VPREB1")
   
   # Getting location of genes in the summarized Beta values matrix that correspond to 23 genes
-  GoodGenesLocation <- unlist(sapply(c(1:length(Good)), function(i) which(rownames(BetaMatrixSummarized) == Good[i])))
-  BadGeneLocation <- unlist(sapply(c(1:length(Bad)), function(i) which(rownames(BetaMatrixSummarized) == Bad[i])))
+  GoodGenesLocation <- unlist(sapply(c(1:length(goodGenes)), function(i) which(rownames(BetaMatrixSummarized) == goodGenes[i])))
+  BadGeneLocation <- unlist(sapply(c(1:length(badGenes)), function(i) which(rownames(BetaMatrixSummarized) == badGenes[i])))
   
   # Visualizations using summarized beta values
   if(FigureGenerate == "Yes") {
@@ -99,11 +106,12 @@ Huet23GeneModel <- function(BetaMatrixSummarized,
   ann_missing_removed_truncated <- sub ("\\;.*", "" , 
                                         ann_missing_removed_beta[, which(colnames(ann_missing_removed_beta) == "UCSC_RefGene_Name")] ) 
  
-  GoodGenesLocation_Unsummarized <- sapply(c(1:length(Good)), 
-                                           function(i)  which(ann_missing_removed_truncated == Good[i]))
-  BadGeneLocation_Unsummarized <- sapply(c(1:length(Bad)), 
-                                         function(i) which(ann_missing_removed_truncated == Bad[i]))
+  GoodGenesLocation_Unsummarized <- sapply(c(1:length(goodGenes)), 
+                                           function(i)  which(ann_missing_removed_truncated == goodGenes[i]))
+  BadGeneLocation_Unsummarized <- sapply(c(1:length(badGenes)), 
+                                         function(i) which(ann_missing_removed_truncated == badGenes[i]))
   
+  # Visualizations using non-summarized beta values
   if(FigureGenerate == "Yes") {
     
     if (PNGorPDF == "png") {
@@ -162,10 +170,10 @@ Huet23GeneModel <- function(BetaMatrixSummarized,
     # Without clustering, look at heatmap using only by sample type FL
     TypeLymphomVector_FL <- c(which(substr(colnames(BetaMatrixNotSummarized), 4, 5) == "FL"))
     if (PNGorPDF == "png") {
-      png(paste0(pathNow,"/img/16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering.", PNGorPDF))
+      png(paste0(pathNow, "/img/16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") {
-      pdf(paste0(pathNow,"/img/16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering.", PNGorPDF))
+      pdf(paste0(pathNow, "/img/16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering.", PNGorPDF))
     }
     # pheatmap(as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),unlist(GoodGenesLocation_Unsummarized)),TypeLymphomVector_FL]), cluster_rows = FALSE,  scale ="none", show_colnames = T, fontface="italic", legend = T, border_color = "black", color =  rev(redgreen(1000)) )
     gplots::heatmap.2(as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),
@@ -186,12 +194,36 @@ Huet23GeneModel <- function(BetaMatrixSummarized,
     grDevices::dev.off()
   }
   
+  
+  
+  
+  
+  # RNAseq analysis
+  
+  
+  # Create matrix 23 genes x patients
+  
+  match(c(goodGenes, badGenes), rownames(RNAseqCountMatrixNormalized))
+  
+  # giving all the bad genes (1:15) a coefficient of 1
+  # giving all good genes (16:20) a coefficient of -1
+  
+  scores_137patients <- sapply(c(1:ncol(RNAseqCountMatrixNormalized)), 
+                               function(p) 
+                               (sum((1 *expression_20genes[c(1:15),p])) + sum(-1*expression_20genes[c(16:20),p])) )
+  
+  
+  
+  
   RESULTS <- list(Probe23MatrixArrangedByType = as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),
                                                                                        unlist(GoodGenesLocation_Unsummarized)),
                                                                                      TypeLymphomVector]),
                   Gene23MatrixArrangedByType = as.matrix(BetaMatrixSummarized[c(BadGeneLocation,
                                                                                 GoodGenesLocation),
                                                                               TypeLymphomVector]))
+  
+  
+  
   
   class(RESULTS) <- "Huet23GeneModel_ASilva"
   return(RESULTS)
