@@ -23,13 +23,13 @@
 # 26_gProfiler_", ConditionName.*
 
 GProfilerAnalysis <- function(GeneIDs,
-                      Organism = "hsapiens",
-                      OrderedQuery = FALSE,
-                      PvalAlphaLevel = 0.01,
-                      PositiveorNegFC = NA,
-                      ConditionName = "condition",
-                      ProduceImages = "Yes", 
-                      PNGorPDF = "png") {
+                              Organism = "hsapiens",
+                              OrderedQuery = FALSE,
+                              PvalAlphaLevel = 0.01,
+                              PositiveorNegFC = NA,
+                              ConditionName = "condition",
+                              ProduceImages = "Yes", 
+                              PNGorPDF = "png") {
   
   library(gprofiler2)
   library(grDevices)
@@ -113,3 +113,4 @@ GProfilerAnalysis <- function(GeneIDs,
    return(RESULTS)
 
   }
+# [END]

@@ -10,7 +10,8 @@
 #                     include "STAGE", "SEX", "SITE_BIOPSY", "TYPE_BIOPSY", "INSTITUTION",
 #                     "COO", "TYPE", "TRANSLOC_14_18", "EPIC_QC", "CLUSTER". Default: "TYPE".
 # AnnotationFileEnsemblToGenes: A data frame containing Ensemble ID in first column and gene  
-#                               name in the next column.  
+#                               name in the next column, including type which lists if a 
+#                               protein-coding gene or not.  
 # ClinicalFile: File with patient sample names, and categories. 
 # ClusterLabels: If "ContrastColumnName" == "CLUSTER", vector of integers with length equal 
 #                to ncol(RNAseqCountMatrix) should be provided. Default is NA. 
@@ -95,9 +96,23 @@ DifferentialExpressionRNAseq <- function(RNAseqCountMatrix,
     stop("The number of samples in RNAseqCountMatrix should match length of ClusterLabels.")
   }
   
+  # AnnotationFileEnsemblToGenes is needed to select protein-coding genes
+  if(all(is.na(AnnotationFileEnsemblToGenes)) == TRUE) {
+    stop("\n AnnotationFileEnsemblToGenes must be provided since only analyzing protein-coding genes.")
+  }
+  
+  
   # Indicate cut-offs for logFC and FDR
   cat("\n LogFCcutoff is set to > ", LogFCcutoff, " and FDRcutoff is set to < ", FDRcutoff, ".")
 
+  
+  
+  # Keep only protein coding ENSEMBLIDs for now
+
+  AnnotationFileENSEMBLIDsProteinCoding <- AnnotationFileEnsemblToGenes %>% dplyr::filter(type == "protein_coding")
+  matchRNAseqAnnotation <- match(AnnotationFileENSEMBLIDsProteinCoding$gene, rownames(RNAseqCountMatrix))
+  RNAseqCountMatrix <- RNAseqCountMatrix[matchRNAseqAnnotation[! is.na(matchRNAseqAnnotation)] , ]                               
+  cat("\n Only analyze protein coding ENSEMBLIDs. Therefore, ", nrow(RNAseqCountMatrix), "ENSEMBL IDs analyzed.")
   
   
   #  create a DGEList object:
@@ -258,7 +273,6 @@ DifferentialExpressionRNAseq <- function(RNAseqCountMatrix,
   } else {
     stop("Not a valid ContrastColumnName. Check doumentation for valid ContrastColumnNames.")
   }
-  
   
   
   
@@ -570,3 +584,4 @@ DifferentialExpressionRNAseq <- function(RNAseqCountMatrix,
   class(RESULTS) <- "DifferentialExpressionRNAseq_ASilva"
   return(RESULTS)
 }
+# [END]
