@@ -33,14 +33,3 @@ echo $name
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
 fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/ucsc.hg19.fasta
 out_folder=/cluster/projects/kridelgroup/FLOMICS/DATA/BC_TargetSeq_Calls
-# An interval list file that contains the locations of the baits used
-amplicon_interval_list=
-# An interval list file that contains the locations of the targets
-$targets_interval_list=
-
-gatk CollectTargetedPcrMetrics \
-       -I $sample \
-       -O ${name}.output_pcr_metrics.txt \
-       -R $fasta_file \
-       --AMPLICON_INTERVALS $amplicon_interval_list \
-       --TARGET_INTERVALS $targets_interval_list
