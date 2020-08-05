@@ -26,7 +26,8 @@
 # 10_BoxPlot_MeanBetaValue_", CategoryToVisualize, ".".p*
 
 BoxPlotsMethylation <- function(BetaMatrix, 
-                                MvalueMatrix, 
+                                MvalueMatrix = NA, 
+                                RNAseqMatrix = NA, 
                                 ClinicalFile, 
                                 CategoryToVisualize = "TYPE", 
                                 ClusterLabels = NA,
@@ -57,13 +58,43 @@ BoxPlotsMethylation <- function(BetaMatrix,
   
   
   if (CategoryToVisualize == "CLUSTER") {
-    # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
-    clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
-                                             TumorPurity = TumorPurity,
-                                             MeanBeta = colMeans(BetaMatrix),
-                                             MedianBeta = colMedians(BetaMatrix),
-                                             VarianceBeta = colVars(BetaMatrix),
-                                             MeanMvalue = colMeans(MvalueMatrix))
+
+    if((all(is.na(MvalueMatrix) == TRUE)) && (all(is.na(RNAseqMatrix)) == TRUE)) { # if MvalueMatrix and RNAseqMatrix is set to NA
+      clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                               TumorPurity = TumorPurity,
+                                               MeanBeta = colMeans(BetaMatrix),
+                                               MedianBeta = colMedians(BetaMatrix),
+                                               VarianceBeta = colVars(BetaMatrix),
+                                               MeanMvalue = NA, 
+                                               RNAseqVal = NA)
+    } else if(all(is.na(MvalueMatrix) == TRUE)) { # if MvalueMatrix is set to NA
+      clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                               TumorPurity = TumorPurity,
+                                               MeanBeta = colMeans(BetaMatrix),
+                                               MedianBeta = colMedians(BetaMatrix),
+                                               VarianceBeta = colVars(BetaMatrix),
+                                               MeanMvalue = NA, 
+                                               RNAseqVal = colMeans(RNAseqMatrix))
+    } else if(all(is.na(RNAseqMatrix) == TRUE)) { # if RNAseqMatrix is set to NA
+      clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                               TumorPurity = TumorPurity,
+                                               MeanBeta = colMeans(BetaMatrix),
+                                               MedianBeta = colMedians(BetaMatrix),
+                                               VarianceBeta = colVars(BetaMatrix),
+                                               MeanMvalue = colMeans(MvalueMatrix), 
+                                               RNAseqVal = NA)
+    } else {
+      # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
+      clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                               TumorPurity = TumorPurity,
+                                               MeanBeta = colMeans(BetaMatrix),
+                                               MedianBeta = colMedians(BetaMatrix),
+                                               VarianceBeta = colVars(BetaMatrix),
+                                               MeanMvalue = colMeans(MvalueMatrix),
+                                               RNAseqVal = colMeans(RNAseqMatrix))
+    }
+    
+
     
     # Define comparisons
     if(length(unique(ClusterLabels)) == 2) {
@@ -109,7 +140,7 @@ BoxPlotsMethylation <- function(BetaMatrix,
                                      panel.grid.minor = element_blank()) +
                                theme(aspect.ratio = 1) # +
     # geom_violin(trim=FALSE) # to get rid of boxplot inside
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanBeta_", CategoryToVisualize, ".", PNGorPDF))
+    ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanBeta_", CategoryToVisualize, ".", PNGorPDF))
     
     p6 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
                             y = "MeanBeta", fill = "Cluster",
@@ -118,7 +149,7 @@ BoxPlotsMethylation <- function(BetaMatrix,
                             stat_compare_means(comparisons = ComparisonOptions) + 
                             # Add pairwise comparisons p-value
                             stat_compare_means(paired = FALSE)
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanBeta_", CategoryToVisualize, ".", PNGorPDF))
+    ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanBeta_", CategoryToVisualize, ".", PNGorPDF))
     
     p7 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
                             y = "MedianBeta", fill = "Cluster",
@@ -127,7 +158,7 @@ BoxPlotsMethylation <- function(BetaMatrix,
                             stat_compare_means(comparisons = ComparisonOptions) + 
                             # Add pairwise comparisons p-value
                             stat_compare_means(paired = FALSE)
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_MedianBeta_", CategoryToVisualize, ".", PNGorPDF))
+    ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MedianBeta_", CategoryToVisualize, ".", PNGorPDF))
     
     p8 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
                             y = "VarianceBeta", fill = "Cluster",
@@ -136,25 +167,38 @@ BoxPlotsMethylation <- function(BetaMatrix,
                             stat_compare_means(comparisons = ComparisonOptions) + 
                             # Add pairwise comparisons p-value
                             stat_compare_means(paired = FALSE)
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_VarianceBeta", CategoryToVisualize, ".", PNGorPDF))
+    ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_VarianceBeta", CategoryToVisualize, ".", PNGorPDF))
     
-    p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
-                            y = "MeanMvalue", fill = "Cluster",
-                            palette = coloursBarPlot[sort(unique(ClusterLabels))],
-                            ylab = " Mean of MValue") + 
-                            stat_compare_means(comparisons = ComparisonOptions) + 
-                            # Add pairwise comparisons p-value
-                            stat_compare_means(paired = FALSE)
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMvalue", CategoryToVisualize, ".", PNGorPDF))
+    if(all(is.na(MvalueMatrix) != TRUE)) {
+      p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
+                              y = "MeanMvalue", fill = "Cluster",
+                              palette = coloursBarPlot[sort(unique(ClusterLabels))],
+                              ylab = " Mean of MValue") + 
+                              stat_compare_means(comparisons = ComparisonOptions) + 
+                              # Add pairwise comparisons p-value
+                              stat_compare_means(paired = FALSE)
+      ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMvalue", CategoryToVisualize, ".", PNGorPDF))
+    }
     
-    p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
+    if(all(is.na(RNAseqMatrix) != TRUE)) {
+      p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
+                              y = "RNAseqVal", fill = "Cluster",
+                              palette = coloursBarPlot[sort(unique(ClusterLabels))],
+                              ylab = "Mean RNAseq Expression") + 
+        stat_compare_means(comparisons = ComparisonOptions) + 
+        # Add pairwise comparisons p-value
+        stat_compare_means(paired = FALSE)
+      ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanRNAseqExpression", CategoryToVisualize, ".", PNGorPDF))
+    }
+    
+    p11 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Cluster", 
                             y = "TumorPurity", fill = "Cluster",
                             palette = coloursBarPlot[sort(unique(ClusterLabels))],
                             ylab = "Tumor Purity") + 
                             stat_compare_means(comparisons = ComparisonOptions) + 
                             # Add pairwise comparisons p-value
                             stat_compare_means(paired = FALSE)
-    ggsave(paste0(pathNow, "/img/10_BoxPlot_Purity", CategoryToVisualize, ".", PNGorPDF))
+    ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_Purity", CategoryToVisualize, ".", PNGorPDF))
     
   } else {
   
@@ -162,13 +206,42 @@ BoxPlotsMethylation <- function(BetaMatrix,
     
     # If no need to plot clusters within categories
     if(is.na(PlotClustersWithinCategories) == TRUE) {
-      # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
-      clinicalCategoryPlotValues <- data.frame(Category = factor(ClinicalFile[, which(colnames(ClinicalFile) == CategoryToVisualize)]),
-                                               TumorPurity = TumorPurity,
-                                               MeanBeta = colMeans(BetaMatrix),
-                                               MedianBeta = colMedians(BetaMatrix),
-                                               VarianceBeta = colVars(BetaMatrix),
-                                               MeanMvalue = colMeans(MvalueMatrix))
+      
+      if((all(is.na(MvalueMatrix) == TRUE)) && (all(is.na(RNAseqMatrix)) == TRUE)) { # if MvalueMatrix and RNAseqMatrix is set to NA
+        # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
+        clinicalCategoryPlotValues <- data.frame(Category = factor(ClinicalFile[, which(colnames(ClinicalFile) == CategoryToVisualize)]),
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = NA, 
+                                                 RNAseqVal = NA)
+      } else if(all(is.na(MvalueMatrix)) == TRUE) { # if MvalueMatrix is set to NA
+        clinicalCategoryPlotValues <- data.frame(Category = factor(ClinicalFile[, which(colnames(ClinicalFile) == CategoryToVisualize)]),
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = NA,
+                                                 RNAseqVal = colMeans(RNAseqMatrix))
+      } else if(all(is.na(RNAseqMatrix)) == TRUE) { # if RNAseqMatrix is set to NA
+        clinicalCategoryPlotValues <- data.frame(Category = factor(ClinicalFile[, which(colnames(ClinicalFile) == CategoryToVisualize)]),
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = colMeans(MvalueMatrix),
+                                                 RNAseqVal = NA)
+      } else {
+        clinicalCategoryPlotValues <- data.frame(Category = factor(ClinicalFile[, which(colnames(ClinicalFile) == CategoryToVisualize)]),
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = colMeans(MvalueMatrix), 
+                                                 RNAseqVal = colMeans(RNAseqMatrix))
+      }
+        
                                               
       # Remove NA values, if present
       if(length(which(is.na(clinicalCategoryPlotValues) == TRUE)) > 0) {
@@ -262,13 +335,25 @@ BoxPlotsMethylation <- function(BetaMatrix,
           
         ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_VarianceOfBetaValue_", CategoryToVisualize, ".", PNGorPDF))
         
-        p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
-                                x = "Category", y = "MeanMvalue", fill = "Category",
-                                palette = ColourChoice,
-                                xlab = paste(CategoryToVisualize),
-                                add = "boxplot", ylab="Mean Mvalue") 
+        if(all(is.na(MeanMvalue)) != TRUE) { 
+          p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+                                  x = "Category", y = "MeanMvalue", fill = "Category",
+                                  palette = ColourChoice,
+                                  xlab = paste(CategoryToVisualize),
+                                  add = "boxplot", ylab = "Mean Mvalue") 
+          
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+        }
         
-        ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+        if(all(is.na(RNAseqMatrix) != TRUE)) {
+          p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+                                  x = "Category", y = "RNAseqVal", fill = "Category",
+                                  palette = ColourChoice,
+                                  xlab = paste(CategoryToVisualize),
+                                  add = "boxplot", ylab = "Mean RNAseq Expression") 
+          
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanRNAseqExpressoin_", CategoryToVisualize, ".", PNGorPDF))
+        }
         
       } else { 
         p6 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, x = "Category", 
@@ -301,7 +386,8 @@ BoxPlotsMethylation <- function(BetaMatrix,
         
         ggplot2::ggsave(paste0(pathNow, "/img/10_BetaPlot_VarianceOfBetaValue_", CategoryToVisualize, ".", PNGorPDF))
         
-        p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+        if(all(is.na(MvalueMatrix) != TRUE)) {
+          p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
                                 x = "Category", y = "MeanMvalue", fill = "Category",
                                 palette = ColourChoice,
                                 xlab = paste(CategoryToVisualize),
@@ -309,7 +395,22 @@ BoxPlotsMethylation <- function(BetaMatrix,
                                 stat_compare_means(comparisons = ComparisonOptions)+ # Add pairwise comparisons p-value
                                 stat_compare_means(paired = FALSE)
         
-        ggplot2::ggsave(paste0(pathNow, "/img/10_BetaPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BetaPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+        }
+        
+        
+        if(all(is.na(RNAseqMatrix) != TRUE)) {
+          p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+                                  x = "Category", y = "RNAseqVal", fill = "Category",
+                                  palette = ColourChoice,
+                                  xlab = paste(CategoryToVisualize),
+                                  add = "boxplot", ylab = "Mean RNAseq Expression") + 
+            stat_compare_means(comparisons = ComparisonOptions)+ # Add pairwise comparisons p-value
+            stat_compare_means(paired = FALSE)
+          
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BetaPlot_MeanRNAseqExpression_", CategoryToVisualize, ".", PNGorPDF))
+        }
+        
         
         p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
                                 x = "Category", y = "TumorPurity", fill = "Category",
@@ -323,14 +424,46 @@ BoxPlotsMethylation <- function(BetaMatrix,
       }
       # If need to plot clusters within categories
     } else if(is.na(PlotClustersWithinCategories) == FALSE) { 
-      # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
-      clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
-                                               Category = ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)],
-                                               TumorPurity = TumorPurity,
-                                               MeanBeta = colMeans(BetaMatrix),
-                                               MedianBeta = colMedians(BetaMatrix),
-                                               VarianceBeta = colVars(BetaMatrix),
-                                               MeanMvalue = colMeans(MvalueMatrix))
+      
+      if((all(is.na(MvalueMatrix) == TRUE)) && (all(is.na(RNAseqMatrix)) == TRUE)) { # if MvalueMatrix and RNAseqMatrix is set to NA
+        clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                                 Category = ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)],
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = NA,
+                                                 RNAseqVal = NA)
+      } else if(all(is.na(MvalueMatrix) == TRUE)) { # if MvalueMatrix is set to NA
+        clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                                 Category = ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)],
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = NA,
+                                                 RNAseqVal = colMeans(RNAseqMatrix))
+      } else if(all(is.na(RNAseqMatrix) == TRUE)) { # if RNAseqMatrix is set to NA
+        clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                                 Category = ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)],
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = colMeans(MvalueMatrix),
+                                                 RNAseqVal = NA)
+      } else {
+        # Creating a matrix with values for CategoryToVisualize and RowMeans of probes using beta values
+        clinicalCategoryPlotValues <- data.frame(Cluster = factor(ClusterLabels),
+                                                 Category = ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)],
+                                                 TumorPurity = TumorPurity,
+                                                 MeanBeta = colMeans(BetaMatrix),
+                                                 MedianBeta = colMedians(BetaMatrix),
+                                                 VarianceBeta = colVars(BetaMatrix),
+                                                 MeanMvalue = colMeans(MvalueMatrix),
+                                                 RNAseqVal = colMeans(RNAseqMatrix))
+      }
+      
       
       # Remove NA values, if present
       if(length(which(is.na(clinicalCategoryPlotValues) == TRUE)) > 0) {
@@ -403,20 +536,38 @@ BoxPlotsMethylation <- function(BetaMatrix,
                               
         ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_VarianceOfBetaValue_", CategoryToVisualize, ".", PNGorPDF))
         
-        p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
-                                x = "Category", 
-                                y = "MeanMvalue", 
-                                fill = "Cluster",
-                                palette = coloursBarPlot[sort(unique(ClusterLabels))],
-                                add = "boxplot", 
-                                ylab ="Mean Mvalue", 
-                                xlab = paste(CategoryToVisualize)) + 
-                                stat_compare_means(comparisons = ComparisonOptions)+ # Add pairwise comparisons p-value
-                                stat_compare_means(paired = FALSE)
+        if(all(is.na(MvalueMatrix) != TRUE)) {
+          p9 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+                                  x = "Category", 
+                                  y = "MeanMvalue", 
+                                  fill = "Cluster",
+                                  palette = coloursBarPlot[sort(unique(ClusterLabels))],
+                                  add = "boxplot", 
+                                  ylab ="Mean Mvalue", 
+                                  xlab = paste(CategoryToVisualize)) + 
+                                  stat_compare_means(comparisons = ComparisonOptions)+ # Add pairwise comparisons p-value
+                                  stat_compare_means(paired = FALSE)
+          
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+        }
         
-        ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanMValue_", CategoryToVisualize, ".", PNGorPDF))
+        if(all(is.na(RNAseqMatrix) != TRUE)) {
+          p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+                                  x = "Category", 
+                                  y = "RNAseqVal", 
+                                  fill = "Cluster",
+                                  palette = coloursBarPlot[sort(unique(ClusterLabels))],
+                                  add = "boxplot", 
+                                  ylab ="Mean RNAseq Expression", 
+                                  xlab = paste(CategoryToVisualize)) + 
+            stat_compare_means(comparisons = ComparisonOptions)+ # Add pairwise comparisons p-value
+            stat_compare_means(paired = FALSE)
+          
+          ggplot2::ggsave(paste0(pathNow, "/img/10_BoxPlot_MeanRNAseqExpression_", CategoryToVisualize, ".", PNGorPDF))
+        }
         
-        p10 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
+        
+        p11 <- ggpubr::ggboxplot(clinicalCategoryPlotValues, 
                                 x = "Category", 
                                 y = "TumorPurity", 
                                 fill = "Cluster",
@@ -676,9 +827,3 @@ BoxPlotMethylationGeneProbe <- function(BetaMatrix,
   class(RESULTS) <- "BoxPlotMethylationGeneProbe_ASilva"
   return(RESULTS)
 }
-
-
-
-
-
-
