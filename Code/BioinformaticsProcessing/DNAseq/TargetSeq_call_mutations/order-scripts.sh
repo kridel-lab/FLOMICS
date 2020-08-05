@@ -14,7 +14,16 @@ find . -type f -name '*.bam' > /cluster/projects/kridelgroup/FLOMICS/DATA/Target
 
 #----run PICARD collect metrics-------------------------------------------------
 
+cd /cluster/projects/kridelgroup/FLOMICS
+
 #1. prepare interval and amplicon files
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/001_Prepare_Amplicons_Targets.R
+
+#2. run collect targeted pcr metrics
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/002_CollectTargetedPcrMetrics.sh
+
+#3. process coverage results/merge with probe info which genes cover and convert
+#sample id
 
 
 #----run PLATYPUS---------------------------------------------------------------
