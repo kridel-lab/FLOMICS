@@ -23,6 +23,7 @@ echo $sample
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
 fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.fasta
 out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA
+targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_targets_input.bed
 
 #MANTA
 MANTA_INSTALL_PATH=/cluster/tools/software/centos7/manta/1.6.0
@@ -35,7 +36,8 @@ MANTA_ANALYSIS_PATH=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA
 ${MANTA_INSTALL_PATH}/bin/configManta.py \
 --tumorBam ${names[${SLURM_ARRAY_TASK_ID}]} \
 --referenceFasta $fasta_file \
---runDir ${MANTA_ANALYSIS_PATH}
+--runDir ${MANTA_ANALYSIS_PATH} \
+--callRegions $targets_interval_list
 
 #After succesfful configuration run the following:
 /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/MANTA_WORKDIR_${names[${SLURM_ARRAY_TASK_ID}]}/runWorkflow.py -j 20

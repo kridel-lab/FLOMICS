@@ -31,3 +31,6 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #mutation calling
 
 #----run MUTECT2----------------------------------------------------------------
+
+#----run strelka and manta----------------------------------------------------------------
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_strelka.sh
