@@ -43,5 +43,8 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 
 #----run strelka and manta----------------------------------------------------------------
 
-#make file gzi for fasta
+#[1] run MANTA first to get SVs and indels
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_strelka.sh
+
+#[2] run STRELKA second to get SNVs
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/006_strelka.sh

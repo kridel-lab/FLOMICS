@@ -43,8 +43,7 @@ ${STRELKA_INSTALL_PATH}/bin/configureStrelkaSomaticWorkflow.py \
 --tumorBam ${names[${SLURM_ARRAY_TASK_ID}]} \
 --referenceFasta $fasta_file \
 --indelCandidates ${MANTA_ANALYSIS_PATH}/results/variants/candidateSmallIndels.vcf.gz \
---runDir ${STRELKA_ANALYSIS_PATH} \
---callRegions ${targets_interval_list}.gz
+--runDir ${STRELKA_ANALYSIS_PATH}
 
 #After succesfful configuration run the following:
-/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/STRELKA_WORKDIR_${sample}/runWorkflow.py -j 20 -m local
+/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/STRELKA_WORKDIR_${sample}/runWorkflow.py -j 8 -m local
