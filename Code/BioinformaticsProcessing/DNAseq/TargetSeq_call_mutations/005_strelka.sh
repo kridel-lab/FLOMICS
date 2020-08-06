@@ -40,7 +40,7 @@ tabix -pbed $targets_interval_list.gz
 
 ${MANTA_INSTALL_PATH}/bin/configManta.py \
 --tumorBam ${names[${SLURM_ARRAY_TASK_ID}]} \
---referenceFasta $fasta_file \
+--referenceFasta /cluster/projects/kridelgroup/RAP_ANALYSIS/human_g1k_v37_decoy.fasta \
 --runDir ${MANTA_ANALYSIS_PATH} \
 --callRegions ${targets_interval_list}.gz
 

@@ -9,6 +9,8 @@
 #----navigate to directory with BAM files---------------------------------------
 cd /cluster/projects/kridelgroup/GSC-1741
 
+#FASTA file downloaded from 1000 genomes
+
 #save all BAM files in text file that will be used as array input for indices
 find . -type f -name '*.bam' > /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/target_seq_samples_bam_locations.txt
 
@@ -24,7 +26,7 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 
 #3. process coverage results/merge with probe info which genes cover and convert
 #sample id
-
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/003_summarize_probe_coverage.R
 
 #----run PLATYPUS---------------------------------------------------------------
 
@@ -33,4 +35,6 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #----run MUTECT2----------------------------------------------------------------
 
 #----run strelka and manta----------------------------------------------------------------
+
+#make file gzi for fasta
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_strelka.sh
