@@ -9,7 +9,14 @@
 #----navigate to directory with BAM files---------------------------------------
 cd /cluster/projects/kridelgroup/GSC-1741
 
+
+#/cluster/projects/kridelgroup/FLOMICS/genome_files
 #FASTA file downloaded from 1000 genomes
+#http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/
+#human_g1k_v37.fasta.gz
+#gunzip human_g1k_v37.fasta.gz
+#zcat human_g1k_v37.fasta > human_g1k_v37.decompressed.fasta #because wasn't decompressed fully after gunzip
+#samtools faidx human_g1k_v37.decompressed.fasta
 
 #save all BAM files in text file that will be used as array input for indices
 find . -type f -name '*.bam' > /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/target_seq_samples_bam_locations.txt

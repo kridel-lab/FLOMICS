@@ -22,7 +22,7 @@ sample=${names[${SLURM_ARRAY_TASK_ID}]}
 echo $sample
 
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
-fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.fasta
+fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.decompressed.fasta
 out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA
 targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_targets_input.bed
 
@@ -40,7 +40,7 @@ tabix -pbed $targets_interval_list.gz
 
 ${MANTA_INSTALL_PATH}/bin/configManta.py \
 --tumorBam ${names[${SLURM_ARRAY_TASK_ID}]} \
---referenceFasta /cluster/projects/kridelgroup/RAP_ANALYSIS/human_g1k_v37_decoy.fasta \
+--referenceFasta $fasta_file \
 --runDir ${MANTA_ANALYSIS_PATH} \
 --callRegions ${targets_interval_list}.gz
 
