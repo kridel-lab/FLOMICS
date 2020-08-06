@@ -14,7 +14,7 @@ module load manta/1.6.0
 module load tabix
 
 cd /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/BC_TargetSeq_Aug2020
-ls *.bam > all_bam_files_FL
+#ls *.bam > all_bam_files_FL
 
 samples=all_bam_files_FL
 names=($(cat $samples))
