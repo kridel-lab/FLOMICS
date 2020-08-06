@@ -2,34 +2,48 @@
 #
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH -p himem
-#SBATCH -c 6
-#SBATCH --mem=40000M
+#SBATCH --mem=61440M
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
-#SBATCH -J picard
-#SBATCH --array=0-130 # job array index - number of jobs = numb of unique samples with top up runs
+#SBATCH -J MUTECT2
+#SBATCH --array=0-479 # job array index
 
-module load annovar
-module load bam-readcount
-module load gcc
-module load STAR
-module load rsem
-module load perl
-module load python/2.7
+#need to run Mutect2 on all bam files from tumour samples
+#author: Karin Isaev
+#date started: June 25, 2019
+
+module load java/8  #8
+module load samtools
+module load python
 module load gatk
-module load tabix
-module load vcftools
+module load annovar
 
-cd /cluster/projects/kridelgroup/GSC-1741
+#pwd
+#/cluster/projects/kridelgroup/RAP_ANALYSIS/chr
 
-samples=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/target_seq_samples_bam_locations.txt
-names=($(cat $samples))
+#this is part 1 of the best protocols GATK steps for identifying SNVs and INDELS
+#https://software.broadinstitute.org/gatk/best-practices/workflow?id=11146
+
+#using output from samtools (split original bam files into chrosome based files)
+
+#find -L . -name "*.cram.bai" > mutect_jobs #480
+#sed 's/.bai//' mutect_jobs > mutect_jobs_clean
+
+#pwd
+names=($(cat mutect_jobs))
 echo ${names[${SLURM_ARRAY_TASK_ID}]}
-sample=${names[${SLURM_ARRAY_TASK_ID}]}
-echo $sample
 
-name=${sample#*hg19a/}
-echo $name
+tum=($(samtools view -H ${names[${SLURM_ARRAY_TASK_ID}]} | grep '^@RG' | sed "s/.*SM:\([^\t]*\).*/\1/g" | uniq))
+echo "${tum}"
+export tum
 
-gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
-fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/ucsc.hg19.fasta
-out_folder=/cluster/projects/kridelgroup/FLOMICS/DATA/BC_TargetSeq_Calls
+chr=($(echo ${names[${SLURM_ARRAY_TASK_ID}]} | awk -F'[_.]' '{print $8}'))
+echo "${chr}"
+
+gatk Mutect2 \
+-R /cluster/projects/kridelgroup/RAP_ANALYSIS/human_g1k_v37_decoy.fasta \
+-I "${names[${SLURM_ARRAY_TASK_ID}]}" \
+-I /cluster/projects/kridelgroup/RAP_ANALYSIS/LY_RAP_0003_Ctl_FzG_01_files/gatk/LY_RAP_0003_Ctl_FzG_01.sorted.dup.recal.bam \
+-L "${chr}" \
+-tumor "${tum}" \
+-O ${names[${SLURM_ARRAY_TASK_ID}]}.vcf.gz \
+--germline-resource /cluster/projects/kridelgroup/RAP_ANALYSIS/af-only-gnomad.raw.sites.b37.vcf.gz
