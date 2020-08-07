@@ -1,6 +1,20 @@
 #----------------------------------------------------------------------
-#prepare intervals for picard collect metrics tool
+#Summarize probe coverage from picard
 #----------------------------------------------------------------------
+
+#Karin Isaev
+#Started August 5th 2020
+#tested on R version 3.5.0
+
+#----------------------------------------------------------------------
+#purpose
+#----------------------------------------------------------------------
+
+#this script takes output from picard collect targeted pcr metrics
+#merges it with sample information
+#make summary csv file with coverage per gene per patient
+#simple barplot summaries of coverage per gene/probe/region
+#calculate differences in coverage between coding and non-coding regions
 
 #----------------------------------------------------------------------
 #load functions and libraries
@@ -16,19 +30,21 @@ packages <- c("dplyr", "readr", "ggplot2", "vcfR", "tidyr", "mclust", "data.tabl
 "plyr",
 "ggrepel", "stringr", "maftools")
 lapply(packages, require, character.only = TRUE)
+library(readxl)
 
 #----------------------------------------------------------------------
-#Interval files provided by IDT and processed by Robert
+#Load sample info
 #----------------------------------------------------------------------
 
-#Sample info
+#Sample info (originally provided by BC team in first data upload)
 samp_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/library_mapping_BC.csv")
 
-#detailed sample info
-more_samp_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
-more_samp_info = more_samp_info[,c("SAMPLE_ID", "rna_seq_file_sample_ID",
-"RES_ID", "LY_FL_ID", "TIME_POINT", "PILOT_30_cases", "SEX", "INSTITUTION",
-"TYPE", "STAGE" ,"COO", "Cluster", "RNAseq_DATA", "EPIC_INCLUDE")]
+#detailed sample info (provided by Anjali and Robert)
+more_samp_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.xlsx"))
+
+#----------------------------------------------------------------------
+#Interval files provided by IDT and prepared by Robert
+#----------------------------------------------------------------------
 
 #coding
 c_amp = fread("coding_genes_probe_coordinates_n_1917.txt")
@@ -38,7 +54,9 @@ c_amp$type = "coding"
 
 c_target = fread("coding_genes_target_coordinates_n_838.txt")
 c_target$V1 = sapply(c_target$V1, function(x){unlist(strsplit(x, "chr"))[2]})
-c_target = c_target[,c(1:4)]
+c_target$gene = sapply(c_target$V4, function(x){unlist(strsplit(x, "\\("  ))[2]})
+c_target$gene = sapply(c_target$gene, function(x){unlist(strsplit(x, "\\)"  ))[1]})
+c_target = c_target[,c(1:4,7)]
 c_target$type = "coding"
 
 #noncoding
@@ -49,7 +67,8 @@ colnames(nc_amp) = colnames(c_amp)
 #nc_amp$V1 = paste("chr", nc_amp$V1, sep="")
 nc_target = fread("non_coding_target_coordinates_n_35.txt")
 nc_target$V1 = sapply(nc_target$V1, function(x){unlist(strsplit(x, "chr"))[2]})
-nc_target = nc_target[,c(1:4)]
+nc_target$gene = sapply(nc_target$V4, function(x){unlist(strsplit(x, "_"))[3]})
+nc_target = nc_target[,c(1:4,7)]
 nc_target$type = "noncoding"
 
 #collect all amplicon intervals
@@ -58,11 +77,16 @@ colnames(all_amps) = c("chr", "start", "stop", "region", "type")
 
 #collect all target intervals
 all_targets = rbind(c_target, nc_target)
-colnames(all_targets) = c("chr", "start", "stop", "region", "type")
+colnames(all_targets) = c("chr", "start", "stop", "region", "gene","type")
+
+#----------------------------------------------------------------------
+#load in output files from picard tools
+#----------------------------------------------------------------------
 
 #all files with coverage per target
 all_res = list.files("/cluster/projects/kridelgroup/FLOMICS/DATA/BC_TargetSeq_Calls", pattern="coverage")
 
+#read in all files and append sample names
 read_file = function(file_name){
 
   f = paste("/cluster/projects/kridelgroup/FLOMICS/DATA/BC_TargetSeq_Calls/", file_name, sep="")
@@ -86,6 +110,7 @@ all_targets$id = paste(all_targets$chr, all_targets$stop, sep="_")
 #Analysis
 #----------------------------------------------------------------------
 
+#merge information about target region to picard output file
 all_res = merge(all_res, all_targets, by = "id")
 colnames(all_res)[3] = "start_picard"
 colnames(all_res)[18] = "start_target"
@@ -93,40 +118,14 @@ colnames(all_res)[18] = "start_target"
 #merge with sample name
 all_res = merge(all_res, samp_info, by="Library")
 
+#merge with detaild sample information
+colnames(more_samp_info)[1] = "External_identifier"
+all_res = merge(all_res, more_samp_info, by = "External_identifier")
+all_res$RNAseq_COMMENT=NULL
+
 #save all_res
 write.csv(all_res, file=paste(date,
   "picard_tools_coverage_summary_targets_DNA_sequencing.csv", sep="_"), quote=F, row.names=F)
 
-#make boxplot comparing coding vs noncoding
-pdf("/cluster/projects/kridelgroup/FLOMICS/DATA/001_coverage_mutation_summary.pdf")
-
-# Change box plot colors by groups
-p<-ggplot(all_res, aes(x=type, y=mean_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=normalized_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=min_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=min_normalized_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=max_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=max_normalized_coverage, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-p<-ggplot(all_res, aes(x=type, y=read_count, fill=type)) +
-  geom_boxplot()
-p+scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-
-dev.off()
+#calculate mean coverage between coding and non-coding
+all_res %>% group_by(type) %>% dplyr::summarize(mean_cov = mean(mean_coverage))
