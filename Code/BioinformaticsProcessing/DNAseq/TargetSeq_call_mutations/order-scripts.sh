@@ -33,7 +33,8 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 
 #3. process coverage results/merge with probe info which genes cover and convert
 #sample id
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/003_summarize_probe_coverage.R
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/003A_summarize_probe_coverage.R
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/003B_summarize_probe_coverage.R
 
 #----run PLATYPUS---------------------------------------------------------------
 
@@ -41,10 +42,7 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 
 #----run MUTECT2----------------------------------------------------------------
 
-#----run strelka and manta----------------------------------------------------------------
+#----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels
-sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_strelka.sh
-
-#[2] run STRELKA second to get SNVs
-sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/006_strelka.sh
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_manta.sh
