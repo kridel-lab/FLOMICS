@@ -9,6 +9,10 @@
 #----navigate to directory with BAM files---------------------------------------
 cd /cluster/projects/kridelgroup/GSC-1741
 
+#save all BAM files in text file that will be used as array input for indices
+find . -type f -name '*.bam' > /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/target_seq_samples_bam_locations.txt
+
+#----prepare genome files-------------------------------------------------------
 
 #/cluster/projects/kridelgroup/FLOMICS/genome_files
 #FASTA file downloaded from 1000 genomes
@@ -18,8 +22,10 @@ cd /cluster/projects/kridelgroup/GSC-1741
 #zcat human_g1k_v37.fasta > human_g1k_v37.decompressed.fasta #because wasn't decompressed fully after gunzip
 #samtools faidx human_g1k_v37.decompressed.fasta
 
-#save all BAM files in text file that will be used as array input for indices
-find . -type f -name '*.bam' > /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/target_seq_samples_bam_locations.txt
+cd /cluster/projects/kridelgroup/FLOMICS/genome_files
+fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.decompressed.fasta
+#make dict file for fasta file
+gatk CreateSequenceDictionary -R $fasta_file
 
 #----run PICARD collect metrics-------------------------------------------------
 
