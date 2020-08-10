@@ -7,10 +7,6 @@
 #SBATCH -J MUTECT2
 #SBATCH --array=0-130 # job array index
 
-#need to run Mutect2 on all bam files from tumour samples
-#author: Karin Isaev
-#date started: June 25, 2019
-
 module load java/8  #8
 module load samtools
 module load python3

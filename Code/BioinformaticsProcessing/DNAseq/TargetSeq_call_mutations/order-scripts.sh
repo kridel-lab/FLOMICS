@@ -48,6 +48,8 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 
 #----run MUTECT2----------------------------------------------------------------
 
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/006_Mutect2.sh
+
 #----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels
