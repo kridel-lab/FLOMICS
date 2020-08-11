@@ -45,6 +45,7 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 #----run PLATYPUS---------------------------------------------------------------
 
 #mutation calling
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_platypus.sh
 
 #----run MUTECT2----------------------------------------------------------------
 

@@ -4,7 +4,7 @@
 #SBATCH -p himem
 #SBATCH --mem=61440M
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
-#SBATCH -J MUTECT2
+#SBATCH -J Platypus
 #SBATCH --array=0-130 # job array index
 
 module load java/8  #8
