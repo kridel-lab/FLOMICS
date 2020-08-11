@@ -24,7 +24,7 @@ echo $sample
 
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
 fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.decompressed.fasta
-out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2
+out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/PLATYPUS
 #targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_targets_input.bed
 targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_amps_input.bed
 ints=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/${sample}_targets.interval_list
@@ -33,14 +33,6 @@ tum=($(samtools view -H ${names[${SLURM_ARRAY_TASK_ID}]} | grep '^@RG' | sed "s/
 echo "${tum}"
 export tum
 
-gatk Mutect2 \
--R $fasta_file \
--I ${names[${SLURM_ARRAY_TASK_ID}]} \
--tumor ${tum} \
--L $ints \
--O $out_folder/${tum}.vcf.gz \
---germline-resource /cluster/projects/kridelgroup/RAP_ANALYSIS/af-only-gnomad.raw.sites.b37.vcf.gz
-
 python /cluster/tools/software/platypus/0.8.1/Platypus.py callVariants \
 --bamFiles ${names[${SLURM_ARRAY_TASK_ID}]} --refFile $fasta_file \
--o ${tum}.platypus.vcf --filterDuplicates=0
+-o ${out_folder}/${tum}.platypus.vcf --filterDuplicates=0

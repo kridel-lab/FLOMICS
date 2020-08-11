@@ -54,6 +54,9 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #get contamination and filter variants
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/007_Mutect2_filter_variants.sh
 
+#normalize vcf and run annovar
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/008_Mutect2_Annotate_via_Annovar.sh
+
 #----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels
