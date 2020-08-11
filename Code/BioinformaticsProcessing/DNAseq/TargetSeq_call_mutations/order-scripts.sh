@@ -48,7 +48,11 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 
 #----run MUTECT2----------------------------------------------------------------
 
+#main script
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/006_Mutect2.sh
+
+#get contamination and filter variants
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/007_Mutect2_filter_variants.sh
 
 #----run Manta----------------------------------------------------------------
 
