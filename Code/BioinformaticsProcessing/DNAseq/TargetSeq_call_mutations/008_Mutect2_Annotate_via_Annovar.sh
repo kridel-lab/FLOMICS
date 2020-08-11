@@ -16,7 +16,7 @@ module load tabix
 module load vt
 
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2
-ls *filtered.vcf.gz > all_vcf_files_FL
+#ls *filtered.vcf.gz > all_vcf_files_FL
 
 samples=all_vcf_files_FL
 names=($(cat $samples))
