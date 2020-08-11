@@ -58,6 +58,10 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #normalize vcf and run annovar
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/008_Mutect2_Annotate_via_Annovar.sh
 
+#soft filtering and matrix prep
+module load R/3.6.1
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/009_Mutect2_prepare_matrix.R
+
 #----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels
