@@ -53,4 +53,7 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels
-sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_manta.sh
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_A_manta.sh
+
+#[2] run job to process each SV VCF file with gene names
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_C_processing_manta_job.sh
