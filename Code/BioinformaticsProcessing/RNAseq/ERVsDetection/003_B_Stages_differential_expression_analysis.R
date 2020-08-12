@@ -1,12 +1,6 @@
 #----------------------------------------------------------------------------------
-#003_B_Stages_differential_expression_analysis.R - Stages
+#003_B_Stages_differential_expression_analysis.R 
 #----------------------------------------------------------------------------------
-
-#Karin Isaev
-#Date: January 16th, 2020
-#This script takes in individual files obtained by telescope
-#for each individual BAM file from RNA-Seq FL TGL13 samples
-#and conducts EdgeR differential expression analysis of these trancripts
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/concatenated_results") #or where ever the 136 tsv files are stored
 source("/cluster/home/srussell/FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/003_B_Stages_DE_source.R")
@@ -69,6 +63,10 @@ group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
 #create DGEList object, normalize
 tier_numbers=c(1,2,3)
 df_tiers=llply(tier_numbers,make_DGEs)
+
+print(dim(df_tiers[[1]]$counts))
+print(dim(df_tiers[[2]]$counts))
+print(dim(df_tiers[[3]]$counts))
 
 #convert_CPM=function(dftiers){
 #  exprs.df <- data.frame(cpm(dftiers, normalized.lib.sizes = FALSE, log = FALSE))
