@@ -35,14 +35,49 @@ muts=fread(list.files(pattern="Mutect2")[length(list.files(pattern="Mutect2"))])
 #samples
 samp_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.xlsx"))
 
-#bc mutation data
-bc_mut_data = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/BC_mutation_data/BC_Cancer_capseq_data.csv")
-
 #old mutation matrix
 old_muts = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/mutect2_full_data_w_AF_DP_2020-02-13_.txt")
 
-#platypus matrix 
+#rnaseq muts
+rnaseq_muts = fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/RNAseq_variants/annovar/2020-06-23_opossum_variant_FL_rna-seq_filtered.txt")
+
+#platypus matrix
+platypus_muts = fread()
 
 #----------------------------------------------------------------------
 #analysis
 #----------------------------------------------------------------------
+
+#remove multiallelic variants and indels
+muts = as.data.table(filter(muts, Tumor_Seq_Allele2 %in% c("A", "C", "G", "T"),
+Reference_Allele %in% c("A", "C", "G", "T")))
+
+s
+get_mut_info = function(pair){
+
+	#[1] check if in old mutation data
+	mut_dat = as.data.table(filter(muts, sample_mut == pair))
+	mut_dat$rnaseq_detect = ""
+	mut_dat$old_muts = ""
+
+	pat_clean= unlist(strsplit(mut_dat$Tumor_Sample_Barcode, "_T1"))[1]
+	old = as.data.table(filter(old_muts, Chromosome == as.numeric(mut_dat$Chromosome),
+		Start_Position == mut_dat$Start_Position ,
+		External_ID %in% c(pat_clean, mut_dat$Tumor_Sample_Barcode)))
+	if(!(dim(old)[1]) == 0){
+			mut_dat$old_muts = "yes"
+		}
+
+	#[2] check if in rnaseq data
+	rna = as.data.table(filter(rnaseq_muts, chr == as.numeric(mut_dat$Chromosome),
+		Start_Position == mut_dat$Start_Position ,
+		Tumor_Sample_Barcode %in% c(pat_clean, mut_dat$Tumor_Sample_Barcode)))
+	if(!(dim(rna)[1]) == 0){
+		mut_dat$rnaseq_detect = "yes"
+	}
+
+	return(mut_dat)
+}
+
+
+all_muts_checked = as.data.table(ldply(llply(all_pairs, get_mut_info, .progress="text")))

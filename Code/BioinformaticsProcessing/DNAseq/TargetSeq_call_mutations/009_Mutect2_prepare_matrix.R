@@ -63,57 +63,35 @@ clean_up_001 = function(paired_vcf){
   vcf = as.data.table(filter(vcf, FILTER=="PASS"))
   print(paste("number of variants that passed filtering=", dim(vcf)[1]))
 
-  #2. filter by coverage
-  #try 30X
-  vcf = as.data.table(filter(vcf, DP >=30))
-  print(paste("number of variants that passed coverage=", dim(vcf)[1]))
-
-  #3. combine vcf and gt info
+	#2. combine vcf and gt info
   cols = colnames(gt)[which(colnames(gt) %in% colnames(vcf))]
   gt = merge(gt, vcf, by= cols)
 
-  #4. remove potential snps annotated by gnomad
-  #z = which(str_detect(gt$avsnp142, "rs"))
-  #if(!(length(z)==0)){
-  #gt = gt[-z,]}
-  #print(paste("number of variants that passed avsnp142=", dim(gt)[1]))
+	#3. get hugo gene names
+  gt = merge(gt, genes, by= "Gene.ensGene")
+  print(paste("number of variants that passed gene merge", dim(gt)[1]))
 
-  #6. keep only those with population allele frequency < 0.001
+  #4. filter by coverage
+  #try 30X
+  vcf = as.data.table(filter(vcf, DP >=10))
+  print(paste("number of variants that passed coverage=", dim(vcf)[1]))
+
+  #5. keep only those with population allele frequency < 0.001
   gt$controls_AF_popmax = as.numeric(gt$controls_AF_popmax)
   gt = as.data.table(filter(gt, (controls_AF_popmax < 0.001 | is.na(controls_AF_popmax))))
   print(paste("number of variants that passed controls_AF_popmax=", dim(gt)[1]))
 
-  #7. keep only mutations where t2 VAF > 0.1
-#  gt$gt_AF = as.numeric(gt$gt_AF)
-#  gt = as.data.table(filter(gt, gt_AF >= 0.1))
-#  print(paste("number of variants that passed vaf >= 0.1=", dim(gt)[1]))
+  #6. keep only mutations where t2 VAF > 0.1
+	gt$gt_AF = as.numeric(gt$gt_AF)
+	gt = as.data.table(filter(gt, gt_AF >= 0.1))
+	print(paste("number of variants that passed vaf >= 0.1=", dim(gt)[1]))
 
-  #8. remove variants from chromosome X and Y
-  gt = as.data.table(filter(gt, !(CHROM %in% c("chrX", "chrY", "chrM", "chrUn_gl000220"))))
-	z = which(str_detect(gt$CHROM, "chrUn"))
-	if(!(length(z) == 0)){
-		gt=gt[-z,]
-	}
-	z = which(str_detect(gt$CHROM, "gl"))
-	if(!(length(z) == 0)){
-		gt=gt[-z,]
-	}
-	z = which(str_detect(gt$CHROM, "mcf"))
-	if(!(length(z) == 0)){
-		gt=gt[-z,]
-	}
-
-  print(paste("number of variants that passed X Y=", dim(gt)[1]))
-
-  #9. get hugo gene names
-  gt = merge(gt, genes, by= "Gene.ensGene")
-  print(paste("number of variants that passed gene merge", dim(gt)[1]))
-
-	#10. keep only muts affecting pcg regions
-	gt = as.data.table(filter(gt, !(ExonicFunc.ensGene == ".")))
+	#7. keep only muts affecting pcg regions
+	gt = as.data.table(filter(gt, !(ExonicFunc.ensGene == "."),
+	!(ExonicFunc.ensGene == "synonymous_SNV")))
 	print(paste("number of variants that passed pcg muts only", dim(gt)[1]))
 
-  #11. generate bed file - summary of mutation and coordinates to intersect with cnvkit output
+  #8. generate bed file - summary of mutation and coordinates to intersect with cnvkit output
   pat = unlist(strsplit(paired_vcf, ".filter."))[1]
 	gt$sample=pat
 
