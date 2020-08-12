@@ -32,7 +32,7 @@ vert_format=function(x){
 
 #format for EdgeR,remove NAs
 filter_removeNA = function(file){
-  x <- file
+  x <- as.data.frame(file)
   x[is.na(x)] <- 0
   tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
   z = which(colnames(x) %in% tier_sample_info$rna_seq_file_sample_ID)
@@ -44,12 +44,13 @@ filter_removeNA = function(file){
 #xtiers=llply(vert_alltiers_telescope,filter_removeNA)
 
 groups_on_tiers = function(file){
-  x <- file
+  x <- as.data.frame(file)
   x[is.na(x)] <- 0
   tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x), STAGE %in% c("ADVANCED", "LIMITED")))
   z = which(colnames(x) %in% tier_sample_info$rna_seq_file_sample_ID)
   x = x[,z]
   tier_sample_info = tier_sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
+  print(tier_sample_info$rna_seq_file_sample_ID == colnames(x))
   group=tier_sample_info$STAGE
   return(group)
 }
@@ -59,16 +60,15 @@ groups_on_tiers = function(file){
 #tier_numbers=c(1,2,3)
 make_DGEs = function(whichtier){
   df = DGEList(counts=xtiers[[whichtier]], group=group_tiers[[whichtier]])
-  df_samples=df$samples
+  df_samples=as.data.frame(df$samples)
   print(summary(df_samples$lib.size))
 
  #normalize, filter lowly expressed genes
   df <- calcNormFactors(df)
   sums = apply(df$counts, 1, sum)
-  z1 = which(sums > 500)
-  z2 = which(sums < 10000000)
-  keep=unique(names(sums)[c(z1,z2)])
-  df <- df[keep, keep.lib.sizes = FALSE]
+  sums=data.frame(sums)
+  z = which(sums > 500 & sums < 10000000)
+  df <- df[z, keep.lib.sizes = FALSE]
   return(df)
   }
 #df_tiers=llply(tier_numbers,make_DGEs)
