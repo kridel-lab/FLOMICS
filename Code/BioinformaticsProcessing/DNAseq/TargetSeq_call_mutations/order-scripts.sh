@@ -50,6 +50,10 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 #normalize VCF files
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_B_platypus_cleanup.sh
 
+#make platypus matrix
+module load R/3.6.1
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_B_platypus_cleanup.R
+
 #----run MUTECT2----------------------------------------------------------------
 
 #main script
