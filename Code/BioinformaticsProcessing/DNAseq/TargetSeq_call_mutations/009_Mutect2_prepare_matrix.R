@@ -138,5 +138,5 @@ clean_up_001 = function(paired_vcf){
 }
 
 all_muts = as.data.table(ldply(llply(files, clean_up_001, .progress="text")))
-write.csv(all_muts, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/",
-date, "_Mutect2_filtered_mutations_FL.csv", sep=""), quote=F, row.names=F)
+write.table(all_muts, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/",
+date, "_Mutect2_filtered_mutations_FL.txt", sep=""), quote=F, row.names=F, sep=";")
