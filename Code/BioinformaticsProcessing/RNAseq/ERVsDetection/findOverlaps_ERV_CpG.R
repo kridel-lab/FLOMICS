@@ -24,33 +24,59 @@ library(ggpubr)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/")
 
-de_erv_stage=as.data.table(read.csv("_2020-07-21_de_erv_stage.csv"))
-de_cpg_stage=as.data.table(read.csv("_2020-07-22_dm_cpg_stage"))
-#de_erv_cluster=as.data.table(read.csv("_2020-07-22_de_erv_cluster.csv"))
-#de_cpg_cluster=as.data.table(read.csv("_2020-07-22_mdm_cpg_cluster.csv"))
-#only performed for stage comparisons
+ervs=fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/_2020-08-12_DE_ERVS_FOR_HITMATRIX.csv")
+cpgs=fread("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/_2020-08-12_DM_CPGS_FOR_HITMATRIX.csv")
+#> dim(ervs)
+#[1] 5195    8
 
-erv_coords = makeGRangesFromDataFrame(de_erv_stage, keep.extra.columns=TRUE)
-cpg_coords = makeGRangesFromDataFrame(de_cpg_stage, keep.extra.columns=TRUE)
+#> dim(cpgs)
+#[1] 190658      8
 
-hits <- findOverlaps(vcf_dat_coords, all_genes_coords, ignore.strand=TRUE)
-hits_overlap = cbind(as.data.table(vcf_dat[queryHits(hits),]), as.data.table(all_genes_coords)[subjectHits(hits),])
-print(head(hits_overlap))
+ervs_t3_FL=ervs[ervs$tier =="tier_3" & ervs$contrast =="ADVANCED_LIMITED",]
+#> dim(ervs_t3_FL)
+#[1] 381   8
+ervs_t3_CL=ervs[ervs$tier =="tier_3" & ervs$contrast =="Cluster1_Cluster2",]
+#dim(ervs_t3_CL)
+#[1] 1700    8
 
-hits <- findOverlaps(erv_coords, cpg_coords, ignore.strand=TRUE)
-hits_overlap = cbind(as.data.table(erv_coords[queryHits(hits),]), as.data.table(cpg_coords)[subjectHits(hits),])
+cpgs_FL=cpgs[cpgs$contrast=="ADVANCED_LIMITED",]
+#> dim(cpgs_FL)
+#[1] 131959      8
+cpgs_CL=cpgs[cpgs$contrast=="Cluster1_Cluster2",]
+#> dim(cpgs_CL)
+#[1] 58699     8
 
-write.csv(hits_overlap, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/", date, "hits_overlap_stage.csv",), quote=F, row.names=F)
+FL_erv_coords = makeGRangesFromDataFrame(ervs_t3_FL, keep.extra.columns=TRUE)
+FL_cpg_coords = makeGRangesFromDataFrame(cpgs_FL, keep.extra.columns=TRUE)
 
-pdf("/cluster/home/srussell/test_J22.pdf", width=5, height=4)
-g=ggscatter(hits_overlap, x = "ERV_logFC", y = "CpG_logFC",
-          add = "reg.line",                                 # Add regression line
-          conf.int = TRUE,                                  # Add confidence interval
-          add.params = list(color = "blue",
-                            fill = "lightgray")
+CL_erv_coords = makeGRangesFromDataFrame(ervs_t3_CL, keep.extra.columns=TRUE)
+CL_cpg_coords = makeGRangesFromDataFrame(cpgs_CL, keep.extra.columns=TRUE)
+
+FL_hits <- findOverlaps(FL_erv_coords, FL_cpg_coords, ignore.strand=TRUE)
+CL_hits <- findOverlaps(CL_erv_coords, CL_cpg_coords, ignore.strand=TRUE)
+
+FL_hits_overlap = cbind(as.data.table(FL_erv_coords[queryHits(FL_hits),]), as.data.table(FL_cpg_coords)[subjectHits(FL_hits),])
+print(head(FL_hits_overlap))
+#> dim(FL_hits_overlap)
+#[1]  4 20
+
+CL_hits_overlap = cbind(as.data.table(CL_erv_coords[queryHits(CL_hits),]), as.data.table(CL_cpg_coords)[subjectHits(CL_hits),])
+print(head(CL_hits_overlap))
+
+#> dim(CL_hits_overlap)
+#[1] 11 20
+
+write.csv(FL_hits_overlap, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/", date, "FL_tier3_hits_overlap.csv"), quote=F, row.names=F)
+write.csv(CL_hits_overlap, paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/TELESCOPE_ANALYSIS/diffmethylation/", date, "CL_hits_overlap.csv"), quote=F, row.names=F)
+
+combined_hits=as.data.frame(rbind(FL_hits_overlap,CL_hits_overlap))
+
+pdf("/cluster/home/srussell/test.pdf", width=5, height=4)
+g=ggscatter(combined_hits, x = "logFC", y = "DM_logFC",
+          color = "contrast", palette = "jco",
+          shape = "contrast"
           )+
           geom_vline(xintercept = 0) +
           geom_hline(yintercept = 0) +
-  stat_cor(method = "pearson", label.x = 1, label.y = 1.5)  # Add correlation coefficient
-  ggpar(g, y.lim=c(-2,2),x.lim=c(-6,6))
+  ggpar(g, y.lim=c(-1,1),x.lim=c(-6,6))
 dev.off()
