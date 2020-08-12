@@ -32,20 +32,22 @@ vert_format=function(x){
 
 #format for EdgeR,remove NAs
 filter_removeNA = function(file){
-  x <- file
+  x <- as.data.frame(file)
   x[is.na(x)] <- 0
   return(x)
 }
 #xtiers=llply(vert_alltiers_telescope,filter_removeNA)
 
 #tier_numbers=c(1,2,3)
-groups_on_tiers = function(whichtier){
-  tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(xtiers[[whichtier]])))
-  tier_sample_info = tier_sample_info[order(match(rna_seq_file_sample_ID, colnames(xtiers[[whichtier]])))]
+groups_on_tiers = function(file){
+  x <- as.data.frame(file)
+  tier_sample_info = as.data.table(filter(sample_info, rna_seq_file_sample_ID %in% colnames(x)))
+  tier_sample_info = tier_sample_info[order(match(rna_seq_file_sample_ID, colnames(x)))]
   group=tier_sample_info$Cluster
-  return(as.character(group))
+  group=as.character(group)
+  return(group)
 }
-#group_tiers=llply(tier_numbers,groups_on_tiers)
+#group_tiers=llply(vert_alltiers_telescope,groups_on_tiers)
 
 #create DGEList object, normalize
 #tier_numbers=c(1,2,3)
@@ -57,10 +59,9 @@ make_DGEs = function(whichtier){
  #normalize, filter lowly expressed genes
   df <- calcNormFactors(df)
   sums = apply(df$counts, 1, sum)
-  z1 = which(sums > 500)
-  z2 = which(sums < 10000000)
-  keep=unique(names(sums)[c(z1,z2)])
-  df <- df[keep, keep.lib.sizes = FALSE]
+  sums=data.frame(sums)
+  z = which(sums > 500 & sums < 10000000)
+  df <- df[z, keep.lib.sizes = FALSE]
   return(df)
   }
 #df_tiers=llply(tier_numbers,make_DGEs)
