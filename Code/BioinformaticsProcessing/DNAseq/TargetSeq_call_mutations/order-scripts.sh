@@ -45,7 +45,10 @@ Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/Target
 #----run PLATYPUS---------------------------------------------------------------
 
 #mutation calling
-sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_platypus.sh
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_A_platypus.sh
+
+#normalize VCF files
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/004_B_platypus_cleanup.sh
 
 #----run MUTECT2----------------------------------------------------------------
 

@@ -36,7 +36,7 @@ colnames(genes)[2] = "Gene.ensGene"
 #genes = as.data.table(filter(genes, biotype == "protein_coding"))
 #genes = as.data.table(filter(genes, !(is.na(entrez))))
 
-files = list.files(pattern="platypus.vcf")
+files = list.files(pattern="normalized.vcf")
 
 #----------------------------------------------------------------------
 #analysis
@@ -97,22 +97,8 @@ clean_up_001 = function(paired_vcf){
 	print(paste("number of variants that passed X Y=", dim(gt)[1]))
 
   #11. generate bed file - summary of mutation and coordinates to intersect with cnvkit output
-  pat = unlist(strsplit(paired_vcf, ".platypus."))[1]
+  pat = unlist(strsplit(paired_vcf, ".normalized.vcf."))[1]
 	gt$sample=pat
-
-	gt$End_Position = gt$POS
-	gt$Start_Position = gt$POS
-	gt$Chromosome = gt$CHROM
-	gt$Reference_Allele = gt$REF
-	gt$Tumor_Seq_Allele2 = gt$ALT
-	gt$Variant_Classification = paste(gt$Func.ensGene, gt$ExonicFunc.ensGene)
-	gt$Variant_Type = "SNP"
-	gt$Tumor_Sample_Barcode = gt$sample
-	gt$Var_Freq = gt$gt_AF
-
-	gt = gt[,c("Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele",
-	"Tumor_Seq_Allele2", "avsnp142", "cosmic68", "AAChange.ensGene",
-	"Variant_Classification", "Variant_Type", "Tumor_Sample_Barcode", "Var_Freq")]
 
 	return(gt)
 
