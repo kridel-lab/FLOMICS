@@ -30,7 +30,7 @@ library(readxl)
 #----------------------------------------------------------------------
 
 #mutations
-muts=fread(list.files(pattern="Mutect2")[length(list.files(pattern="Mutect2"))])
+muts=fread(list.files(pattern="Mutect2_filtered_mutations_FL.txt")[length(list.files(pattern="Mutect2_filtered_mutations_FL.txt"))])
 
 #samples
 samp_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample_annotations_rcd6Nov2019.xlsx"))
@@ -48,9 +48,13 @@ platypus_muts = fread("2020-08-12_Platypus_filtered_mutations_FL.txt")
 #analysis
 #----------------------------------------------------------------------
 
-#remove multiallelic variants and indels
-muts = as.data.table(filter(muts, Tumor_Seq_Allele2 %in% c("A", "C", "G", "T"),
-Reference_Allele %in% c("A", "C", "G", "T")))
+#remove multiallelic variants and keep (indels)
+#muts = as.data.table(filter(muts, Tumor_Seq_Allele2 %in% c("A", "C", "G", "T"),
+#Reference_Allele %in% c("A", "C", "G", "T")))
+
+z = which(str_detect(muts$Tumor_Seq_Allele2, ","))
+muts = muts[-z,]
+
 muts$sample_mut = paste(muts$Chromosome, muts$Start_Position, muts$Tumor_Sample_Barcode, sep="_")
 all_pairs = unique(muts$sample_mut)
 
