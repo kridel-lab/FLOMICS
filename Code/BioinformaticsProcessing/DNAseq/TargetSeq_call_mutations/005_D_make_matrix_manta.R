@@ -65,7 +65,7 @@ more_samp_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS
 #analysis
 #----------------------------------------------------------------------
 
-all_svs = list.files(pattern=".rds")
+all_svs = list.files(pattern="_2020-08-13_")
 
 get_res = function(file){
   f = readRDS(file)
