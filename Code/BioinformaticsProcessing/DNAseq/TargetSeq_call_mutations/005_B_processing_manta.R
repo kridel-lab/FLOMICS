@@ -24,7 +24,7 @@ index = args[1]
 print(index)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA")
-setwd(paste("MANTA_WORKDIR_", index, "/", "results/variants", sep=""))
+setwd(paste("MANTA_WORKDIR_nointervals_", index, "/", "results/variants", sep=""))
 
 #----------------------------------------------------------------------
 #purpose
