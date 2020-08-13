@@ -78,3 +78,6 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 
 #[2] run job to process each SV VCF file with gene names
 sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_C_processing_manta_job.sh
+
+#[3] run script to combine results into matrix
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_D_make_matrix_manta.R
