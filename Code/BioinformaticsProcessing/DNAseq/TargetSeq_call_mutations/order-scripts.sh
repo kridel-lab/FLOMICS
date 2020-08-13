@@ -68,6 +68,9 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 module load R/3.6.1
 Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/009_Mutect2_prepare_matrix.R
 
+#final mutation cleanup add info on whether mutation was found via rnaseq as well
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/010_Mutect2_merged_wPlatypus_old_data.R
+
 #----run Manta----------------------------------------------------------------
 
 #[1] run MANTA first to get SVs and indels

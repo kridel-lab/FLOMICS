@@ -82,8 +82,8 @@ clean_up_001 = function(paired_vcf){
   print(paste("number of variants that passed controls_AF_popmax=", dim(gt)[1]))
 
   #6. keep only mutations where t2 VAF > 0.1
-	gt$gt_AF = as.numeric(gt$gt_AF)
-	gt = as.data.table(filter(gt, gt_AF >= 0.1))
+	#gt$gt_AF = as.numeric(gt$gt_AF)
+	#gt = as.data.table(filter(gt, gt_AF >= 0.1))
 	print(paste("number of variants that passed vaf >= 0.1=", dim(gt)[1]))
 
 	#7. keep only muts affecting pcg regions
