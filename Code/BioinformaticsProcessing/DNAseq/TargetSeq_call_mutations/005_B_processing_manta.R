@@ -53,8 +53,8 @@ genes = as.data.table(filter(genes, biotype == "protein_coding"))
 genes = as.data.table(filter(genes, !(is.na(entrez))))
 
 #add extra window to start and end of gene to capture gene even if not directly overlapping
-all_genes$start_position = all_genes$start_position - 5000
-all_genes$end_position = all_genes$end_position + 5000
+all_genes$start_position = all_genes$start_position - 500
+all_genes$end_position = all_genes$end_position + 500
 all_genes = as.data.table(filter(all_genes, chromosome_name %in% c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6",
   "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
   "chr20", "chr21", "chr22", "chrX", "chrY", "chrMT")))
