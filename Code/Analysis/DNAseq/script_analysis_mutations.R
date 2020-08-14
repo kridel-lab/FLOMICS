@@ -36,6 +36,7 @@ mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13
   filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
+length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
 # n = 679 rows & 129 unique patients
 
 # Plot nb of mutations per sample in FLOMICS
