@@ -41,7 +41,7 @@ tabix -pbed $targets_interval_list.gz
 
 ${MANTA_INSTALL_PATH}/bin/configManta.py \
 --tumorBam ${names[${SLURM_ARRAY_TASK_ID}]} \
---referenceFasta $fasta_file \
+--referenceFasta $fasta_file --exome \
 --runDir ${MANTA_ANALYSIS_PATH} #\
 #--callRegions ${targets_interval_list}.gz
 
