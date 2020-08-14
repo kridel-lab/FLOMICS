@@ -1,9 +1,6 @@
 
 library(dplyr)
 library(ggplot2)
-# library(forcats)
-# library(ggpubr)
-# library(data.table)
 
 # setwd("~/FLOMICS/")
 
@@ -16,7 +13,7 @@ library(ggplot2)
 gene.panel <- read.csv("DNAseq/Final_target_files/coding_gene_panel_PLOSMED_FLOMICS.csv", header = TRUE)
 genes.common <- gene.panel %>%
   filter(PLOS_MED_PANEL == "YES" & FLOMICS_PANEL == "YES") %>%
-  .$Gene.Name %>% as.character() # n = 55
+  .$Gene.Name %>% as.character() # n = 57
 
 # All FLOMICS samples included
 all.samples.DNAseq.FLOMICS <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
@@ -32,9 +29,12 @@ all.samples.DNAseq.PLOSMED <- read.csv("metadata/sample_annotations_rcd6Nov2019.
 coverage.samples <- read.csv("DNAseq/Targeted_Seq_Coverage/08-07-2020/2020-08-07_sample_based_coverage_summary.csv")
 
 # Read in mutation calls for FLOMICS
-mut.FLOMICS <- read.table("DNAseq/Mutation_calls_KI/08-12-2020/2020-08-12_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt", header = T, sep = ";") %>%
-  mutate(Cohort = "FLOMICS")
-# n = 584 rows
+mut.FLOMICS <- read.table("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt", header = T, sep = "\t") %>%
+  mutate(Cohort = "FLOMICS") %>%
+  filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
+  filter(Var_Freq > 0.1)
+dim(mut.FLOMICS)
+# n = 679 rows
 
 # Plot nb of mutations per sample in FLOMICS
 mut.FLOMICS %>%
@@ -43,7 +43,7 @@ mut.FLOMICS %>%
   full_join(coverage.samples, by = c("Tumor_Sample_Barcode" = "External_identifier")) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   ggplot(aes(x = count)) +
-  geom_histogram()
+  geom_histogram(bins = 30)
 
 # Plot nb of mutations vs. coverage in FLOMICS
 mut.FLOMICS %>%
@@ -51,9 +51,9 @@ mut.FLOMICS %>%
   summarize(count = n()) %>%
   full_join(coverage.samples, by = c("Tumor_Sample_Barcode" = "External_identifier")) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
-  ggplot(aes(x = mean_cov, y = count)) + geom_point() + geom_smooth(method=lm)
-# Conclusion: no clear relationship between coverage and nb of mutations
-# some of the very low coverage cases have actually high nb of mutations
+  ggplot(aes(x = mean_cov, y = count)) + geom_point() + geom_smooth(method = lm)
+# Conclusion: no correlation between coverage and nb of mutations
+# some of the very low coverage cases have high nb of mutations, however
 # this means we should probably filter such cases out.
 
 # Identify poor coverage samples and filter them out
@@ -85,7 +85,7 @@ mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv"
 mut.merged <- mut.FLOMICS.filt %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 675
+  filter(Hugo_Symbol %in% genes.common) # n = 825
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -94,7 +94,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/(131-length(poor.coverage.samples)), count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.68 mutations per sample, whereas FLOMICS have 3.30 mutations per sample
+# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.06 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -130,7 +130,7 @@ mut.merged %>%
 # i.e. difference previously seen is artifact of differences between FLOMICS and PLOSMED
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
-x <- mut.merged %>%
+mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
   left_join(sample.annotation) %>%
   filter(TIME_POINT == "T1" & STAGE == "ADVANCED") %>%
@@ -139,6 +139,55 @@ x <- mut.merged %>%
   reshape2::dcast(Hugo_Symbol ~ Cohort) %>%
   mutate(percentage.FLOMICS = (FLOMICS/44)*100,
          percentage.PLOSMED = (PLOSMED/31)*100)
-# especially KMT2D, CREBBP more common in PLOSMED ..
 
+# Explore differences between stages, gene by gene
+
+n.lim <- sample.annotation %>%
+  filter(SAMPLE_ID %in% all.samples.DNAseq.FLOMICS & TIME_POINT == "T1" & STAGE == "LIMITED") %>%
+  nrow()
+
+n.adv <- sample.annotation %>%
+  filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED) & TIME_POINT == "T1" & STAGE == "ADVANCED") %>%
+  nrow()
+
+fisher <- function(a, b, c, d) {
+  data <- matrix(c(a,b,c,d), ncol = 2)
+  c(P = fisher.test(data)$p.value,
+    OR = fisher.test(data)$estimate,
+    CI = fisher.test(data)$conf.int)
+}
+
+mut.lim.vs.adv <- mut.merged %>%
+  distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
+  left_join(sample.annotation) %>%
+  filter(TIME_POINT == "T1") %>%
+  group_by(Hugo_Symbol, STAGE) %>%
+  summarize(count = n()) %>%
+  reshape2::dcast(Hugo_Symbol ~ STAGE) %>%
+  mutate(ADVANCED = ifelse(is.na(ADVANCED), 0, ADVANCED)) %>%
+  mutate(LIMITED = ifelse(is.na(LIMITED), 0, LIMITED)) %>%
+  mutate(not.ADVANCED = n.adv - ADVANCED) %>%
+  mutate(not.LIMITED = n.lim - LIMITED) %>%
+  mutate(percentage.ADVANCED = (ADVANCED/n.adv)*100) %>%
+  mutate(percentage.LIMITED = (LIMITED/n.lim)*100) %>%
+  ungroup() %>%
+  rowwise() %>% 
+  mutate(p = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[1]],
+         OR = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[2]],
+         CI1 = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[3]],
+         CI2 = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[4]])
+
+mut.lim.vs.adv$fdr <- p.adjust(mut.lim.vs.adv$p, method = "fdr")
+
+# Mutation matrix
+mut.merged.matrix <- mut.merged %>%
+  distinct(SAMPLE_ID, Hugo_Symbol) %>%
+  left_join(sample.annotation) %>%
+  filter(TIME_POINT == "T1") %>%
+  select(SAMPLE_ID, Hugo_Symbol) %>%
+  mutate(var = 1) %>%
+  reshape2::dcast(Hugo_Symbol ~ SAMPLE_ID) %>%
+  replace(is.na(.), 0)
+
+write.csv(mut.merged.matrix, file = "mut.merged.matrix.csv", row.names = FALSE)
 
