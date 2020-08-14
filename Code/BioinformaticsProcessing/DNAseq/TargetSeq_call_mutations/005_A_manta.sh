@@ -23,7 +23,7 @@ echo $sample
 
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
 fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.decompressed.fasta
-out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA
+out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA
 #targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_targets_input.bed
 targets_interval_list=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/picard_tools_amps_input.bed
 
@@ -33,7 +33,7 @@ MANTA_INSTALL_PATH=/cluster/tools/software/centos7/manta/1.6.0
 echo ${names[${SLURM_ARRAY_TASK_ID}]}
 
 mkdir ${out_folder}/MANTA_WORKDIR_nointervals_${names[${SLURM_ARRAY_TASK_ID}]}
-MANTA_ANALYSIS_PATH=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/MANTA_WORKDIR_nointervals_${names[${SLURM_ARRAY_TASK_ID}]}
+MANTA_ANALYSIS_PATH=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA/MANTA_WORKDIR_nointervals_${names[${SLURM_ARRAY_TASK_ID}]}
 
 #index bed file
 sort -k 1,1 -k 2,2n -k 3,3n $targets_interval_list | bgzip -c > ${targets_interval_list}.gz
@@ -46,4 +46,4 @@ ${MANTA_INSTALL_PATH}/bin/configManta.py \
 #--callRegions ${targets_interval_list}.gz
 
 #After succesfful configuration run the following:
-/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/MANTA_WORKDIR_nointervals_${names[${SLURM_ARRAY_TASK_ID}]}/runWorkflow.py -j 20
+/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA/MANTA_WORKDIR_nointervals_${names[${SLURM_ARRAY_TASK_ID}]}/runWorkflow.py -j 20
