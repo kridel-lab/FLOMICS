@@ -73,8 +73,21 @@ tmm = cpm(y)
 
 run_immdeco = function(exp_matrix, tool_used, qc_data){
   #2. try running a tool
-  res = deconvolute(tmm, tool_used)
+  res = deconvolute(tmm, tool_used, tumor=TRUE)
   immune_cells = as.data.frame(res)
+
+  #tool specific plotting
+  if(tool_used == "quantiseq"){
+  tool_plot = res %>%
+    gather(sample, fraction, -cell_type) %>%
+    # plot as stacked bar chart
+    ggplot(aes(x=sample, y=fraction, fill=cell_type)) +
+      geom_bar(stat='identity') +
+      coord_flip() +
+      scale_fill_brewer(palette="Paired") +
+      scale_x_discrete(limits = rev(levels(res)))+
+              theme(axis.text.y = element_text(color = "grey20", size = 4))
+  }
 
   #3. only keep 132 patients used in RNA-seq in the end
   z = which(colnames(immune_cells) %in% rnaseq_qc$rna_seq_file_sample_ID)
@@ -107,6 +120,7 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   print(g1)
   print(g2)
   print(g3)
+  print(tool_used)
 
   dev.off()
 

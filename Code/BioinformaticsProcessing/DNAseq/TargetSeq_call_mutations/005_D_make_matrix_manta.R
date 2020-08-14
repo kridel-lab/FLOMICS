@@ -21,7 +21,7 @@ date = Sys.Date()
 
 print(date)
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/PROCESSED/")
+setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA/PROCESSED/")
 
 #----------------------------------------------------------------------
 #purpose
