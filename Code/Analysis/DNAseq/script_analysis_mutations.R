@@ -149,7 +149,6 @@ mut.merged %>%
          percentage.PLOSMED = (PLOSMED/31)*100)
 
 # Explore differences between stages, gene by gene
-
 n.lim <- sample.annotation %>%
   filter(SAMPLE_ID %in% all.samples.DNAseq.FLOMICS & TIME_POINT == "T1" & STAGE == "LIMITED") %>%
   nrow()
