@@ -48,3 +48,5 @@ all_targets = rbind(c_target, nc_target)
 colnames(all_targets) = c("chr", "start", "stop")
 write.table(all_targets, file="picard_tools_targets_input.bed", quote=F,
 row.names=F, col.names=F, sep="\t")
+
+#prepare target file for platypus regions file
