@@ -23,7 +23,7 @@ args = commandArgs(trailingOnly = TRUE) #patient ID
 index = args[1]
 print(index)
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA")
+setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA")
 setwd(paste("MANTA_WORKDIR_nointervals_", index, "/", "results/variants", sep=""))
 
 #----------------------------------------------------------------------
@@ -156,4 +156,4 @@ clean_up_001 = function(vcf){
 processed_vcf = clean_up_001(vcf)
 print("done")
 print(index)
-saveRDS(processed_vcf, file=paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/STRELKA_MANTA/PROCESSED/", date, index, ".rds", sep="_"))
+saveRDS(processed_vcf, file=paste("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MANTA/PROCESSED/", date, index, ".rds", sep="_"))
