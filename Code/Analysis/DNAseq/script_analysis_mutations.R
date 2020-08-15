@@ -1,8 +1,10 @@
-
 library(dplyr)
 library(ggplot2)
+library(data.table)
+library(EnvStats)
+library(ggpubr)
 
-# setwd("~/FLOMICS/")
+# setwd("~/FLOMICS/") <- FLOMICS teams folder
 
 # This script explores mutation data
 
@@ -29,12 +31,13 @@ all.samples.DNAseq.PLOSMED <- read.csv("metadata/sample_annotations_rcd6Nov2019.
 coverage.samples <- read.csv("DNAseq/Targeted_Seq_Coverage/08-07-2020/2020-08-07_sample_based_coverage_summary.csv")
 
 # Read in mutation calls for FLOMICS
-mut.FLOMICS <- read.table("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt", header = T, sep = "\t") %>%
+mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
   mutate(Cohort = "FLOMICS") %>%
   filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
-# n = 679 rows
+length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
+# n = 679 rows & 129 unique patients
 
 # Plot nb of mutations per sample in FLOMICS
 mut.FLOMICS %>%
@@ -58,10 +61,12 @@ mut.FLOMICS %>%
 
 # Identify poor coverage samples and filter them out
 poor.coverage.samples <- coverage.samples %>%
-  filter(mean_cov < 50) %>% .$External_identifier %>% as.character()
+  filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples
+length(poor.coverage.samples)
 
 mut.FLOMICS.filt <- mut.FLOMICS %>%
-  filter(!Tumor_Sample_Barcode %in% poor.coverage.samples) # n = 113 samples left
+  filter(!Tumor_Sample_Barcode %in% poor.coverage.samples) # n = 113 samples left <- I see 111 samples here
+length(unique(mut.FLOMICS.filt$Tumor_Sample_Barcode))
 
 # Nb of mutations per gene in FLOMICS (max 1 mutation per gene per sample counted)
 mut.FLOMICS.filt %>%
@@ -74,7 +79,7 @@ mut.FLOMICS.filt %>%
   ggplot(aes(x = Hugo_Symbol, y = count)) +
   geom_bar(stat="identity") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-  
+
 # Read in mutation calls for PLOSMED
 mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv", header = T) %>%
   mutate(Cohort = "PLOSMED") %>%
@@ -113,10 +118,11 @@ mut.merged %>%
   right_join(sample.annotation) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   filter(TIME_POINT == "T1") %>%
-  ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")
+  ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
+  stat_compare_means()+stat_n_text()
 # higher nb of mutations in advanced vs limited
-  
-# subset on only FLOMICS cases  
+
+# subset on only FLOMICS cases
 mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
   group_by(SAMPLE_ID, Cohort) %>%
@@ -125,9 +131,12 @@ mut.merged %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   filter(TIME_POINT == "T1") %>%
   filter(Cohort == "FLOMICS") %>%
-  ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")
+  ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
+  stat_compare_means()+stat_n_text()
 # same nb of mutations in advanced vs limited
 # i.e. difference previously seen is artifact of differences between FLOMICS and PLOSMED
+#but also smaller sample size now in advanced
+#wilcoxon p-value = 0.056
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
 mut.merged %>%
@@ -141,7 +150,6 @@ mut.merged %>%
          percentage.PLOSMED = (PLOSMED/31)*100)
 
 # Explore differences between stages, gene by gene
-
 n.lim <- sample.annotation %>%
   filter(SAMPLE_ID %in% all.samples.DNAseq.FLOMICS & TIME_POINT == "T1" & STAGE == "LIMITED") %>%
   nrow()
@@ -171,7 +179,7 @@ mut.lim.vs.adv <- mut.merged %>%
   mutate(percentage.ADVANCED = (ADVANCED/n.adv)*100) %>%
   mutate(percentage.LIMITED = (LIMITED/n.lim)*100) %>%
   ungroup() %>%
-  rowwise() %>% 
+  rowwise() %>%
   mutate(p = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[1]],
          OR = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[2]],
          CI1 = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[3]],
@@ -190,4 +198,3 @@ mut.merged.matrix <- mut.merged %>%
   replace(is.na(.), 0)
 
 write.csv(mut.merged.matrix, file = "mut.merged.matrix.csv", row.names = FALSE)
-
