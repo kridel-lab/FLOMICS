@@ -85,8 +85,8 @@ table(final.BA.results.T1$BCL6_BA_consensus)
 table(final.BA.results.T1$STAGE, final.BA.results.T1$BCL2_BA_consensus)
 table(final.BA.results.T1$STAGE, final.BA.results.T1$BCL6_BA_consensus)
 
-write.csv(final.BA.results, file = "final.BA.results.csv", row.names = FALSE)
-write.csv(final.BA.results.T1, file = "final.BA.results.T1.csv", row.names = FALSE)
+write.csv(final.BA.results, file = "BA.results.csv", row.names = FALSE)
+write.csv(final.BA.results.T1, file = "BA.results.T1.csv", row.names = FALSE)
 
 
 
