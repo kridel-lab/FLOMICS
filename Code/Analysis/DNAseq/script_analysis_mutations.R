@@ -1,8 +1,6 @@
-library(dplyr)
-library(ggplot2)
-library(data.table)
-library(EnvStats)
-library(ggpubr)
+
+packages <- c("dplyr", "ggplot2", "data.table", "EnvStats", "ggpubr")
+lapply(packages, require, character.only = TRUE)
 
 # setwd("~/FLOMICS/") <- FLOMICS teams folder
 
@@ -64,12 +62,8 @@ poor.coverage.samples <- coverage.samples %>%
   filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples
 length(poor.coverage.samples)
 
-mut.FLOMICS.filt <- mut.FLOMICS %>%
-  filter(!Tumor_Sample_Barcode %in% poor.coverage.samples) # n = 113 samples left <- I see 111 samples here
-length(unique(mut.FLOMICS.filt$Tumor_Sample_Barcode))
-
 # Nb of mutations per gene in FLOMICS (max 1 mutation per gene per sample counted)
-mut.FLOMICS.filt %>%
+mut.FLOMICS %>%
   group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
   summarize(count = n()) %>%
   group_by(Hugo_Symbol) %>%
@@ -87,10 +81,10 @@ mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv"
 # n = 380 rows
 
 # Merge FLOMICS and PLOSMED
-mut.merged <- mut.FLOMICS.filt %>%
+mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 825
+  filter(Hugo_Symbol %in% genes.common) # n = 932
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -98,8 +92,8 @@ mut.merged %>%
   summarize(count = n()) %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
-  mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/(131-length(poor.coverage.samples)), count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.06 mutations per sample
+  mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
+# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.21 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -108,8 +102,7 @@ mut.merged %>%
 # Need sample annotation
 sample.annotation <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
   select(SAMPLE_ID, TIME_POINT, STAGE) %>%
-  filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED)) %>%
-  filter(!SAMPLE_ID %in% c(poor.coverage.samples)) # n=144
+  filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED))
 
 mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
@@ -119,7 +112,7 @@ mut.merged %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   filter(TIME_POINT == "T1") %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
-  stat_compare_means()+stat_n_text()
+  stat_compare_means() + stat_n_text()
 # higher nb of mutations in advanced vs limited
 
 # subset on only FLOMICS cases
@@ -132,11 +125,10 @@ mut.merged %>%
   filter(TIME_POINT == "T1") %>%
   filter(Cohort == "FLOMICS") %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
-  stat_compare_means()+stat_n_text()
-# same nb of mutations in advanced vs limited
-# i.e. difference previously seen is artifact of differences between FLOMICS and PLOSMED
-#but also smaller sample size now in advanced
-#wilcoxon p-value = 0.056
+  stat_compare_means() + stat_n_text()
+# still slight increase of nb of mutations in advanced vs limited, although no statistically significant (wilcoxon p-value = 0.056)
+# i.e. difference previously seen is in part artifact of differences between FLOMICS and PLOSMED
+# but also smaller sample size now in advanced
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
 mut.merged %>%
@@ -146,7 +138,7 @@ mut.merged %>%
   group_by(Hugo_Symbol, Cohort) %>%
   summarize(count = n()) %>%
   reshape2::dcast(Hugo_Symbol ~ Cohort) %>%
-  mutate(percentage.FLOMICS = (FLOMICS/44)*100,
+  mutate(percentage.FLOMICS = (FLOMICS/45)*100, # n=44 if filtered based on poor coverage
          percentage.PLOSMED = (PLOSMED/31)*100)
 
 # Explore differences between stages, gene by gene
@@ -188,13 +180,33 @@ mut.lim.vs.adv <- mut.merged %>%
 mut.lim.vs.adv$fdr <- p.adjust(mut.lim.vs.adv$p, method = "fdr")
 
 # Mutation matrix
-mut.merged.matrix <- mut.merged %>%
+no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, mut.merged$SAMPLE_ID)
+# n = 3 without mutation calls "LY_FL_179_T1" "LY_FL_181_T1" "LY_FL_399_T2"
+
+mut.merged.df.incomplete <- mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol) %>%
   left_join(sample.annotation) %>%
-  filter(TIME_POINT == "T1") %>%
   select(SAMPLE_ID, Hugo_Symbol) %>%
   mutate(var = 1) %>%
   reshape2::dcast(Hugo_Symbol ~ SAMPLE_ID) %>%
   replace(is.na(.), 0)
 
-write.csv(mut.merged.matrix, file = "mut.merged.matrix.csv", row.names = FALSE)
+no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.matrix.incomplete), 3,
+                               dimnames = list(c(), no.mut.cases)),
+                               stringsAsFactors = F)
+
+mut.merged.df.T1.T2 <- cbind(mut.merged.df.incomplete, no.mut.cases.df)
+mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
+
+mut.merged.df.T1.T2.poor.cov.excl <- mut.merged.df.T1.T2[, c("Hugo_Symbol", setdiff(sample.annotation$SAMPLE_ID, poor.coverage.samples))]
+
+T1.samples <- sample.annotation %>% filter(TIME_POINT == "T1") %>% .$SAMPLE_ID %>% as.character() # n = 154
+T1.samples.poor.cov.excl <- setdiff(T1.samples, poor.coverage.samples) # n = 138
+
+mut.merged.df.T1 <- mut.merged.df.T1.T2[,c("Hugo_Symbol", T1.samples)]
+mut.merged.df.T1.poor.cov.excl <- mut.merged.df.T1.T2[,c("Hugo_Symbol", T1.samples.poor.cov.excl)]
+
+write.csv(mut.merged.df.T1.T2, file = "mut.merged.df.T1.T2.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "mut.merged.df.T1.T2.poor.cov.excl.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1, file = "mut.merged.df.T1.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1.poor.cov.excl, file = "mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
