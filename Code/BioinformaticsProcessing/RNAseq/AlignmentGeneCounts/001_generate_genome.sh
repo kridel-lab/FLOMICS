@@ -19,4 +19,5 @@ module load rsem
 module load perl
 
 
-STAR --runMode genomeGenerate --genomeDir /cluster/projects/kridelgroup/FLOMICS/genome_files/ --genomeFastaFiles /cluster/projects/kridelgroup/FLOMICS/genome_files/ucsc.hg19.fasta --sjdbGTFfile /cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf --runThreadN 10
+STAR --runMode genomeGenerate --genomeDir /cluster/projects/kridelgroup/FLOMICS/genome_files/ \
+--genomeFastaFiles /cluster/projects/kridelgroup/FLOMICS/genome_files/ucsc.hg19.fasta --sjdbGTFfile /cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf --runThreadN 10

@@ -69,6 +69,13 @@ y <- y[keep, , keep.lib.sizes=FALSE]
 y <- calcNormFactors(y)
 tmm = cpm(y)
 
+res = xCellAnalysis(exp)
+file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "xcell_results_basic", "_results.pdf", sep="")
+
+pdf(file_name)
+heatmap(res)
+dev.off()
+
 #run analysis - save plots and output from analysis
 
 run_immdeco = function(exp_matrix, tool_used, qc_data){
