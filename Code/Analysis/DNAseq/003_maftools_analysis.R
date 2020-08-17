@@ -92,9 +92,9 @@ snp = which((mut.merged$Variant_Allele %in% c("A", "G", "C", "T")) &
 mut.merged$Variant_Type = "SNP"
 colnames(mut.merged)[1] = "Tumor_Sample_Barcode"
 colnames(mut.merged)[7] = "Tumor_Seq_Allele2"
-write.table(mut.merged, file="maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
+write.table(mut.merged, file="Analysis-Files/maftools/maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
 
-maffile=read.maf("maftools_mutations_test.txt")
+maffile=read.maf("Analysis-Files/maftools/maftools_mutations_test.txt")
 pdf("Analysis-Files/maftools/maftools_prelim_plots.pdf")
 plotmafSummary(maf = maffile, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
 #oncoplot for top ten mutated genes.
