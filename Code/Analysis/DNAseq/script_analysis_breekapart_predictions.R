@@ -5,9 +5,9 @@
 # (non-coding regions of BCL2 and BCL6 were targeted with specific purpose to detect translocations)
 ###
 
-# load libraries 
+# load libraries
 packages <- c("dplyr", "ggplot2")
-lapply(packages, require, character.only = TRUE)              
+lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
 
@@ -19,7 +19,7 @@ sample.annotation <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", hea
 sample.annotation.FLOMICS.131 <- sample.annotation %>%
   filter(CAPSEQ_DATA == TRUE & CAPSEQ_DATA_YEAR == "2019" & CAPSEQ_INCLUDE == "YES") %>%
   select(SAMPLE_ID, STAGE, TRANSLOC_14_18, INSTITUTION)
-  
+
 # load MANTA rearrangements predictions
 predictions <- read.csv("DNAseq/BC_SV_MANTA/08-13-2020/2020-08-13_Manta_SVs_pass.csv")
 
@@ -87,6 +87,3 @@ table(final.BA.results.T1$STAGE, final.BA.results.T1$BCL6_BA_consensus)
 
 write.csv(final.BA.results, file = "BA.results.csv", row.names = FALSE)
 write.csv(final.BA.results.T1, file = "BA.results.T1.csv", row.names = FALSE)
-
-
-
