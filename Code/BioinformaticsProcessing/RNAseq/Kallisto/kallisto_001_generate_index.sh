@@ -14,7 +14,7 @@ module load bam-readcount
 module load kallisto
 
 #pwd
-cd /cluster/projects/kridelgroup/genome_files
+cd /cluster/projects/kridelgroup/FLOMICS/genome_files
 
 #building an index
 fasta_file=Homo_sapiens.GRCh37.cdna.all.fa.gz
