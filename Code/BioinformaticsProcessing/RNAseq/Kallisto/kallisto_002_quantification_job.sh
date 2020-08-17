@@ -14,13 +14,13 @@ module load bam-readcount
 module load kallisto
 
 #pwd
-cd /cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+cd /cluster/projects/kridelgroup/FLOMICS
 
 #ls *_R1.fastq > all_fastq_files.txt
 #remove _R1.fastq from all lines
 #sed -e 's!_R1.fastq!!' all_fastq_files.txt > all_fastq_files_cleaned.txt
 
-for sample in $(cat all_fastq_files_cleaned.txt)    #for each patient folder...
+for sample in $(cat  /cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ/all_fastq_files_cleaned.txt)    #for each patient folder...
 do
     #submit patient specific job
     #here the input to the job is the patient name...
