@@ -6,7 +6,7 @@
 ###
 
 # load libraries
-packages <- c("dplyr", "ggplot2")
+packages <- c("dplyr", "ggplot2", "data.table")
 lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
@@ -21,7 +21,7 @@ sample.annotation.FLOMICS.131 <- sample.annotation %>%
   select(SAMPLE_ID, STAGE, TRANSLOC_14_18, INSTITUTION)
 
 # load MANTA rearrangements predictions
-predictions <- read.csv("DNAseq/BC_SV_MANTA/08-13-2020/2020-08-13_Manta_SVs_pass.csv")
+predictions <- fread("DNAseq/BC_SV_MANTA/08-17-2020/2020-08-17_Manta_SVs_pass.txt")
 
 # Identify BCL2 rearrangements to chr14, i.e. t(14;18)
 BCL2.BA.predictions <- predictions %>%

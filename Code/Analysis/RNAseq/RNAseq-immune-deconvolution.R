@@ -72,6 +72,10 @@ tmm = cpm(y)
 #run analysis - save plots and output from analysis
 
 run_immdeco = function(exp_matrix, tool_used, qc_data){
+
+  #set up file for plotting
+  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.pdf", sep=""), width=15)
+
   #2. try running a tool
   res = deconvolute(tmm, tool_used, tumor=TRUE)
   immune_cells = as.data.frame(res)
@@ -87,6 +91,8 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
       scale_fill_brewer(palette="Paired") +
       scale_x_discrete(limits = rev(levels(res)))+
               theme(axis.text.y = element_text(color = "grey20", size = 4))
+
+    print(tool_plot)
   }
 
   #3. only keep 132 patients used in RNA-seq in the end
@@ -100,8 +106,6 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   immune_cells$Cluster = factor(immune_cells$Cluster)
 
   #5. plot distribution of each cell type frequency across disease and stages
-
-  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.pdf", sep=""), width=15)
   g1 = ggboxplot(filter(immune_cells, !(is.na(STAGE))), x="cell_type", y="value", fill="STAGE") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste("Tool used=", tool_used, " via TMM values calcualted by EdgeR", sep=""))+
