@@ -67,13 +67,13 @@ length(poor.coverage.samples)
 mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv", header = T) %>%
   mutate(Cohort = "PLOSMED") %>%
   select(SAMPLE_ID, Hugo_Symbol, Cohort, Chromosome, Start_Position, Reference_Allele,
-  Variant_Allele, End_Position)
+  Tumor_Seq_Allele2=Variant_Allele, End_Position, Variant_Classification=Mutation_Type)
 
 # Merge FLOMICS and PLOSMED
 mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort, Chromosome,
-  Start_Position, Reference_Allele, Variant_Allele=Tumor_Seq_Allele2,
-  End_Position) %>%
+  Start_Position, Reference_Allele, Tumor_Seq_Allele2,
+  End_Position, Variant_Classification) %>%
   rbind(mut.PLOSMED) %>%
   mutate(mut_id = paste(.$Chromosome, .$Start_Position, sep="_")) %>%
   filter(Hugo_Symbol %in% genes.common) #55 unique genes
@@ -86,12 +86,15 @@ mut.merged <- mut.FLOMICS %>%
 #Mandatory fields: Hugo_Symbol, Chromosome, Start_Position, End_Position,
 #Reference_Allele, Tumor_Seq_Allele2,
 #Variant_Classification, Variant_Type and Tumor_Sample_Barcode.
-mut.merged$Variant_Classification = "Missense_Mutation"
+options=c("Missense_Mutation", "Nonesense_Mutation", "Split_Site",
+"Frame_Shift_Ins", "Frame_Shift_Del", "In_Frame_Ins", "In_Frame_Del")
+
+mut.merged$Variant_Classification = ""
+
 snp = which((mut.merged$Variant_Allele %in% c("A", "G", "C", "T")) &
 (mut.merged$Reference_Allele %in% c("A", "T", "C", "G")))
 mut.merged$Variant_Type = "SNP"
 colnames(mut.merged)[1] = "Tumor_Sample_Barcode"
-colnames(mut.merged)[7] = "Tumor_Seq_Allele2"
 write.table(mut.merged, file="Analysis-Files/maftools/maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
 
 maffile=read.maf("Analysis-Files/maftools/maftools_mutations_test.txt")
