@@ -13,7 +13,7 @@ module load annovar
 module load bam-readcount
 module load kallisto
 
-cd /cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MIXCR_ANALYSIS/sorted_input
 index_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/transcripts.idx
 output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/KALLISTO
 gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
@@ -24,5 +24,6 @@ echo $index
 
 mkdir ${output}/${index}
 
+#need to use sorted FASTQ files
 kallisto quant -i $index_file -o ${output}/${index} \
--b 100 ${index}_R1.fastq ${index}_R2.fastq --genomebam --gtf $gtf --chromosomes $chrs
+-b 100 ${index}_R1_sorted.fastq.gz ${index}_R2_sorted.fastq.gz --genomebam --gtf $gtf --chromosomes $chrs
