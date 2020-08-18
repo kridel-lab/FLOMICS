@@ -78,6 +78,12 @@ mut.merged <- mut.FLOMICS %>%
   mutate(mut_id = paste(.$Chromosome, .$Start_Position, sep="_")) %>%
   filter(Hugo_Symbol %in% genes.common) #55 unique genes
 
+#clinical data
+clin = fread("metadata/clinical_data_rcd11Aug2020.csv")
+colnames(clin)[1] = "Tumor_Sample_Barcode"
+colnames(clin)[19] = "Overall_Survival_Status"
+colnames(clin)[23] = "days_to_last_followup"
+
 #-----------
 #ANALYSIS
 #-----------
@@ -86,23 +92,103 @@ mut.merged <- mut.FLOMICS %>%
 #Mandatory fields: Hugo_Symbol, Chromosome, Start_Position, End_Position,
 #Reference_Allele, Tumor_Seq_Allele2,
 #Variant_Classification, Variant_Type and Tumor_Sample_Barcode.
-options=c("Missense_Mutation", "Nonesense_Mutation", "Split_Site",
-"Frame_Shift_Ins", "Frame_Shift_Del", "In_Frame_Ins", "In_Frame_Del")
 
-mut.merged$Variant_Classification = ""
+#> unique(mut.merged$Variant_Classification)
+# [1] "exonic frameshift_deletion"        "exonic frameshift_insertion"
+# [3] "exonic nonsynonymous_SNV"          "exonic nonframeshift_deletion"
+# [5] "exonic stopgain"                   "exonic nonframeshift_insertion"
+# [7] "exonic nonframeshift_substitution" "exonic stoploss"
+# [9] "Missense_Mutation"                 "Splice_Site"
+#[11] "Frame_Shift_Ins"                   "Frame_Shift_Del"
+#[13] "Nonsense_Mutation"                 "In_Frame_Del"
 
-snp = which((mut.merged$Variant_Allele %in% c("A", "G", "C", "T")) &
-(mut.merged$Reference_Allele %in% c("A", "T", "C", "G")))
-mut.merged$Variant_Type = "SNP"
+#change to match maftools requirements
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic frameshift_deletion"] = "Frame_Shift_Del"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic frameshift_insertion"] = "Frame_Shift_Ins"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic nonsynonymous_SNV"] = "Missense_Mutation"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic nonframeshift_deletion"] = "In_Frame_Del"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic stopgain"] = "Nonsense_Mutation"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic nonframeshift_insertion"] = "In_Frame_Ins"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic nonframeshift_substitution"] = "Inframe_INDEL"
+mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic stoploss"] = "Nonstop_Mutation"
+
+mut.merged[,ref_alt_diff := nchar(Reference_Allele) - nchar(Tumor_Seq_Allele2)]
+mut.merged[, Variant_Type := ifelse(ref_alt_diff == 0 , yes = "SNP", no = ifelse(ref_alt_diff < 0 , yes = "INS", no = "DEL"))]
+
 colnames(mut.merged)[1] = "Tumor_Sample_Barcode"
-write.table(mut.merged, file="Analysis-Files/maftools/maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
 
-maffile=read.maf("Analysis-Files/maftools/maftools_mutations_test.txt")
+#seperate into T1 and T2 samples
+mut.merged$status = sapply(mut.merged$Tumor_Sample_Barcode, function(x){unlist(strsplit(x, "_"))[4]})
+mut.merged$Tumor_Sample_Barcode = sapply(mut.merged$Tumor_Sample_Barcode, function(x){paste(unlist(strsplit(x, "_"))[1:3], collapse="_")})
+t1 = filter(mut.merged, status=="T1")
+t2 = filter(mut.merged, status=="T2")
+clin$PRIM_TX = NULL
+write.table(mut.merged, file="Analysis-Files/maftools/maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
+write.table(t1, file="Analysis-Files/maftools/maftools_mutations_T1_only.txt", quote=F, row.names=F, sep="\t")
+write.table(t2, file="Analysis-Files/maftools/maftools_mutations_T2_only.txt", quote=F, row.names=F, sep="\t")
+write.table(clin, file="Analysis-Files/maftools/maftools_clinical_file.txt", quote=F, row.names=F, sep="\t")
+
+#T1 FL
+t1 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_T1_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt")
+#T2 FL
+t2 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_T2_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt")
+
 pdf("Analysis-Files/maftools/maftools_prelim_plots.pdf")
-plotmafSummary(maf = maffile, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
-#oncoplot for top ten mutated genes.
-oncoplot(maf = maffile, top = 10)
-ints_res = somaticInteractions(maf = maffile, top = 55, pvalue = c(0.05, 0.01), fontSize=0.5)
+
+#global overview of mutations - t1 only
+plotmafSummary(maf = t1, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
+#in depth summary of top 30 genes -t1 only
+oncoplot(maf = t1, fontSize=0.5, clinicalFeatures ='TYPE', sortByAnnotation = TRUE, top=30)
+#somatic interactions - t1 only
+ints_res = somaticInteractions(maf = t1, top = 55, pvalue = c(0.05, 0.01), fontSize=0.5)
 ints_res$fdr = p.adjust(ints_res$pValue, method="fdr")
-write.table(ints_res, file="Analysis-Files/maftools/somatic_interactions_results.txt", sep=";", quote=F, row.names=F)
+write.table(ints_res, file="Analysis-Files/maftools/somatic_interactions_results_T1_only.txt", sep=";", quote=F, row.names=F)
+
+#types of mutation in depth - T1 only
+fl.titv = titv(maf = t1, plot = FALSE, useSyn = TRUE)
+#plot titv summary
+plotTiTv(res = fl.titv)
+
+#Using top 55 mutated genes to identify a set of genes (of size 2) to predict poor prognostic groups
+prog_geneset = survGroup(maf = t1, top = 55, geneSetSize = 2, #to test all gene pairs
+  time = "days_to_last_followup", Status = "Overall_Survival_Status", verbose = FALSE)
+print(prog_geneset)
+#multiple testing correction
+prog_geneset$fdr = p.adjust(prog_geneset$P_value, method="fdr")
+write.csv(prog_geneset, file="Analysis-Files/maftools/prognostic_partners_results_T1_only.csv", quote=F, row.names=F)
+
+mafSurvGroup(maf = t1, geneSet = c("CREBBP", "STAT6"),
+time = "days_to_last_followup", Status = "Overall_Survival_Status")
+
+mafSurvGroup(maf = t1, geneSet = c("FOXO1", "SOCS1"),
+time = "days_to_last_followup", Status = "Overall_Survival_Status")
+
+mafSurvGroup(maf = t1, geneSet = c("CREBBP", "FOXO1"),
+time = "days_to_last_followup", Status = "Overall_Survival_Status")
+
+mafSurvGroup(maf = t1, geneSet = c("TNFRSF14", "B2M"),
+time = "days_to_last_followup", Status = "Overall_Survival_Status")
+
+#compare the two cohorts
+pt.vs.rt <- mafCompare(m1 = t1, m2 = t2, m1Name = 'T1 FL', m2Name = 'T2 FL', minMut = 2)
+print(pt.vs.rt)
+forestPlot(mafCompareRes = pt.vs.rt, pVal = 0.1, color = c('royalblue', 'maroon'), geneFontSize = 0.8)
+
+#genes = c("CREBBP")
+#coOncoplot(m1 = t1, m2 = t2,
+#  m1Name = 'T1', m2Name = 'T2', genes=c("TP53", "EZH2"), removeNonMutated = TRUE)
+coBarplot(m1 = t1, m2 = t2, m1Name = "T1 FL", m2Name = "T2 FL")
+
+fab.ce = clinicalEnrichment(maf = t1, clinicalFeature = 'TYPE')
+fab.ce$groupwise_comparision[p_value < 0.05]
+plotEnrichmentResults(enrich_res = fab.ce, pVal = 0.05)
+dgi = drugInteractions(maf = t1, fontSize = 0.5)
+
+dnmt3a.dgi = drugInteractions(genes = "CREBBP", drugs = TRUE)
+dnmt3a.dgi[,.(Gene, interaction_types, drug_name, drug_claim_name)]
+
+OncogenicPathways(maf = t1)
+
+PlotOncogenicPathways(maf = t1, pathways = "NOTCH")
+
 dev.off()

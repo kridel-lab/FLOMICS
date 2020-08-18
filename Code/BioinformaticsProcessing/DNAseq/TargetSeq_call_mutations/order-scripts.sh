@@ -81,3 +81,15 @@ sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetS
 
 #[3] run script to combine results into matrix
 Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/DNAseq/TargetSeq_call_mutations/005_D_make_matrix_manta.R
+
+#----run Kallisto----------------------------------------------------------------
+
+#[1] make Kallisto index first
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/Kallisto/kallisto_001_generate_index.sh
+
+#[2] make Kallisto on sorted FASTQ files
+sbatch /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/RNAseq/Kallisto/kallisto_002_quantification_job.sh
+
+#----run STAR--------------------------------------------------------------------
+
+#fill in 
