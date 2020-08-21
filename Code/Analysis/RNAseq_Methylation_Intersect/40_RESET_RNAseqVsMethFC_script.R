@@ -79,16 +79,18 @@ dim(methNorSelOutput$normal.enh.probes) # 2798    5
 
 silProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.sil.probes))
 length(silProbesFL) # 45229
-write.csv(silProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Enhancers.csv")
+write.csv(silProbesFL, file = "RESET_HypermethylatedProbesNormalCondition_Enhancers.csv")
 enhProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.enh.probes))
 length(enhProbesFL) # 2798
-write.csv(enhProbesFL, file = "RESET_HypermethylatedProbesNormalCondition_Silencers.csv")
+write.csv(enhProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Silencers.csv")
 
 
 # Match samples between RNAseq and methylation - 131 tumor samples
 matchRNAseqBeta <- match(colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
                          colnames(BetaMatrix_T1))
 
+
+#### RESET_HypermethylatedProbes_FLDLBCL_Enhancers ####
 # Run reset function on all tumor samples - enhancers
 resetResultsENH <- reset(normal.db = methNorSelOutput$normal.enh.probes,
                          meth.tumor = BetaMatrix_T1[, matchRNAseqBeta[1:131]],
@@ -122,12 +124,42 @@ for (i in 1:nrow(resetScoreENH)){
   resetScoreENH[i, 6] <- resetResultsENH$FDR.res$FDR[which(resetScoreENH$Score[i] == resetResultsENH$FDR.res$observed.scores)]
 }
 head(resetScoreENH)
-dim(resetScoreENH)
+dim(resetScoreENH) # 585   6
+length(unique(resetScoreENH$Gene)) # 476
 range(resetScoreENH$Score) # 0.02586767 1.29846829
 View(resetScoreENH)
-write.csv(resetScoreENH, file = "RESET_HypomethylatedProbes_Enhancers.csv")
+write.csv(resetScoreENH, file = "RESET_HypermethylatedProbes_FLDLBCL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENH %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+# Plot No.Methylation.Events vs Score
+resetScoreENH %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
 
 
+# Plot top 100 Genes vs Score
+resetScoreENH %>%  
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes (Enhancers) For FL+DLBCL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+#### RESET_HypomethylatedProbes_FLDLBCL_Silencers ####
 # Run reset function on all 131 tumor samples - silencers
 resetResultsSIL <- reset(normal.db = methNorSelOutput$normal.sil.probes,
                          meth.tumor = BetaMatrix_T1[, matchRNAseqBeta[1:131]],
@@ -138,18 +170,18 @@ resetResultsSIL <- reset(normal.db = methNorSelOutput$normal.sil.probes,
 
 
 names(resetResultsSIL)
-dim(resetResultsSIL$normal.meth)  # 2798    5
-dim(resetResultsSIL$meth.tumor.all) # 2798  131
-dim(resetResultsSIL$meth.tumor.status.all) # 2798  131
-dim(resetResultsSIL$beta.dist.normal.specific) #  2798    4
+dim(resetResultsSIL$normal.meth)  # 45229    5
+dim(resetResultsSIL$meth.tumor.all) # 45229  131
+dim(resetResultsSIL$meth.tumor.status.all) # 45229  131
+dim(resetResultsSIL$beta.dist.normal.specific) #  45229    4
 dim(resetResultsSIL$beta.dist.normal.universal) # NULL
-dim(resetResultsSIL$Score.report) #  2798    5
-dim(resetResultsSIL$transcriptome) # 2798  131
-dim(resetResultsSIL$transcriptome.norm.dis) # 2798  131
-dim(resetResultsSIL$meth.tumor.matched) # 2798  131
-dim(resetResultsSIL$meth.tumor.status.matched) #  2798  131
-dim(resetResultsSIL$FDR.res) #  585   2
-dim(resetResultsSIL$permutation.res) #  2798  102
+dim(resetResultsSIL$Score.report) #  45229    5
+dim(resetResultsSIL$transcriptome) # 45229  131
+dim(resetResultsSIL$transcriptome.norm.dis) # 45229  131
+dim(resetResultsSIL$meth.tumor.matched) # 45229  131
+dim(resetResultsSIL$meth.tumor.status.matched) #  45229  131
+dim(resetResultsSIL$FDR.res) #  6611   2
+dim(resetResultsSIL$permutation.res) #  45229  102
 dim(resetResultsSIL$score.cutoff)
 
 
@@ -158,12 +190,40 @@ for (i in 1:nrow(resetScoreSIL)) {
   resetScoreSIL[i, 6] <- resetResultsSIL$FDR.res$FDR[which(resetScoreSIL$Score[i] == resetResultsSIL$FDR.res$observed.scores)]
 }
 head(resetScoreSIL)
+dim(resetScoreSIL) # 6611    6
+length(unique(resetScoreSIL$Gene)) # 3925
 range(resetScoreSIL$Score) # 0.002308231 1.269213329
 View(resetScoreSIL)
+write.csv(resetScoreSIL, file = "RESET_HypomethylatedProbes_FLDLBCL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSIL %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+
+# Plot top 100 Genes vs Score
+resetScoreSIL %>%  
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL+DLBCL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
 
 
 
 
+
+
+#### RESET_HypermethylatedProbes_FL_Enhancers ####
 
 # Run reset function on all tumor samples - enhancers - FL only
 resetResultsENHFLonly <- reset(normal.db = methNorSelOutput$normal.enh.probes,
@@ -172,17 +232,43 @@ resetResultsENHFLonly <- reset(normal.db = methNorSelOutput$normal.enh.probes,
                                methylation.event = c('enh'),
                                FDR.permutation.no = 100, 
                                seed = 100)
-
+dim(resetResultsENHFLonly$FDR.res) #  588   2
 
 resetScoreENHFLonly <- data.frame(resetResultsENHFLonly$Score.report[which(! is.na(resetResultsENHFLonly$Score.report$Score) == TRUE), ], FDR = NA)
 for (i in 1:nrow(resetScoreENHFLonly)) {
   resetScoreENHFLonly[i, 6] <- resetResultsENHFLonly$FDR.res$FDR[which(resetScoreENHFLonly$Score[i] == resetResultsENHFLonly$FDR.res$observed.scores)]
 }
 head(resetScoreENHFLonly)
+dim(resetScoreENHFLonly) # 588 6
+length(unique(resetScoreENHFLonly$Gene)) # 489
 range(resetScoreENHFLonly$Score) # 0.004389081 1.150200828
 View(resetScoreENHFLonly)
+write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLonly %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
 
 
+# Plot top 100 Genes vs Score
+resetScoreENHFLonly %>%  
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes (Enhancers) For FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+#### RESET_HypomethylatedProbes_FL_Silencers ####
 
 # Run reset function on all tumor samples - silencers - FL only
 resetResultsSILFLonly <- reset(normal.db = methNorSelOutput$normal.sil.probes,
@@ -191,12 +277,39 @@ resetResultsSILFLonly <- reset(normal.db = methNorSelOutput$normal.sil.probes,
                                methylation.event = c('sil'),
                                FDR.permutation.no = 100, 
                                seed = 100)
-
+dim(resetResultsSILFLonly$FDR.res) #  6452   2
 
 resetScoreSILFLonly <- data.frame(resetResultsSILFLonly$Score.report[which(! is.na(resetResultsSILFLonly$Score.report$Score) == TRUE), ], FDR = NA)
 for (i in 1:nrow(resetScoreENHFLonly)) {
   resetScoreSILFLonly[i, 6] <- resetResultsSILFLonly$FDR.res$FDR[which(resetScoreSILFLonly$Score[i] == resetResultsSILFLonly$FDR.res$observed.scores)]
 }
 head(resetScoreSILFLonly)
-range(resetScoreSILFLonly$Score) # 0.004389081 1.150200828
+dim(resetScoreSILFLonly) #  6452  6
+length(unique(resetScoreSILFLonly$Gene)) # 3848
+range(resetScoreSILFLonly$Score) # 0.003460362 1.282929804
 View(resetScoreSILFLonly)
+write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLonly %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+  
+  
+
+
+# Plot top 100 Genes vs Score
+resetScoreSILFLonly %>%  
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
