@@ -206,8 +206,8 @@ DifferentialExpressionRNAseq <- function(RNAseqCountMatrix,
     colnames(designRNAseq) <- levels(statusContrastName)
     contrasts <- limma::makeContrasts("ABC-GCB", levels = designRNAseq)
   } else if(ContrastColumnName == "TYPE") {
-    if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")]) == TRUE)) > 0) {
-      if (length(unique(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")])) == 2) {
+    if(length(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]) == TRUE)) > 0) {
+      if (length(unique(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")])) == 2) {
         statusContrastName <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]) == TRUE)), 
                                                             which(colnames(ClinicalFile) == "TYPE")]), levels = c("DLBCL", "FL","RLN"))
         exprsRNAseqNormFacs <- exprsRNAseqNormFacs[, - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")]) == TRUE))]
