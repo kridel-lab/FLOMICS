@@ -193,6 +193,7 @@ mut.merged.df.incomplete <- mut.merged %>%
 no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.matrix.incomplete), 3,
                                dimnames = list(c(), no.mut.cases)),
                                stringsAsFactors = F)
+# is mut.merged.matrix.incomplete defined before? I tried mut.merged.df.incomplete but it gives an error. Please look. Thanks.
 
 mut.merged.df.T1.T2 <- cbind(mut.merged.df.incomplete, no.mut.cases.df)
 mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
