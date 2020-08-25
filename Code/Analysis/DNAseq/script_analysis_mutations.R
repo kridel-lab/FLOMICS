@@ -1,3 +1,4 @@
+
 packages <- c("dplyr", "ggplot2", "data.table", "EnvStats", "ggpubr")
 lapply(packages, require, character.only = TRUE)
 
@@ -33,8 +34,23 @@ mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13
   filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
+
+mut.FLOMICS.rescued <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
+  mutate(Cohort = "FLOMICS") %>%
+  filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
+  filter(Var_Freq <= 0.1) %>%
+  filter((Chromosome == "1" & Start_Position %in% c("150727482")) |                                                      # CTSS hotspot
+         (Chromosome == "7" & Start_Position %in% c("148506437", "148506467", "148508727", "148508728")) |               # EZH2 hotspots
+         (Chromosome == "8" & Start_Position %in% c("20074767", "20074768")) |                                           # ATP6V1B2 hotspots
+         (Chromosome == "12" & Start_Position %in% c("57496660", "57496661", "57496662", "57498345", "57499079")))       # STAT6 hotspots
+
+dim(mut.FLOMICS.rescued)
+
+mut.FLOMICS <- mut.FLOMICS %>% rbind(mut.FLOMICS.rescued)
+
+dim(mut.FLOMICS)
 length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
-# n = 679 rows & 129 unique patients
+# n = 692 rows & 130 unique patients
 
 # Plot nb of mutations per sample in FLOMICS
 mut.FLOMICS %>%
@@ -83,7 +99,7 @@ mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv"
 mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 932
+  filter(Hugo_Symbol %in% genes.common) # n = 945
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -92,7 +108,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.21 mutations per sample
+# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -103,6 +119,8 @@ sample.annotation <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", hea
   select(SAMPLE_ID, TIME_POINT, STAGE) %>%
   filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED))
 
+sample.no.mut <- data.frame(SAMPLE_ID  = "LY_FL_179_T1", Cohort = "FLOMICS", count = 0, TIME_POINT = "T1", STAGE = "LIMITED")
+
 mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
   group_by(SAMPLE_ID, Cohort) %>%
@@ -110,6 +128,8 @@ mut.merged %>%
   right_join(sample.annotation) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   filter(TIME_POINT == "T1") %>%
+  data.frame() %>%
+  rbind(sample.no.mut) %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
   stat_compare_means() + stat_n_text()
 # higher nb of mutations in advanced vs limited
@@ -123,22 +143,34 @@ mut.merged %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   filter(TIME_POINT == "T1") %>%
   filter(Cohort == "FLOMICS") %>%
+  data.frame() %>%
+  rbind(sample.no.mut) %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
   stat_compare_means() + stat_n_text()
-# still slight increase of nb of mutations in advanced vs limited, although no statistically significant (wilcoxon p-value = 0.056)
+# still slight increase of nb of mutations in advanced vs limited, statistically significant (wilcoxon p-value = 0.038)
 # i.e. difference previously seen is in part artifact of differences between FLOMICS and PLOSMED
 # but also smaller sample size now in advanced
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
-mut.merged %>%
+tmp <- mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
   left_join(sample.annotation) %>%
-  filter(TIME_POINT == "T1" & STAGE == "ADVANCED") %>%
+  filter(TIME_POINT == "T1" & STAGE == "ADVANCED")
+  
+n.adv.FLOMICS <- tmp %>%
+  filter(Cohort == "FLOMICS") %>%
+  .$SAMPLE_ID %>% unique() %>% length()
+
+n.adv.PLOSMED <- tmp %>%
+  filter(Cohort == "PLOSMED") %>%
+  .$SAMPLE_ID %>% unique() %>% length()
+  
+tmp %>%  
   group_by(Hugo_Symbol, Cohort) %>%
   summarize(count = n()) %>%
   reshape2::dcast(Hugo_Symbol ~ Cohort) %>%
-  mutate(percentage.FLOMICS = (FLOMICS/45)*100, # n=44 if filtered based on poor coverage
-         percentage.PLOSMED = (PLOSMED/31)*100)
+  mutate(percentage.FLOMICS = (FLOMICS/n.adv.FLOMICS)*100,
+         percentage.PLOSMED = (PLOSMED/n.adv.PLOSMED)*100)
 
 # Explore differences between stages, gene by gene
 n.lim <- sample.annotation %>%
@@ -180,7 +212,7 @@ mut.lim.vs.adv$fdr <- p.adjust(mut.lim.vs.adv$p, method = "fdr")
 
 # Mutation matrix
 no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, mut.merged$SAMPLE_ID)
-# n = 3 without mutation calls "LY_FL_179_T1" "LY_FL_181_T1" "LY_FL_399_T2"
+# n = 2 without mutation calls "LY_FL_179_T1" "LY_FL_399_T2"
 
 mut.merged.df.incomplete <- mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol) %>%
@@ -190,10 +222,10 @@ mut.merged.df.incomplete <- mut.merged %>%
   reshape2::dcast(Hugo_Symbol ~ SAMPLE_ID) %>%
   replace(is.na(.), 0)
 
-no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.matrix.incomplete), 3,
+no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.df.incomplete), 2,
                                dimnames = list(c(), no.mut.cases)),
                                stringsAsFactors = F)
-# is mut.merged.matrix.incomplete defined before? I tried mut.merged.df.incomplete but it gives an error. Please look. Thanks.
+no.mut.cases.df[is.na(no.mut.cases.df)] <- 0
 
 mut.merged.df.T1.T2 <- cbind(mut.merged.df.incomplete, no.mut.cases.df)
 mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
@@ -206,13 +238,10 @@ T1.samples.poor.cov.excl <- setdiff(T1.samples, poor.coverage.samples) # n = 138
 mut.merged.df.T1 <- mut.merged.df.T1.T2[,c("Hugo_Symbol", T1.samples)]
 mut.merged.df.T1.poor.cov.excl <- mut.merged.df.T1.T2[,c("Hugo_Symbol", T1.samples.poor.cov.excl)]
 
-write.csv(mut.merged.df.T1.T2, file = "mut.merged.df.T1.T2.csv", row.names = FALSE)
-write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "mut.merged.df.T1.T2.poor.cov.excl.csv", row.names = FALSE)
-write.csv(mut.merged.df.T1, file = "mut.merged.df.T1.csv", row.names = FALSE)
-write.csv(mut.merged.df.T1.poor.cov.excl, file = "mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
-
-
-
+write.csv(mut.merged.df.T1.T2, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.T2.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.T2.poor.cov.excl.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.csv", row.names = FALSE)
+write.csv(mut.merged.df.T1.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
 
 # Added by Anjali - generate counts by stage
 # Nb of mutations per gene in FLOMICS (max 1 mutation per gene per sample counted)
@@ -304,8 +333,6 @@ mut.FLOMICS.Stage %>%
   ggplot(aes(x = Hugo_Symbol, y = count)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-
 
 mut.FLOMICS.Stage %>%
   filter(TRANSLOCATION1418 == "0") %>%
