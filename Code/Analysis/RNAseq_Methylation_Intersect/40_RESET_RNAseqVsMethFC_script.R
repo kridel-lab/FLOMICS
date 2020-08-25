@@ -10,12 +10,13 @@
 DirectoryResetScripts <- "/OtherScripts/reset/R"
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/eventScore.R")))
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/methStatus.R")))
+source(paste0(getwd(), paste0(DirectoryResetScripts,"/FDRcal.R")))
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/reset.R")))
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/shared_functions.R")))
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/methNorSel.R")))
 
 load(paste0(getwd(), "/OtherScripts/reset/R/promoter-probes-list.rdata"))
-View(promoter.probes.list)
+# View(promoter.probes.list)
 head(promoter.probes.list)
 names(promoter.probes.list)
 # [1] "ProbID"             "index"              "Gene_Name"          "Coordinate_Pos"    
@@ -79,10 +80,10 @@ dim(methNorSelOutput$normal.enh.probes) # 2798    5
 
 silProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.sil.probes))
 length(silProbesFL) # 45229
-write.csv(silProbesFL, file = "RESET_HypermethylatedProbesNormalCondition_Enhancers.csv")
+# write.csv(silProbesFL, file = "RESET_HypermethylatedProbesNormalCondition_Enhancers.csv")
 enhProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.enh.probes))
 length(enhProbesFL) # 2798
-write.csv(enhProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Silencers.csv")
+# write.csv(enhProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Silencers.csv")
 
 
 # Match samples between RNAseq and methylation - 131 tumor samples
@@ -138,13 +139,19 @@ resetScoreENH %>%
 
 # Plot No.Methylation.Events vs Score
 resetScoreENH %>%
-  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
   geom_smooth(method = lm) +
-  stat_cor()
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
 
 
 # Plot top 100 Genes vs Score
 resetScoreENH %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
@@ -202,9 +209,22 @@ resetScoreSIL %>%
   geom_smooth(method = lm) +
   stat_cor()
 
+# Plot No.Methylation.Events vs Score
+resetScoreSIL %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
 
 # Plot top 100 Genes vs Score
 resetScoreSIL %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
@@ -251,9 +271,22 @@ resetScoreENHFLonly %>%
   geom_smooth(method = lm) +
   stat_cor()
 
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLonly %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
 
 # Plot top 100 Genes vs Score
 resetScoreENHFLonly %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
@@ -297,10 +330,22 @@ resetScoreSILFLonly %>%
   stat_cor()
   
   
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLonly %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
 
 
 # Plot top 100 Genes vs Score
-resetScoreSILFLonly %>%  
+resetScoreSILFLonly %>% 
+  filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
@@ -313,3 +358,7 @@ resetScoreSILFLonly %>%
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         text = element_text(size = 15))
+
+save.image("40_RESET_RNAseqVsMethFC_script.RData")
+
+# [END]
