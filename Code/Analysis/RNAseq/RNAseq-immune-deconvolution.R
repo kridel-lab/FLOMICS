@@ -20,7 +20,10 @@ packages <- c("dplyr", "readr", "ggplot2", "tidyr",
 library(gridExtra)
 lapply(packages, require, character.only = TRUE)
 library(limSolve)
+library(xCell)
 library(immunedeconv) #<- main package with tools for immune deconvolution
+set_cibersort_binary("Analysis-Files/Immune-Deconvolution/CIBERSORT.R")
+set_cibersort_mat("Analysis-Files/Immune-Deconvolution/LM22.txt")
 
 #date
 date=Sys.Date()
@@ -53,7 +56,13 @@ exp$symbol = NULL
 exp$ensgene = NULL
 
 #load in results from kallisto
-tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt")
+tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt", data.table=F)
+colnames(tpm)[1] = "ensgene"
+tpm = merge(tpm, genes_class, by = "ensgene")
+tpm = as.data.frame(tpm)
+rownames(tpm) = tpm$symbol
+tpm$symbol = NULL
+tpm$ensgene = NULL
 
 # All FLOMICS samples included - load sample information
 all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv")
@@ -66,13 +75,13 @@ rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterConta
 #----------------------------------------------------------------------
 
 #1. prepare normalize count matrix - TMM
-y <- DGEList(counts=exp)
-keep <- filterByExpr(y, min.count=10)
-y <- y[keep, , keep.lib.sizes=FALSE]
-y <- calcNormFactors(y)
-tmm = cpm(y)
+#y <- DGEList(counts=exp)
+#keep <- filterByExpr(y, min.count=10)
+#y <- y[keep, , keep.lib.sizes=FALSE]
+#y <- calcNormFactors(y)
+#tmm = cpm(y)
 
-res = xCellAnalysis(exp)
+res = xCellAnalysis(tpm)
 file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "xcell_results_basic", "_results.pdf", sep="")
 
 pdf(file_name)
@@ -87,7 +96,7 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.pdf", sep=""), width=15)
 
   #2. try running a tool
-  res = deconvolute(tmm, tool_used, tumor=TRUE)
+  res = deconvolute(tpm, tool_used, tumor=TRUE)
   immune_cells = as.data.frame(res)
 
   #tool specific plotting
@@ -146,5 +155,6 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
 
 }
 
-run_immdeco(tmm, "quantiseq", rnaseq_qc)
-run_immdeco(tmm, "mcp_counter", rnaseq_qc)
+run_immdeco(tpm, "quantiseq", rnaseq_qc)
+run_immdeco(tpm, "mcp_counter", rnaseq_qc)
+run_immdeco(tpm, "cibersort", rnaseq_qc)
