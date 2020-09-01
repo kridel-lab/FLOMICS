@@ -54,7 +54,11 @@ txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignore
 txi.kallisto <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
 head(txi.kallisto$counts)
 
+tpm = txi.kallisto$counts
+#remove the "." in the gene id
+rownames(tpm) = sapply(rownames(tpm), function(x){unlist(strsplit(x, "\\."))[1]})
+
 #save results
-write.table(txi.kallisto$counts, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date,
+write.table(tpm, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date,
 "_kallisto_gene_based_counts.txt", sep=""), quote=F,
 row.names=F, sep=";")
