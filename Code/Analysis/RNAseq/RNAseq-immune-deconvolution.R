@@ -52,6 +52,9 @@ rownames(exp) = exp$symbol
 exp$symbol = NULL
 exp$ensgene = NULL
 
+#load in results from kallisto
+tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt")
+
 # All FLOMICS samples included - load sample information
 all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv")
 

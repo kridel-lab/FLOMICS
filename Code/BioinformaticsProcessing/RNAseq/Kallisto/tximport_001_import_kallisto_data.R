@@ -61,4 +61,4 @@ rownames(tpm) = sapply(rownames(tpm), function(x){unlist(strsplit(x, "\\."))[1]}
 #save results
 write.table(tpm, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/", date,
 "_kallisto_gene_based_counts.txt", sep=""), quote=F,
-row.names=F, sep=";")
+row.names=T, sep=";")
