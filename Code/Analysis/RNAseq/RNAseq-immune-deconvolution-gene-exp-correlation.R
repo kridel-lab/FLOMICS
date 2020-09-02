@@ -21,6 +21,11 @@ lapply(packages, require, character.only = TRUE)
 #date
 date=Sys.Date()
 
+args = commandArgs(trailingOnly = TRUE) #patient ID
+index = args[1]
+print(index) #this should be gene name provided as input
+gene_name=index
+
 #getwd() --> FLOMICS teams folder
 #cd /Users/kisaev/UHN/kridel-lab - Documents/FLOMICS
 
@@ -65,14 +70,17 @@ get_gene_immune_correlation = function(gene){
   gene_dat = t(tpm[which(rownames(tpm) == gene),])
   gene_dat = as.data.frame(gene_dat)
   gene_dat$rna_seq_file_sample_ID = rownames(gene_dat)
+  colnames(gene_dat)[1] = "gene"
+  gene_dat$gene_exp = ""
+  gene_dat$gene_exp[gene_dat$gene < 0.5] = "neg"
+  gene_dat$gene_exp[gene_dat$gene > 0.5] = "pos"
 
   cibersort_temp = cibersort
   cibersort_temp = merge(cibersort_temp, gene_dat, by = "rna_seq_file_sample_ID")
-  colnames(cibersort_temp)[ncol(cibersort_temp)] = "gene"
 
   #create dataset for plotting
   plot = cibersort_temp %>%
-    select(rna_seq_file_sample_ID, cell_type, value, gene, STAGE, TYPE) %>%
+    select(rna_seq_file_sample_ID, cell_type, value, gene, STAGE, TYPE, gene_exp) %>%
       melt(measure = "value")
 
   z = which(str_detect(plot$rna_seq_file_sample_ID, "DLC"))
@@ -80,17 +88,31 @@ get_gene_immune_correlation = function(gene){
   z = which(str_detect(plot$rna_seq_file_sample_ID, "RLN"))
   plot = plot[-z,]
 
+  file_name = paste("Analysis-Files/Immune-Deconvolution/", gene, ".pdf", sep="")
+  pdf(file_name, width=10, height=12)
+
   #correlation between cell type value and FOXP3 measure
-  g=ggscatter(plot, x = "value", y = "gene",size=1,add = "reg.line",
+  g1=ggscatter(plot, x = "value", y = "gene",size=1,add = "reg.line",
   color = "black", shape = 21) +
             ylab(paste(gene, "TPM")) +
   stat_cor(aes(color=STAGE), size=2) + xlab("Cell type fraction")
-  g=ggpar(g, font.tickslab = c(5, "plain", "black"))
-  g=facet(g, facet.by="cell_type", ,
+  g1=ggpar(g1, font.tickslab = c(5, "plain", "black"))
+  g1=facet(g1, facet.by="cell_type", ,
          panel.labs.font = list(color = "black", size=6))
-  print(g)
+  print(g1)
+
+  #binary gene expression vs continuous cell fraction
+  g2=ggboxplot(plot, x = "gene_exp", y = "value",
+  fill = "STAGE") +
+  ylab(paste(gene, "Cell type fraction")) +
+  xlab(gene)
+  g2=ggpar(g2, font.tickslab = c(5, "plain", "black"))
+  g2=facet(g2, facet.by="cell_type", ,
+         panel.labs.font = list(color = "black", size=6))
+  print(g2)
+
+  dev.off()
 
 }
 
-get_gene_immune_correlation("FOXP3")
-get_gene_immune_correlation("EZH2")
+get_gene_immune_correlation(gene_name)
