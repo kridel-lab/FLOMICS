@@ -1,8 +1,7 @@
 #----------------------------------------------------------------------
 #Karin Isaev
 #Use RNA-seq count matrix (first normalize to TPM)
-#Run through immune deconvolution tools to estimate fraction of immune
-#cells present in each sample
+#Plot gene expression versus cell type fraction 
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
@@ -22,8 +21,6 @@ lapply(packages, require, character.only = TRUE)
 library(limSolve)
 library(xCell)
 library(immunedeconv) #<- main package with tools for immune deconvolution
-set_cibersort_binary("Analysis-Files/Immune-Deconvolution/CIBERSORT.R")
-set_cibersort_mat("Analysis-Files/Immune-Deconvolution/LM22.txt")
 
 #date
 date=Sys.Date()
@@ -100,3 +97,4 @@ get_gene_immune_correlation = function(gene){
 }
 
 get_gene_immune_correlation("FOXP3")
+get_gene_immune_correlation("EZH2")
