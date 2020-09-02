@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------
 #Karin Isaev
-#Use RNA-seq count matrix (first normalize to TPM)
-#Plot gene expression versus cell type fraction 
+#Use RNA-seq TPM matrix from Kallisto
+#Plot gene expression versus cell type fraction
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
@@ -9,18 +9,14 @@
 #----------------------------------------------------------------------
 
 options(stringsAsFactors = F)
-#avoid scientific notation
-options(scipen=999)
+options(scipen=999) #avoid scientific notation
+
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "tidyr",
 "data.table", "plyr",
 "ggrepel", "stringr", "maftools", "ggpubr", "readxl", "skimr",
- "edgeR", "annotables", "EnvStats")
-library(gridExtra)
+ "edgeR", "annotables", "EnvStats", "gridExtra")
 lapply(packages, require, character.only = TRUE)
-library(limSolve)
-library(xCell)
-library(immunedeconv) #<- main package with tools for immune deconvolution
 
 #date
 date=Sys.Date()
