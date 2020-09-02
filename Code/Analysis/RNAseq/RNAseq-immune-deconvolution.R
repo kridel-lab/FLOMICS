@@ -45,16 +45,6 @@ genes_class = unique(genes_class[,c("ensgene", "symbol")])
 z = which(duplicated(genes_class$symbol))
 genes_class = genes_class[-z,]
 
-#load in count matrix produced via STAR
-exp <- fread("RNAseq/counts/STAR_quantmode_counts_matrix_FL_136_patients.txt")
-#change ensembl ids to gene names as required for package to work
-colnames(exp)[1] = "ensgene"
-exp = merge(exp, genes_class, by = "ensgene")
-exp = as.data.frame(exp)
-rownames(exp) = exp$symbol
-exp$symbol = NULL
-exp$ensgene = NULL
-
 #load in results from kallisto
 tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt", data.table=F)
 colnames(tpm)[1] = "ensgene"
@@ -74,13 +64,7 @@ rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterConta
 #analysis
 #----------------------------------------------------------------------
 
-#1. prepare normalize count matrix - TMM
-#y <- DGEList(counts=exp)
-#keep <- filterByExpr(y, min.count=10)
-#y <- y[keep, , keep.lib.sizes=FALSE]
-#y <- calcNormFactors(y)
-#tmm = cpm(y)
-
+#run xCell 
 res = xCellAnalysis(tpm)
 file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "xcell_results_basic", "_results.pdf", sep="")
 
@@ -127,17 +111,17 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   #5. plot distribution of each cell type frequency across disease and stages
   g1 = ggboxplot(filter(immune_cells, !(is.na(STAGE))), x="cell_type", y="value", fill="STAGE") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle(paste("Tool used=", tool_used, " via TMM values calcualted by EdgeR", sep=""))+
+  ggtitle(paste("Tool used=", tool_used, " via TPM values calcualted by Kallisto", sep=""))+
   stat_compare_means(aes(group = STAGE), label = "p.signif")
 
   g2 = ggboxplot(immune_cells, x="cell_type", y="value", fill="TYPE") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle(paste("Tool used=", tool_used, " via TMM values calcualted by EdgeR", sep=""))+
+  ggtitle(paste("Tool used=", tool_used, " via TPM values calcualted by Kallisto", sep=""))+
   stat_compare_means(aes(group = TYPE), label = "p.signif")
 
   g3 = ggboxplot(immune_cells, x="cell_type", y="value", fill="Cluster",palette = "jco") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle(paste("Tool used=", tool_used, " via TMM values calcualted by EdgeR", sep=""))+
+  ggtitle(paste("Tool used=", tool_used, " via TPM values calcualted by Kallisto", sep=""))+
   stat_compare_means(aes(group = Cluster), label = "p.signif")
 
   print(g1)
@@ -158,3 +142,4 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
 run_immdeco(tpm, "quantiseq", rnaseq_qc)
 run_immdeco(tpm, "mcp_counter", rnaseq_qc)
 run_immdeco(tpm, "cibersort", rnaseq_qc)
+run_immdeco(tpm, "cibersort_abs", rnaseq_qc)
