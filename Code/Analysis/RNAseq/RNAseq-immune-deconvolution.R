@@ -64,23 +64,21 @@ rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterConta
 #analysis
 #----------------------------------------------------------------------
 
-#run xCell 
-res = xCellAnalysis(tpm)
-file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "xcell_results_basic", "_results.pdf", sep="")
-
-pdf(file_name)
-heatmap(res)
-dev.off()
-
 #run analysis - save plots and output from analysis
 
-run_immdeco = function(exp_matrix, tool_used, qc_data){
+run_immdeco = function(tool_used, exp_matrix, qc_data){
+
+  print(tool_used)
 
   #set up file for plotting
   pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.pdf", sep=""), width=15)
 
   #2. try running a tool
-  res = deconvolute(tpm, tool_used, tumor=TRUE)
+  #res = deconvolute(exp_matrix, tool_used, tumor=TRUE)
+
+  res = deconvolute(exp_matrix, tool_used) %>%
+    map_result_to_celltypes(c("T cell CD4+", "T cell CD8+", "B cell", "NK cell", "Neutrophil", "Monocyte"), tool_used)
+
   immune_cells = as.data.frame(res)
 
   #tool specific plotting
@@ -103,7 +101,9 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   immune_cells = immune_cells[,c(1,z)]
 
   #4. add tag based on whether sample is limited advanced and FL vs DLBCL
-  immune_cells = melt(as.data.table(immune_cells))
+  immune_cells$cell_type = rownames(immune_cells)
+  immune_cells = as.data.table(immune_cells)
+  immune_cells = melt((immune_cells))
   colnames(immune_cells)[2] = "rna_seq_file_sample_ID"
   immune_cells = merge(immune_cells, rnaseq_qc, by = "rna_seq_file_sample_ID")
   immune_cells$Cluster = factor(immune_cells$Cluster)
@@ -135,11 +135,14 @@ run_immdeco = function(exp_matrix, tool_used, qc_data){
   file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.txt", sep="")
   write.table(immune_cells, file_name, quote=F, row.names=F, sep=";")
 
+  immune_cells$method = tool_used
+  return(immune_cells)
   print("done analysis")
 
 }
 
-run_immdeco(tpm, "quantiseq", rnaseq_qc)
-run_immdeco(tpm, "mcp_counter", rnaseq_qc)
-run_immdeco(tpm, "cibersort", rnaseq_qc)
-run_immdeco(tpm, "cibersort_abs", rnaseq_qc)
+methods = as.list(c("xcell", "mcp_counter", "cibersort_abs"))
+
+all_res = as.data.table(ldply(llply(methods, run_immdeco, tpm, rnaseq_qc)))
+
+#summarize consistency across methods
