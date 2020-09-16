@@ -21,10 +21,11 @@ lapply(packages, require, character.only = TRUE)
 #date
 date=Sys.Date()
 
-#args = commandArgs(trailingOnly = TRUE) #patient ID
-#index = args[1]
-#print(index) #this should be gene name provided as input
-#gene_name=index
+args = commandArgs(trailingOnly = TRUE) #patient ID
+geneA = args[1]
+print(geneA) #this should be gene name provided as input
+geneB = args[2]
+print(geneB)
 
 #getwd() --> FLOMICS teams folder
 #cd /Users/kisaev/UHN/kridel-lab - Documents/FLOMICS
@@ -58,10 +59,6 @@ all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv
 #sample info with rna-seq qc
 rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
 
-#results from CIBERSORT abs
-cibersort_short=fread("Analysis-Files/Immune-Deconvolution/2020-09-14_cibersort_abs_results.txt")
-cibersort_full=fread("Analysis-Files/Immune-Deconvolution/2020-09-01_cibersort_abs_results.txt")
-
 #mutation calls
 muts = fread("DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv")
 
@@ -69,17 +66,19 @@ muts = fread("DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv
 #analysis
 #----------------------------------------------------------------------
 
-get_mutation_gene_exp_correlation = function(gene){
+get_mutation_gene_exp_correlation = function(gene_mut, gene_exp){
 
-  print(gene)
-  gene_dat = t(muts[muts$Hugo_Symbol == gene,])
+  print(gene_mut)
+  print(gene_exp)
+
+  gene_dat = t(muts[muts$Hugo_Symbol == gene_mut,])
   gene_dat = as.data.frame(gene_dat)
   colnames(gene_dat) = gene_dat[1,]
   gene_dat$rna_seq_file_sample_ID = rownames(gene_dat)
   gene_dat = gene_dat[-1,]
   colnames(gene_dat)[1] = "gene_mut"
 
-  exp_dat = t(tpm[which(rownames(tpm) == gene),])
+  exp_dat = t(tpm[which(rownames(tpm) == gene_exp),])
   exp_dat = as.data.frame(exp_dat)
   if(!(dim(exp_dat)[2] == 0)){
 
@@ -107,19 +106,25 @@ get_mutation_gene_exp_correlation = function(gene){
   plot$gene_mut = factor(plot$gene_mut, levels=c("0", "1"))
 
   #binary gene expression vs continuous cell fraction
-  g2=ggboxplot(plot, x = "gene_mut", y = "gene",
+  g2=ggboxplot(plot, x = "gene_mut", y = "gene", palette = c("#00AFBB", "#E7B800"),
   fill = "gene_mut", facet.by = "STAGE") +
-  ylab(paste(gene, "TPM")) +
-  xlab(paste(gene, "mutation"))
+  ylab(paste(gene_exp, "TPM")) +
+  xlab(paste(gene_mut, "mutation"))
   g2=ggpar(g2, font.tickslab = c(5, "plain", "black"))+
    stat_compare_means() + stat_n_text()
   print(g2)
 
+  #do not split by stages
+  g3=ggboxplot(plot, x = "gene_mut", y = "gene", palette = c("#00AFBB", "#E7B800"),
+  fill = "gene_mut") +
+  ylab(paste(gene_exp, "TPM")) +
+  xlab(paste(gene_mut, "mutation"))
+  g3=ggpar(g3, font.tickslab = c(5, "plain", "black"))+
+   stat_compare_means() + stat_n_text()
+  print(g3)
+
 }}
 
-genes = as.list(unique(muts$Hugo_Symbol))
-
-file_name = paste("Analysis-Files/Immune-Deconvolution/", "full_gene_exp_vs_mutations", ".pdf", sep="")
-pdf(file_name)
-llply(genes, get_mutation_gene_exp_correlation, .progress="text")
+pdf(paste(geneA, "mut", geneB, "exp.pdf", sep="_"))
+get_mutation_gene_exp_correlation(geneA, geneB)
 dev.off()

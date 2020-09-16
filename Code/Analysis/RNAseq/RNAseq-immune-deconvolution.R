@@ -21,6 +21,7 @@ library(gridExtra)
 lapply(packages, require, character.only = TRUE)
 library(limSolve)
 library(xCell)
+library(tibble)
 library(immunedeconv) #<- main package with tools for immune deconvolution
 set_cibersort_binary("Analysis-Files/Immune-Deconvolution/CIBERSORT.R")
 set_cibersort_mat("Analysis-Files/Immune-Deconvolution/LM22.txt")
@@ -66,47 +67,63 @@ rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterConta
 
 #run analysis - save plots and output from analysis
 
-run_immdeco = function(tool_used, exp_matrix, qc_data){
+run_immdeco = function(tool_used, exp_matrix, qc_data, type_analysis){
 
   print(tool_used)
 
   #set up file for plotting
-  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.pdf", sep=""), width=15)
+  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_", type_analysis, "_results.pdf", sep=""), width=15)
 
   #2. try running a tool
   #res = deconvolute(exp_matrix, tool_used, tumor=TRUE)
 
-  res = deconvolute(exp_matrix, tool_used) %>%
-    map_result_to_celltypes(c("T cell CD4+", "T cell CD8+", "B cell", "NK cell", "Neutrophil", "Monocyte"), tool_used)
+  if(type_analysis == "full"){
+
+    if(tool_used == "timer"){
+      res = deconvolute(exp_matrix, tool_used,
+      indications = c(rep("dlbc", 136)))}
+
+    if(!(tool_used == "timer")){
+    res = deconvolute(exp_matrix, tool_used)}
+
+  }
+
+  if(type_analysis == "subset"){
+
+    if(tool_used == "timer"){
+      res = deconvolute(exp_matrix, tool_used,
+      indications = c(rep("dlbc", 136))) %>%
+        map_result_to_celltypes(c("T cell CD4+", "T cell CD8+", "B cell", "NK cell"), tool_used)
+    }
+
+    if(!(tool_used == "timer")){
+      res = deconvolute(exp_matrix, tool_used) %>%
+        map_result_to_celltypes(c("T cell CD4+", "T cell CD8+", "B cell", "NK cell"), tool_used)
+    }
+  }
 
   immune_cells = as.data.frame(res)
-
-  #tool specific plotting
-  if(tool_used == "quantiseq"){
-  tool_plot = res %>%
-    gather(sample, fraction, -cell_type) %>%
-    # plot as stacked bar chart
-    ggplot(aes(x=sample, y=fraction, fill=cell_type)) +
-      geom_bar(stat='identity') +
-      coord_flip() +
-      scale_fill_brewer(palette="Paired") +
-      scale_x_discrete(limits = rev(levels(res)))+
-              theme(axis.text.y = element_text(color = "grey20", size = 4))
-
-    print(tool_plot)
+  z = which(colnames(immune_cells) == "cell_type")
+  if(!(length(z)==0)){
+    rownames(immune_cells) = immune_cells$cell_type
+    immune_cells = immune_cells[,-z]
   }
+
+  immune_cells$cell_type = rownames(immune_cells)
 
   #3. only keep 132 patients used in RNA-seq in the end
   z = which(colnames(immune_cells) %in% rnaseq_qc$rna_seq_file_sample_ID)
-  immune_cells = immune_cells[,c(1,z)]
+  immune_cells = immune_cells[,c(z, ncol(immune_cells))]
 
   #4. add tag based on whether sample is limited advanced and FL vs DLBCL
-  immune_cells$cell_type = rownames(immune_cells)
+#  immune_cells$cell_type = rownames(immune_cells)
   immune_cells = as.data.table(immune_cells)
   immune_cells = melt((immune_cells))
   colnames(immune_cells)[2] = "rna_seq_file_sample_ID"
   immune_cells = merge(immune_cells, rnaseq_qc, by = "rna_seq_file_sample_ID")
   immune_cells$Cluster = factor(immune_cells$Cluster)
+
+  head(immune_cells)
 
   #5. plot distribution of each cell type frequency across disease and stages
   g1 = ggboxplot(filter(immune_cells, !(is.na(STAGE))), x="cell_type", y="value", fill="STAGE") +
@@ -132,17 +149,27 @@ run_immdeco = function(tool_used, exp_matrix, qc_data){
   dev.off()
 
   #6. save file
-  file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", tool_used, "_results.txt", sep="")
-  write.table(immune_cells, file_name, quote=F, row.names=F, sep=";")
-
   immune_cells$method = tool_used
+  immune_cells$type_analysis=type_analysis
   return(immune_cells)
   print("done analysis")
 
 }
 
-methods = as.list(c("xcell", "mcp_counter", "cibersort_abs"))
+methods = as.list(c("xcell", "mcp_counter", "cibersort_abs", "epic", "cibersort", "timer", "quantiseq"))
 
-all_res = as.data.table(ldply(llply(methods, run_immdeco, tpm, rnaseq_qc)))
+#save results for subset analysis for each methods only common cell types
+all_res_subset = as.data.table(ldply(llply(methods, run_immdeco, tpm, rnaseq_qc, "subset")))
+all_res_subset = unique(all_res_subset %>% select("type_analysis", "method", "rna_seq_file_sample_ID",
+"cell_type", "value", "STAGE", "TYPE"))
 
-#summarize consistency across methods
+file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "subset_cell_types", "_results.txt", sep="")
+write.table(all_res_subset, file_name, quote=F, row.names=F, sep=";")
+
+#save results for full analysis for each methods all the cell types that it looks at
+all_res_full = as.data.table(ldply(llply(methods, run_immdeco, tpm, rnaseq_qc, "full")))
+all_res_full = unique(all_res_full %>% select("type_analysis", "method", "rna_seq_file_sample_ID",
+"cell_type", "value", "STAGE", "TYPE"))
+
+file_name=paste("Analysis-Files/Immune-Deconvolution/", date, "_", "full_cell_types", "_results.txt", sep="")
+write.table(all_res_full, file_name, quote=F, row.names=F, sep=";")
