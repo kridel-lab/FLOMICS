@@ -5,7 +5,7 @@
 # Author: Anjali Silva
 
 
-
+#### Source files from RESET ####
 # Resource to detect Epigenetically Silenced and Enhanced Targets
 DirectoryResetScripts <- "/OtherScripts/reset/R"
 source(paste0(getwd(), paste0(DirectoryResetScripts,"/eventScore.R")))
@@ -23,8 +23,8 @@ names(promoter.probes.list)
 # [5] "Gene_Fantom"        "Chromosome"         "Promoter_Pos_start" "Promoter_Pos_End"  
 # [9] "Promoter_No"        "Entrezgene_ID"      "Hgnc_ID"            "Uniprot_ID"      
 
+#### select TSS probes ####
 
-# select TSS probes
 AnnotationFileEdited <- EPICAnnotationFile
 matchBetaProbes <- match(rownames(BetaMatrix_T1), AnnotationFileEdited$V1)
 AnnotationFileEditedBetaMatrix <- AnnotationFileEdited[matchBetaProbes, ]
@@ -35,7 +35,7 @@ matchTSSProbes <- match(promoterProbes, rownames(BetaMatrix_T1))
 length(matchTSSProbes) # 114897
 
 
-
+#### select RNAseq samples (T3) ####
 ClinicalFile_T1Cluster <- data.frame(ClinicalFile_T1, "CLUSTER" = InfiniumClustLabels$Cluster)
 RNAseqQC18June2020T3Samples132 <- QCRNAseq(RNAseqCountMatrix = RNAseqCountMatrixMatched, 
                                            QCMatrix = RNAseqQCFile, 
@@ -65,7 +65,74 @@ dim(RNAseqT3ProteinCode) # 17190   131
 # RNAseq counts for T3 (131 patients )
 
 
-# Run first function from RESET - 
+
+
+
+#### select RNAseq samples (T2) ####
+ClinicalFile_T1Cluster <- data.frame(ClinicalFile_T1, "CLUSTER" = InfiniumClustLabels$Cluster)
+RNAseqQC18June2020T2Samples104 <- QCRNAseq(RNAseqCountMatrix = RNAseqCountMatrixMatched, 
+                                           QCMatrix = RNAseqQCFile, 
+                                           RNAseqAnnotationFile = ENSMBLid, 
+                                           BetaMatrix = BetaMatrix_T1,  
+                                           MvalueMatrix = MvalueMatrix_T1, 
+                                           TumorPurity = TumorPurity,
+                                           ClinicalFile = ClinicalFile_T1,
+                                           SurvivalFile = SurvivalFile,
+                                           RNAseqSampleCufoffUniqMapReadCount = 10000000, 
+                                           RNAseqSampleCufoffUniqMapReadPercentage = 50,
+                                           RNAseqSampleCufoffReadsMappedMultipleLoci = 20,
+                                           RNAseqSampleCutoffRRNAcontam = 40, 
+                                           RNAseqFeatureSelectionMethod = "edgeR",
+                                           RNAseqFeatureSelectionCutOff = NA,
+                                           RNAseqFeatureSelectionNumberofProbes = NA,
+                                           RNAseqNormalizationMethod = "edgeR",
+                                           ImageName = "35_QCRNAseq_T2",
+                                           PNGorPDF = "png",
+                                           ProduceImages = "No")
+RNAseqT2ProteinCode <- RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations[which(RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations$type == "protein_coding"), ]
+dim(RNAseqT2ProteinCode) # 15080   107
+rownames(RNAseqT2ProteinCode) <- RNAseqT2ProteinCode$name
+RNAseqT2ProteinCode <- RNAseqT2ProteinCode[, c(4:107)]
+dim(RNAseqT2ProteinCode) # 15080   104
+# RNAseq counts for T2 (104 patients )
+
+
+RNAseqT2ProteinCodeNormalized <- RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized[which(RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations$type == "protein_coding"), ]
+
+
+
+#### select RNAseq samples (T1) ####
+ClinicalFile_T1Cluster <- data.frame(ClinicalFile_T1, "CLUSTER" = InfiniumClustLabels$Cluster)
+RNAseqQC18June2020T1Samples81 <- QCRNAseq(RNAseqCountMatrix = RNAseqCountMatrixMatched, 
+                                          QCMatrix = RNAseqQCFile, 
+                                          RNAseqAnnotationFile = ENSMBLid, 
+                                          BetaMatrix = BetaMatrix_T1,  
+                                          MvalueMatrix = MvalueMatrix_T1, 
+                                          TumorPurity = TumorPurity,
+                                          ClinicalFile = ClinicalFile_T1,
+                                          SurvivalFile = SurvivalFile,
+                                          RNAseqSampleCufoffUniqMapReadCount = 10000000, 
+                                          RNAseqSampleCufoffUniqMapReadPercentage = 70,
+                                          RNAseqSampleCufoffReadsMappedMultipleLoci = 20,
+                                          RNAseqSampleCutoffRRNAcontam = 40, 
+                                          RNAseqFeatureSelectionMethod = "edgeR",
+                                          RNAseqFeatureSelectionCutOff = NA,
+                                          RNAseqFeatureSelectionNumberofProbes = NA,
+                                          RNAseqNormalizationMethod = "edgeR",
+                                          ImageName = "35_QCRNAseq_T1",
+                                          PNGorPDF = "png",
+                                          ProduceImages = "Yes")
+RNAseqT1ProteinCode <- RNAseqQC18June2020T1Samples81$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations[which(RNAseqQC18June2020T1Samples81$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations$type == "protein_coding"), ]
+dim(RNAseqT1ProteinCode) # 15080   84
+rownames(RNAseqT1ProteinCode) <- RNAseqT1ProteinCode$name
+RNAseqT1ProteinCode <- RNAseqT1ProteinCode[, c(4:84)]
+dim(RNAseqT1ProteinCode) #  14914    81
+
+
+
+
+
+#### Run first function from RESET with RLN samples as normal ####
 methNorSelOutput <- methNorSel(normal.mtx = BetaMatrix_T1[matchTSSProbes, c(166:170)],
                                probe.list = promoter.probes.list)
 # this function first extract the data regarding the selected probes, and later based on the beta-values prepare two seperate normal-sample data-sets:
@@ -75,23 +142,76 @@ names(methNorSelOutput) # "normal.sil.probes" "normal.enh.probes"
 typeof(methNorSelOutput)
 dim(methNorSelOutput$normal.sil.probes) # 45229     5
 class(methNorSelOutput$normal.sil.probes)
-dim(methNorSelOutput$normal.enh.probes) # 2798    5
-
-
+normal.sil.probes <- data.frame(methNorSelOutput$normal.sil.probes, rowMedians = rowMedians(methNorSelOutput$normal.sil.probes))
+ggplot(normal.sil.probes, aes(x = c(1:45229), y = rowMedians)) + # plot rowMeans of sil.probes
+  geom_point(size = 2) +
+  labs(x = "probe", y = "Median Beta Value") +
+  theme_bw() + 
+  theme(text = element_text(size = 20), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold")) +
+  scale_color_manual(values = c("#d6604d", "#66bd63", "#4575b4")) +
+  theme(aspect.ratio = 1, 
+        legend.position = "right", 
+        panel.background = element_rect(colour = "black", size=1.5),  
+        axis.title =  element_text(face = "bold"))
 silProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.sil.probes))
 length(silProbesFL) # 45229
 # write.csv(silProbesFL, file = "RESET_HypermethylatedProbesNormalCondition_Enhancers.csv")
+source("26_Gprofiler.R")
+gprofilersilProbesFL <- GProfilerAnalysis(GeneIDs = list(silProbesFL),
+                                          Organism = "hsapiens",
+                                          OrderedQuery = TRUE,
+                                          PvalAlphaLevel = 0.01,
+                                          PositiveorNegFC = NA, # with respect to expression
+                                          ConditionName = "All",
+                                          ProduceImages = "Yes", 
+                                          PNGorPDF = "png")
+gprofilersilProbesFL$shortLink  # "https://biit.cs.ut.ee/gplink/l/ZLxq3tvKRC"
+
+
+
 enhProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.enh.probes))
 length(enhProbesFL) # 2798
 # write.csv(enhProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Silencers.csv")
+normal.enh.probes <- data.frame(methNorSelOutput$normal.enh.probes, rowMedians = rowMedians(methNorSelOutput$normal.enh.probes))
+ggplot(normal.enh.probes, aes(x = c(1:2798), y = rowMedians)) + # plot rowMeans of enh.probes
+  geom_point(size = 2) +
+  labs(x = "probe", y = "Median Beta Value") +
+  theme_bw() + 
+  theme(text = element_text(size = 20), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold")) +
+  scale_color_manual(values = c("#d6604d", "#66bd63", "#4575b4")) +
+  theme(aspect.ratio = 1, 
+        legend.position = "right", 
+        panel.background = element_rect(colour = "black", size=1.5),  
+        axis.title =  element_text(face = "bold"))
+silProbesFL <- gsub(".*@", "", rownames(methNorSelOutput$normal.sil.probes))
 
+gprofilerenhProbesFL <- GProfilerAnalysis(GeneIDs = list(enhProbesFL),
+                                          Organism = "hsapiens",
+                                          OrderedQuery = TRUE,
+                                          PvalAlphaLevel = 0.01,
+                                          PositiveorNegFC = NA, # with respect to expression
+                                          ConditionName = "All",
+                                          ProduceImages = "Yes", 
+                                          PNGorPDF = "png")
+gprofilerenhProbesFL$shortLink # "https://biit.cs.ut.ee/gplink/l/Aw1-UW-RS_"
+
+
+
+
+#### RESET_HypermethylatedProbes_FL+DLBCL_(n = 131)_Enhancers ####
 
 # Match samples between RNAseq and methylation - 131 tumor samples
 matchRNAseqBeta <- match(colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
                          colnames(BetaMatrix_T1))
 
-
-#### RESET_HypermethylatedProbes_FLDLBCL_Enhancers ####
 # Run reset function on all tumor samples - enhancers
 resetResultsENH <- reset(normal.db = methNorSelOutput$normal.enh.probes,
                          meth.tumor = BetaMatrix_T1[, matchRNAseqBeta[1:131]],
@@ -99,6 +219,8 @@ resetResultsENH <- reset(normal.db = methNorSelOutput$normal.enh.probes,
                          methylation.event = c('enh'),
                          FDR.permutation.no = 100, 
                          seed = 100)
+
+
 
 names(resetResultsENH)
 dim(resetResultsENH$normal.meth)  # 2798    5
@@ -113,7 +235,7 @@ dim(resetResultsENH$meth.tumor.matched) # 2798  131
 dim(resetResultsENH$meth.tumor.status.matched) #  2798  131
 dim(resetResultsENH$FDR.res) #  585   2
 dim(resetResultsENH$permutation.res) #  2798  102
-dim(resetResultsENH$score.cutoff)
+dim(resetResultsENH$score.cutoff)# NULL
 
 # Sadegh Saghafinia <Sadegh.saghafinia@epfl.ch>
 # In general score above 1.5 is what you can trust. So if the FDR is significant enough, 
@@ -149,7 +271,7 @@ resetScoreENH %>%
         text = element_text(size = 15))
 
 
-# Plot top 100 Genes vs Score
+# Plot top 100 Genes vs Score after selecting by FDR
 resetScoreENH %>%  
   filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
@@ -166,8 +288,13 @@ resetScoreENH %>%
         text = element_text(size = 15))
 
 
-#### RESET_HypomethylatedProbes_FLDLBCL_Silencers ####
+#### RESET_HypomethylatedProbes_FL+DLBCL_(n = 131)_Silencers ####
 # Run reset function on all 131 tumor samples - silencers
+
+# Match samples between RNAseq and methylation - 131 tumor samples
+matchRNAseqBeta <- match(colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
+                         colnames(BetaMatrix_T1))
+
 resetResultsSIL <- reset(normal.db = methNorSelOutput$normal.sil.probes,
                          meth.tumor = BetaMatrix_T1[, matchRNAseqBeta[1:131]],
                          transcriptome = RNAseqT3ProteinCode,
@@ -189,7 +316,7 @@ dim(resetResultsSIL$meth.tumor.matched) # 45229  131
 dim(resetResultsSIL$meth.tumor.status.matched) #  45229  131
 dim(resetResultsSIL$FDR.res) #  6611   2
 dim(resetResultsSIL$permutation.res) #  45229  102
-dim(resetResultsSIL$score.cutoff)
+dim(resetResultsSIL$score.cutoff) # NULL
 
 
 resetScoreSIL <- data.frame(resetResultsSIL$Score.report[which(! is.na(resetResultsSIL$Score.report$Score) == TRUE), ], FDR = NA)
@@ -200,8 +327,8 @@ head(resetScoreSIL)
 dim(resetScoreSIL) # 6611    6
 length(unique(resetScoreSIL$Gene)) # 3925
 range(resetScoreSIL$Score) # 0.002308231 1.269213329
-View(resetScoreSIL)
-write.csv(resetScoreSIL, file = "RESET_HypomethylatedProbes_FLDLBCL_Silencers.csv")
+# View(resetScoreSIL)
+# write.csv(resetScoreSIL, file = "RESET_HypomethylatedProbes_FLDLBCL_Silencers.csv")
 
 # Plot No.Methylation.Events vs Score
 resetScoreSIL %>%
@@ -222,7 +349,7 @@ resetScoreSIL %>%
 
 
 
-# Plot top 100 Genes vs Score
+# Plot top 100 Genes vs Score after selecting based on FDR
 resetScoreSIL %>%  
   filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
@@ -239,11 +366,58 @@ resetScoreSIL %>%
         text = element_text(size = 15))
 
 
+# Plot top 100 Genes vs Score after selecting based on FDR - coloured by FDR
+resetScoreSIL %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL+DLBCL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+# Plot top 100 Genes vs Score after selecting based on FDR - coloured by No.Methylation.Events
+resetScoreSIL %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = No.Methylation.Events)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL+DLBCL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
 
 
+# Plot top 100 Genes vs Score after selecting based on FDR - coloured by Promoter.no
+resetScoreSIL %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = factor(Promoter.no))) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL+DLBCL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
 
 
-#### RESET_HypermethylatedProbes_FL_Enhancers ####
+###########################################################################################
+#### RESET_HypomethylatedProbes_FL_(T3 n = 131-10 = 121)_HypermethylatedNormal(Enhancers) ####
 
 # Run reset function on all tumor samples - enhancers - FL only
 resetResultsENHFLonly <- reset(normal.db = methNorSelOutput$normal.enh.probes,
@@ -253,6 +427,237 @@ resetResultsENHFLonly <- reset(normal.db = methNorSelOutput$normal.enh.probes,
                                FDR.permutation.no = 100, 
                                seed = 100)
 dim(resetResultsENHFLonly$FDR.res) #  588   2
+head(resetResultsENHFLonly$meth.tumor.status.all)
+ENHFLmeth.tumor.status.all <- data.frame(resetResultsENHFLonly$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.status.all)))
+head(ENHFLmeth.tumor.status.all)
+dim(ENHFLmeth.tumor.status.all) # 2798  122
+dim(resetResultsENHFLonly$meth.tumor.all) # 2798  121
+dim(resetResultsENHFLonly$transcriptome) # 2798  121
+
+genelist <- c("SPO11", "FCRLB")
+testingGene <- genelist[1]
+ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene), ]
+rowSums(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene), c(1:121)])
+
+
+
+plotting <- function() {
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)) == 1) {
+    
+    
+    testingDataFrame <- data.frame(Values = c(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ],
+                                              resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ],
+                                              resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hypoProbes <- which(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 247 2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                         t(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 250   4
+    
+    
+    testingDataFrame %>%  # highest score: cg20802515.p1.SPO11 methylation only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    # look at 2nd probe with highest score
+    hypoProbes <- which(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene)[2], hypoProbes],
+                                                    resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene)[2], hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 25  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene)[2], hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene)[2], hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  }
+}
+
+
 
 resetScoreENHFLonly <- data.frame(resetResultsENHFLonly$Score.report[which(! is.na(resetResultsENHFLonly$Score.report$Score) == TRUE), ], FDR = NA)
 for (i in 1:nrow(resetScoreENHFLonly)) {
@@ -262,8 +667,11 @@ head(resetScoreENHFLonly)
 dim(resetScoreENHFLonly) # 588 6
 length(unique(resetScoreENHFLonly$Gene)) # 489
 range(resetScoreENHFLonly$Score) # 0.004389081 1.150200828
-View(resetScoreENHFLonly)
-write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+resetScoreENHFLonly[which(resetScoreENHFLonly$Gene == testingGene), ]
+
+
+# View(resetScoreENHFLonly)
+# write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
 
 # Plot No.Methylation.Events vs Score
 resetScoreENHFLonly %>%
@@ -286,14 +694,14 @@ resetScoreENHFLonly %>%
 
 # Plot top 100 Genes vs Score
 resetScoreENHFLonly %>%  
-  filter(FDR < 0.5) %>% # FDR < 0.5
+  #filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
   ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
   geom_bar(stat = "identity") +
   labs(x = "Gene") +
-  ggtitle(paste0("Plot of Hypermethylated Probes (Enhancers) For FL")) +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.grid.major = element_blank(),
@@ -301,7 +709,28 @@ resetScoreENHFLonly %>%
         text = element_text(size = 15))
 
 
-#### RESET_HypomethylatedProbes_FL_Silencers ####
+
+resetScoreENHFLonly %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+#### RESET_HypermethylatedProbesFL_(T3 n = 131-10 = 121)_HypomethylatedNormal(Silencers) ####
+
+# Match samples between RNAseq and methylation - 131 tumor samples
+matchRNAseqBeta <- match(colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
+                         colnames(BetaMatrix_T1))
 
 # Run reset function on all tumor samples - silencers - FL only
 resetResultsSILFLonly <- reset(normal.db = methNorSelOutput$normal.sil.probes,
@@ -311,6 +740,180 @@ resetResultsSILFLonly <- reset(normal.db = methNorSelOutput$normal.sil.probes,
                                FDR.permutation.no = 100, 
                                seed = 100)
 dim(resetResultsSILFLonly$FDR.res) #  6452   2
+SILFLmeth.tumor.status.all <- data.frame(resetResultsSILFLonly$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.status.all)))
+head(SILFLmeth.tumor.status.all)
+dim(SILFLmeth.tumor.status.all) # 45229   122
+dim(resetResultsSILFLonly$meth.tumor.all) # 45229  121
+dim(resetResultsSILFLonly$transcriptome) # 45229  121
+
+genelist <- c("BMP3", "MME", "HLTF", "CAMK1")
+testingGene <- genelist[1]
+SILFLmeth.tumor.status.all[which(SILFLmeth.tumor.status.all$Gene == testingGene), ]
+rowSums(SILFLmeth.tumor.status.all[which(SILFLmeth.tumor.status.all$Gene == testingGene), c(1:121)])
+
+
+
+
+plotting <- function() {
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene)) == 1) {
+    testingDataFrame <- data.frame(Values = c(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene), ],
+                                              resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene), ],
+                                              resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hyperProbes <- which(SILFLmeth.tumor.status.all[which(SILFLmeth.tumor.status.all$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene)[2], hyperProbes],
+                                                    resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene)[2], hyperProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hyperProbes)), rep("TumorRNAseq", length(hyperProbes))))
+    dim(testingDataFrameStatus) # 33  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene)[2], hyperProbes]),
+                                      MeanTranscriptome = mean(resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene)[2], hyperProbes]))
+    
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene), ]),
+                                         t(resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247   4
+    
+    
+    testingDataFrame %>%  # highest score: cg01941671@p1@BMP3 methylation only
+      melt(id.vars = "Type")  %>%
+      filter(variable == "cg01941671.p1.BMP3") %>% # highest score: cg01941671@p1@BMP3
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg01941671.p1.BMP3") %>% # highest score: cg01941671.p1.BMP3
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsSILFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLonly$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsSILFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLonly$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsSILFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLonly$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+  }
+}
 
 resetScoreSILFLonly <- data.frame(resetResultsSILFLonly$Score.report[which(! is.na(resetResultsSILFLonly$Score.report$Score) == TRUE), ], FDR = NA)
 for (i in 1:nrow(resetScoreENHFLonly)) {
@@ -320,16 +923,18 @@ head(resetScoreSILFLonly)
 dim(resetScoreSILFLonly) #  6452  6
 length(unique(resetScoreSILFLonly$Gene)) # 3848
 range(resetScoreSILFLonly$Score) # 0.003460362 1.282929804
-View(resetScoreSILFLonly)
-write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+resetScoreSILFLonly[which(resetScoreSILFLonly$Gene == testingGene), ]
+
+# View(resetScoreSILFLonly)
+# write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
 
 # Plot No.Methylation.Events vs Score
 resetScoreSILFLonly %>%
   ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
   geom_smooth(method = lm) +
   stat_cor()
-  
-  
+
+
 # Plot No.Methylation.Events vs Score
 resetScoreSILFLonly %>%
   ggplot(aes(x = FDR, y = Score)) + geom_point() + 
@@ -345,20 +950,3028 @@ resetScoreSILFLonly %>%
 
 # Plot top 100 Genes vs Score
 resetScoreSILFLonly %>% 
-  filter(FDR < 0.5) %>% # FDR < 0.5
+  #filter(FDR < 0.5) %>% # FDR < 0.5
   arrange(desc(Score)) %>% # arrange highest to lowest by score value
   dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
   top_n(- 100) %>%  # select top 100 genes based on score
   ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
   geom_bar(stat = "identity") +
   labs(x = "Gene") +
-  ggtitle(paste0("Plot of Hypomethylated Probes (Silencers) For FL")) +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         text = element_text(size = 15))
 
-save.image("40_RESET_RNAseqVsMethFC_script.RData")
 
+
+resetScoreSILFLonly %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+
+###########################################################################################
+#### RESET_HypomethylatedProbes_FL_(T2 n = 104-10 = 94)_HypermethylatedNormal(Enhancers) ####
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBeta104 <- match(colnames(RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
+                            colnames(BetaMatrix_T1))
+
+# Run reset function on all tumor samples - enhancers - FL only
+resetResultsENHFL104only <- reset(normal.db = methNorSelOutput$normal.enh.probes,
+                                  meth.tumor = BetaMatrix_T1[, matchRNAseqBeta104[11:104]],
+                                  transcriptome = RNAseqT2ProteinCode[, c(11:104)],
+                                  methylation.event = c('enh'),
+                                  FDR.permutation.no = 100, 
+                                  seed = 100)
+dim(resetResultsENHFL104only$FDR.res) #  470   2
+head(resetResultsENHFL104only$meth.tumor.status.all)
+ENHFLmeth.tumor.status.all104 <- data.frame(resetResultsENHFL104only$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsENHFL104only$meth.tumor.status.all)))
+head(ENHFLmeth.tumor.status.all104)
+dim(ENHFLmeth.tumor.status.all104) # 2798  95
+dim(resetResultsENHFL104only$meth.tumor.all) # 2798  94
+dim(resetResultsENHFL104only$transcriptome) # 2798  94
+resetResultsENHFL104only$FDR.res
+
+
+
+genelist <- c("FCRLB")
+testingGene <- genelist[1]
+ENHFLmeth.tumor.status.all104[which(ENHFLmeth.tumor.status.all104$Gene == testingGene), ]
+rowSums(ENHFLmeth.tumor.status.all104[which(ENHFLmeth.tumor.status.all104$Gene == testingGene), c(1:94)])
+
+
+# If one probe
+plotting <- function() {
+  if(length(which(gsub(".*@", "", rownames(resetResultsENHFL104only$normal.meth)) == testingGene)) == 1) {
+    
+    
+    testingDataFrame <- data.frame(Values = c(resetResultsENHFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFL104only$normal.meth)) == testingGene), ],
+                                              resetResultsENHFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFL104only$meth.tumor.all)) == testingGene), ],
+                                              resetResultsENHFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFL104only$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 94), rep("TumorRNAseq", 94)))
+    dim(testingDataFrame) # 193 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsENHFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsENHFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsENHFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hypoProbes <- which(ENHFLmeth.tumor.status.all104[which(ENHFLmeth.tumor.status.all104$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFL104only$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFL104only$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFL104only$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) #  133   2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFL104only$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFL104only$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFL104only$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                         t(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 250   4
+    
+    
+    testingDataFrame %>%  # highest score: cg20802515.p1.SPO11 methylation only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    # look at 2nd probe with highest score
+    hypoProbes <- which(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene)[2], hypoProbes],
+                                                    resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene)[2], hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 25  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLonly$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLonly$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsENHFLonly$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLonly$meth.tumor.all)) == testingGene)[2], hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLonly$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLonly$transcriptome)) == testingGene)[2], hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  }
+}
+
+
+
+resetScoreENHFL104only <- data.frame(resetResultsENHFL104only$Score.report[which(! is.na(resetResultsENHFL104only$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreENHFL104only)) {
+  resetScoreENHFL104only[i, 6] <- resetResultsENHFL104only$FDR.res$FDR[which(resetScoreENHFL104only$Score[i] == resetResultsENHFL104only$FDR.res$observed.scores)]
+}
+head(resetScoreENHFL104only)
+dim(resetScoreENHFL104only) # 470   6
+length(unique(resetScoreENHFL104only$Gene)) # 388
+range(resetScoreENHFL104only$Score) # 0.02766526 1.05906088
+resetScoreENHFL104only[which(resetScoreENHFL104only$Gene == testingGene), ]
+
+
+# View(resetScoreENHFLonly)
+# write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFL104only %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFL104only %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreENHFL104only %>%  
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreENHFL104only %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+#### RESET_HypermethylatedProbesFL_(T2 n = 104-10 = 94)_HypomethylatedNormal(Silencers) ####
+
+# Match samples between RNAseq and methylation - 131 tumor samples
+matchRNAseqBeta104 <- match(colnames(RNAseqQC18June2020T2Samples104$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized),
+                            colnames(BetaMatrix_T1))
+
+# Run reset function on all tumor samples - silencers - FL only
+resetResultsSILFL104only <- reset(normal.db = methNorSelOutput$normal.sil.probes,
+                                  meth.tumor = BetaMatrix_T1[, matchRNAseqBeta104[11:104]],
+                                  transcriptome = RNAseqT2ProteinCode[, c(11:104)],
+                                  methylation.event = c('sil'),
+                                  FDR.permutation.no = 100, 
+                                  seed = 100)
+dim(resetResultsSILFL104only$FDR.res) # 5257    2
+SILFLmeth.tumor.status.all104 <- data.frame(resetResultsSILFL104only$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.status.all)))
+head(SILFLmeth.tumor.status.all104)
+dim(SILFLmeth.tumor.status.all104) # 45229   95
+dim(resetResultsSILFL104only$meth.tumor.all) # 45229  94
+dim(resetResultsSILFL104only$transcriptome) # 45229  94
+
+genelist <- c("BMP7")
+testingGene <- genelist[1]
+SILFLmeth.tumor.status.all[which(SILFLmeth.tumor.status.all104$Gene == testingGene), ]
+rowSums(SILFLmeth.tumor.status.all104[which(SILFLmeth.tumor.status.all104$Gene == testingGene), c(1:94)])
+
+
+
+plotting <- function() {
+  
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)) == 1) {
+    testingDataFrame <- data.frame(Values = c(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ],
+                                              resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ],
+                                              resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hyperProbes <- which(SILFLmeth.tumor.status.all104[which(SILFLmeth.tumor.status.all104$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene)[2], hyperProbes],
+                                                    resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene)[2], hyperProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hyperProbes)), rep("TumorRNAseq", length(hyperProbes))))
+    dim(testingDataFrameStatus) # 89  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene)[2], hyperProbes]),
+                                      MeanTranscriptome = mean(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene)[2], hyperProbes]))
+    
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247   4
+    
+    
+    testingDataFrame %>%  # highest score: cg01941671@p1@BMP3 methylation only
+      melt(id.vars = "Type")  %>%
+      filter(variable == "cg01941671.p1.BMP3") %>% # highest score: cg01941671@p1@BMP3
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg01941671.p1.BMP3") %>% # highest score: cg01941671.p1.BMP3
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+  }
+}
+
+
+resetScoreSILFL104only <- data.frame(resetResultsSILFL104only$Score.report[which(! is.na(resetResultsSILFL104only$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreSILFL104only)) {
+  resetScoreSILFL104only[i, 6] <- resetResultsSILFL104only$FDR.res$FDR[which(resetScoreSILFL104only$Score[i] == resetResultsSILFL104only$FDR.res$observed.scores)]
+}
+head(resetScoreSILFL104only)
+dim(resetScoreSILFL104only) #   5257    6
+length(unique(resetScoreSILFL104only$Gene)) # 3120
+range(resetScoreSILFL104only$Score) # 0.009003583 1.312216365
+resetScoreSILFL104only[which(resetScoreSILFL104only$Gene == testingGene), ]
+
+# View(resetScoreSILFLonly)
+# write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFL104only %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFL104only %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreSILFL104only %>% 
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreSILFL104only %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+
+###########################################################################################
+#### Comparison of T3 and T2 #####
+
+resetScoreENHFLonlyGenes <- resetScoreENHFLonly$Gene
+resetScoreSILFLonlyGenes <- resetScoreSILFLonly$Gene
+resetScoreENHFL104onlyGenes <- resetScoreENHFL104only$Gene
+resetScoreSILFL104onlyGenes <- resetScoreSILFL104only$Gene
+
+n <- max(length(resetScoreENHFLonlyGenes), 
+         length(resetScoreSILFLonlyGenes),
+         length(resetScoreENHFL104onlyGenes),
+         length(resetScoreSILFL104onlyGenes))
+
+length(resetScoreENHFLonlyGenes) <- n                      
+length(resetScoreSILFLonlyGenes) <- n
+length(resetScoreENHFL104onlyGenes) <- n                      
+length(resetScoreSILFL104onlyGenes) <- n
+
+TableGenesENHSILT2T3 <- cbind(resetScoreENHFLonlyGenes,
+                              resetScoreSILFLonlyGenes,
+                              resetScoreENHFL104onlyGenes,
+                              resetScoreSILFL104onlyGenes)
+
+write.csv(TableGenesENHSILT2T3, "TableGenesENHSILT2T3_1Sept2020.csv")
+
+
+
+resetScoreENHFLonlyProbes <- rownames(resetScoreENHFLonly)
+resetScoreSILFLonlyProbes <- rownames(resetScoreSILFLonly)
+resetScoreENHFL104onlyProbes <- rownames(resetScoreENHFL104only)
+resetScoreSILFL104onlyProbes <- rownames(resetScoreSILFL104only)
+
+n <- max(length(resetScoreENHFLonlyProbes), 
+         length(resetScoreSILFLonlyProbes),
+         length(resetScoreENHFL104onlyProbes),
+         length(resetScoreSILFL104onlyProbes))
+
+length(resetScoreENHFLonlyProbes) <- n                      
+length(resetScoreSILFLonlyProbes) <- n
+length(resetScoreENHFL104onlyProbes) <- n                      
+length(resetScoreSILFL104onlyProbes) <- n
+
+TableProbesENHSILT2T3 <- cbind(resetScoreENHFLonlyProbes,
+                               resetScoreSILFLonlyProbes,
+                               resetScoreENHFL104onlyProbes,
+                               resetScoreSILFL104onlyProbes)
+
+write.csv(TableProbesENHSILT2T3, "TableProbesENHSILT2T3_1Sept2020.csv")
+
+###########################################################################################
+#### RESET_HypomethylatedProbes_FL_(T3 with C1 samples as tumor)_HypermethylatedNormal(Enhancers) ####
+
+
+# Get C1 FL only samples
+matchRNAseqC1 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 1)][-c(1:10)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC1 <- matchRNAseqC1[! is.na(matchRNAseqC1)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC1])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC1 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC1]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC1]), colnames(RNAseqT3ProteinCode[, matchRNAseqC1]))
+# TRUE
+
+
+# Run reset function on C1 tumor samples - enhancers - FL only
+resetResultsENHFLC1 <- reset(normal.db = methNorSelOutput$normal.enh.probes,
+                             meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC1],
+                             transcriptome = RNAseqT3ProteinCode[, matchRNAseqC1],
+                             methylation.event = c('enh'),
+                             FDR.permutation.no = 100, 
+                             seed = 100)
+dim(resetResultsENHFLC1$FDR.res) #  363   2
+head(resetResultsENHFLC1$meth.tumor.status.all)
+ENHFLmeth.tumor.status.allC1 <- data.frame(resetResultsENHFLC1$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.status.all)))
+head(ENHFLmeth.tumor.status.allC1)
+dim(ENHFLmeth.tumor.status.allC1) # 2798  58
+dim(resetResultsENHFLC1$meth.tumor.all) # 2798  57
+dim(resetResultsENHFLC1$transcriptome) # 2798  57
+resetResultsENHFLC1$FDR.res
+range(resetResultsENHFLC1$Score.report$Score, na.rm = TRUE) # 0.03474982 0.96606185
+
+
+
+genelist <- c("ATF5")
+testingGene <- genelist[1]
+ENHFLmeth.tumor.status.allC1[which(ENHFLmeth.tumor.status.allC1$Gene == testingGene), ]
+rowSums(ENHFLmeth.tumor.status.allC1[which(ENHFLmeth.tumor.status.allC1$Gene == testingGene), c(1:57)])
+
+
+# If one probe
+plotting <- function() {
+  if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)) == 1) {
+    
+    
+    testingDataFrame <- data.frame(Values = c(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ],
+                                              resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ],
+                                              resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 94), rep("TumorRNAseq", 94)))
+    dim(testingDataFrame) # 193 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hypoProbes <- which(ENHFLmeth.tumor.status.allC1[which(ENHFLmeth.tumor.status.allC1$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) #  133   2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                         t(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 250   4
+    
+    
+    testingDataFrame %>%  # highest score: cg20802515.p1.SPO11 methylation only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    # look at 2nd probe with highest score
+    hypoProbes <- which(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene)[2], hypoProbes],
+                                                    resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene)[2], hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 25  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene)[2], hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene)[2], hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  }
+}
+
+
+
+resetScoreENHFLC1 <- data.frame(resetResultsENHFLC1$Score.report[which(! is.na(resetResultsENHFLC1$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreENHFLC1)) {
+  resetScoreENHFLC1[i, 6] <- resetResultsENHFLC1$FDR.res$FDR[which(resetScoreENHFLC1$Score[i] == resetResultsENHFLC1$FDR.res$observed.scores)]
+}
+head(resetScoreENHFLC1)
+dim(resetScoreENHFLC1) # 363   6
+length(unique(resetScoreENHFLC1$Gene)) # 312
+range(resetScoreENHFLC1$Score) # 0.03474982 0.96606185
+resetScoreENHFLC1[which(resetScoreENHFLC1$Gene == testingGene), ]
+
+
+# View(resetScoreENHFLonly)
+# write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC1 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC1 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreENHFLC1 %>%  
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL - C1")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreENHFLC1 %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+# GProfilerAnalysis
+# get gene list of those with FDR < 0.5
+resetScoreENHFLC1Genes <- resetScoreENHFLC1 %>%  
+  dplyr::filter(FDR < 0.5) %>% 
+  dplyr::select(Gene)
+
+gprofilerResetScoreENHFLC1 <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC1Genes$Gene),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = NA, # with respect to expression
+                                                ConditionName = "All",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+gprofilerResetScoreENHFLC1$shortLink
+# "https://biit.cs.ut.ee/gplink/l/PC-KEBe5Rj"
+
+# run with all genes 
+gprofilerResetScoreENHFLC1All <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC1$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreENHFLC1All$shortLink
+# "https://biit.cs.ut.ee/gplink/l/MABDo3KOQG"
+
+#### RESET_HypermethylatedProbesFL_(T3 with C1 samples as tumor)_HypomethylatedNormal(Silencers) ####
+
+# Get C1 FL only samples
+matchRNAseqC1 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 1)][-c(1:10)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC1 <- matchRNAseqC1[! is.na(matchRNAseqC1)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC1])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC1 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC1]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC1]), colnames(RNAseqT3ProteinCode[, matchRNAseqC1]))
+# TRUE
+
+
+# Run reset function on C1 tumor samples - enhancers - FL only
+resetResultsSILFLC1 <- reset(normal.db = methNorSelOutput$normal.sil.probes,
+                             meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC1],
+                             transcriptome = RNAseqT3ProteinCode[, matchRNAseqC1],
+                             methylation.event = c('sil'),
+                             FDR.permutation.no = 100, 
+                             seed = 100)
+dim(resetResultsSILFLC1$FDR.res) # 4359    2
+SILFLmeth.tumor.status.allC1 <- data.frame(resetResultsSILFLC1$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsSILFLC1$meth.tumor.status.all)))
+head(SILFLmeth.tumor.status.allC1)
+dim(SILFLmeth.tumor.status.allC1) #  45229    58
+dim(resetResultsSILFLC1$meth.tumor.all) # 45229   57
+dim(resetResultsSILFLC1$transcriptome) # 45229   57
+
+genelist <- c("BMP7")
+testingGene <- genelist[1]
+SILFLmeth.tumor.status.allC1[which(SILFLmeth.tumor.status.allC1$Gene == testingGene), ]
+rowSums(SILFLmeth.tumor.status.allC1[which(SILFLmeth.tumor.status.allC1$Gene == testingGene), c(1:57)])
+
+
+
+plotting <- function() {
+  
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsSILFLC1$normal.meth)) == testingGene)) == 1) {
+    testingDataFrame <- data.frame(Values = c(resetResultsSILFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1$normal.meth)) == testingGene), ],
+                                              resetResultsSILFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1$meth.tumor.all)) == testingGene), ],
+                                              resetResultsSILFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsSILFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsSILFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsSILFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hyperProbes <- which(SILFLmeth.tumor.status.allC1[which(SILFLmeth.tumor.status.allC1$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsSILFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsSILFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1$meth.tumor.all)) == testingGene)[2], hyperProbes],
+                                                    resetResultsSILFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1$transcriptome)) == testingGene)[2], hyperProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hyperProbes)), rep("TumorRNAseq", length(hyperProbes))))
+    dim(testingDataFrameStatus) # 61  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsSILFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsSILFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1$meth.tumor.all)) == testingGene)[2], hyperProbes]),
+                                      MeanTranscriptome = mean(resetResultsSILFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1$transcriptome)) == testingGene)[2], hyperProbes]))
+    
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247   4
+    
+    
+    testingDataFrame %>%  # highest score: cg01941671@p1@BMP3 methylation only
+      melt(id.vars = "Type")  %>%
+      filter(variable == "cg01941671.p1.BMP3") %>% # highest score: cg01941671@p1@BMP3
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg01941671.p1.BMP3") %>% # highest score: cg01941671.p1.BMP3
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+  }
+}
+
+
+resetScoreSILFLC1 <- data.frame(resetResultsSILFLC1$Score.report[which(! is.na(resetResultsSILFLC1$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreSILFLC1)) {
+  resetScoreSILFLC1[i, 6] <- resetResultsSILFLC1$FDR.res$FDR[which(resetScoreSILFLC1$Score[i] == resetResultsSILFLC1$FDR.res$observed.scores)]
+}
+head(resetScoreSILFLC1)
+dim(resetScoreSILFLC1) #  4359    6
+length(unique(resetScoreSILFLC1$Gene)) # 2493  
+range(resetScoreSILFLC1$Score) # 0.007039039 1.722105323
+resetScoreSILFLC1[which(resetScoreSILFLC1$Gene == testingGene), ]
+
+# View(resetScoreSILFLonly)
+# write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC1 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC1 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreSILFLC1 %>% 
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreSILFLC1 %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+# GProfilerAnalysis
+# get gene list of those with FDR < 0.5
+resetScoreSILFLC1Genes <- resetScoreSILFLC1 %>%  
+  dplyr::filter(FDR < 0.5) %>% 
+  dplyr::select(Gene)
+
+gprofilerResetScoreSILFLC1 <- GProfilerAnalysis(GeneIDs = list(resetScoreSILFLC1Genes$Gene),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = NA, # with respect to expression
+                                                ConditionName = "All",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+gprofilerResetScoreSILFLC1$shortLink
+# "https://biit.cs.ut.ee/gplink/l/Qn9NIgj9Qo"
+
+# run with all genes 
+gprofilerResetScoreSILFLC1All <- GProfilerAnalysis(GeneIDs = list(resetScoreSILFLC1$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreSILFLC1All$shortLink
+# "https://biit.cs.ut.ee/gplink/l/q8dXk_IkRa"
+
+
+###########################################################################################
+#### RESET_HypermethylatedProbesFL_(T3 with C2 samples as tumor)_HypomethylatedNormal(Silencers) ####
+
+# Get C2 FL only samples
+matchRNAseqC2 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 2)][- c(92:96)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC2 <- matchRNAseqC2[! is.na(matchRNAseqC2)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC2])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC2 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC2]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC2]), colnames(RNAseqT3ProteinCode[, matchRNAseqC2]))
+# TRUE
+
+
+# Run reset function on C2 tumor samples - enhancers - FL only
+resetResultsSILFLC2 <- reset(normal.db = methNorSelOutput$normal.sil.probes,
+                             meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC2],
+                             transcriptome = RNAseqT3ProteinCode[, matchRNAseqC2],
+                             methylation.event = c('sil'),
+                             FDR.permutation.no = 100, 
+                             seed = 100)
+dim(resetResultsSILFLC2$FDR.res) # 3808    2
+range(resetResultsSILFLC2$Score.report$Score, na.rm = TRUE)
+
+SILFLmeth.tumor.status.allC2 <- data.frame(resetResultsSILFLC2$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.status.all)))
+head(SILFLmeth.tumor.status.allC2)
+dim(SILFLmeth.tumor.status.allC2) # 45229    65
+dim(resetResultsSILFLC2$meth.tumor.all) # 45229    64
+dim(resetResultsSILFLC2$transcriptome) # 45229    64
+dim(resetResultsSILFLC2$score.cutoff)  # NULL
+
+genelist <- c("WNT9A")
+testingGene <- genelist[1]
+SILFLmeth.tumor.status.allC2[which(SILFLmeth.tumor.status.allC2$Gene == testingGene), ]
+rowSums(SILFLmeth.tumor.status.allC2[which(SILFLmeth.tumor.status.allC2$Gene == testingGene), c(1:57)])
+
+
+
+plotting <- function() {
+  
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene)) == 1) {
+    testingDataFrame <- data.frame(Values = c(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ],
+                                              resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), ],
+                                              resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hyperProbes <- which(SILFLmeth.tumor.status.allC2[which(SILFLmeth.tumor.status.allC2$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ],
+                                                    resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), hyperProbes],
+                                                    resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), hyperProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hyperProbes)), rep("TumorRNAseq", length(hyperProbes))))
+    dim(testingDataFrameStatus) # 9  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), hyperProbes]),
+                                      MeanTranscriptome = mean(resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), hyperProbes]))
+    
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247   4
+    
+    
+    testingDataFrame %>%  # highest score: cg01941671@p1@BMP3 methylation only
+      melt(id.vars = "Type")  %>%
+      filter(variable == "cg01941671.p1.BMP3") %>% # highest score: cg01941671@p1@BMP3
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg01941671.p1.BMP3") %>% # highest score: cg01941671.p1.BMP3
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+  }
+}
+
+
+resetScoreSILFLC2 <- data.frame(resetResultsSILFLC2$Score.report[which(! is.na(resetResultsSILFLC2$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreSILFLC2)) {
+  resetScoreSILFLC2[i, 6] <- resetResultsSILFLC2$FDR.res$FDR[which(resetScoreSILFLC2$Score[i] == resetResultsSILFLC2$FDR.res$observed.scores)]
+}
+head(resetScoreSILFLC2)
+dim(resetScoreSILFLC2) #  3808    6
+range(resetScoreSILFLC2$FDR) # 0.0900000 0.9553846
+length(unique(resetScoreSILFLC2$Gene)) # 2386
+range(resetScoreSILFLC2$Score) # 0.001555952 1.583194347
+resetScoreSILFLC2[which(resetScoreSILFLC2$Gene == testingGene), ]
+
+# View(resetScoreSILFLonly)
+# write.csv(resetScoreSILFLonly, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC2 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC2 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreSILFLC2 %>% 
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreSILFLC2 %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+# run with all genes 
+gprofilerResetScoreSILFLC2All <- GProfilerAnalysis(GeneIDs = list(resetScoreSILFLC2$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreSILFLC2All$shortLink
+# "https://biit.cs.ut.ee/gplink/l/KBybBHDXSV"
+
+
+#### RESET_HypomethylatedProbes_FL_(T3 with C2 samples as tumor)_HypermethylatedNormal(Enhancers) ####
+
+
+# Get C2 FL only samples
+matchRNAseqC2 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 2)][- c(92:96)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC2 <- matchRNAseqC2[! is.na(matchRNAseqC2)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC2])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC2 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC2]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC2]), colnames(RNAseqT3ProteinCode[, matchRNAseqC2]))
+
+
+# Run reset function on C2 tumor samples - enhancers - FL only
+resetResultsENHFLC2 <- reset(normal.db = methNorSelOutput$normal.enh.probes,
+                             meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC2],
+                             transcriptome = RNAseqT3ProteinCode[, matchRNAseqC2],
+                             methylation.event = c('enh'),
+                             FDR.permutation.no = 100, 
+                             seed = 100)
+
+dim(resetResultsENHFLC2$FDR.res) #  494   2
+head(resetResultsENHFLC2$meth.tumor.status.all)
+ENHFLmeth.tumor.status.allC2 <- data.frame(resetResultsENHFLC2$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.status.all)))
+head(ENHFLmeth.tumor.status.allC2)
+dim(ENHFLmeth.tumor.status.allC2) # 2798  65
+dim(resetResultsENHFLC2$meth.tumor.all) # 2798  64
+dim(resetResultsENHFLC2$transcriptome) # 2798  64
+resetResultsENHFLC2$FDR.res
+range(resetResultsENHFLC2$Score.report$Score, na.rm = TRUE) # 0.009277029 1.168854874
+
+
+
+genelist <- c("TBC1D12")
+testingGene <- genelist[1]
+ENHFLmeth.tumor.status.allC2[which(ENHFLmeth.tumor.status.allC2$Gene == testingGene), ]
+rowSums(ENHFLmeth.tumor.status.allC2[which(ENHFLmeth.tumor.status.allC2$Gene == testingGene), c(1:57)])
+
+
+# If one probe
+plotting <- function() {
+  if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene)) == 1) {
+    
+    
+    testingDataFrame <- data.frame(Values = c(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ],
+                                              resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), ],
+                                              resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 94), rep("TumorRNAseq", 94)))
+    dim(testingDataFrame) # 193 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hypoProbes <- which(ENHFLmeth.tumor.status.allC2[which(ENHFLmeth.tumor.status.allC2$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) #  133   2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ]),
+                                         t(resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 250   4
+    
+    
+    testingDataFrame %>%  # highest score: cg20802515.p1.SPO11 methylation only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    # look at 2nd probe with highest score
+    hypoProbes <- which(ENHFLmeth.tumor.status.allC2[which(ENHFLmeth.tumor.status.allC2$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 25  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC2$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC2$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC2$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  }
+}
+
+
+
+resetScoreENHFLC2 <- data.frame(resetResultsENHFLC2$Score.report[which(! is.na(resetResultsENHFLC2$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreENHFLC2)) {
+  resetScoreENHFLC2[i, 6] <- resetResultsENHFLC2$FDR.res$FDR[which(resetScoreENHFLC2$Score[i] == resetResultsENHFLC2$FDR.res$observed.scores)]
+}
+head(resetScoreENHFLC2)
+dim(resetScoreENHFLC2) # 494    6
+length(unique(resetScoreENHFLC2$Gene)) # 424
+range(resetScoreENHFLC2$Score) # 0.009277029 1.168854874
+resetScoreENHFLC2[which(resetScoreENHFLC2$Gene == testingGene), ]
+
+
+# View(resetScoreENHFLonly)
+# write.csv(resetScoreENHFLonly, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC2 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC2 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreENHFLC2 %>%  
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL - C2")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreENHFLC2 %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+# GProfilerAnalysis
+# get gene list of those with FDR < 0.5
+resetScoreENHFLC2Genes <- resetScoreENHFLC2 %>%  
+  dplyr::filter(FDR < 0.5) %>% 
+  dplyr::select(Gene)
+
+gprofilerResetScoreENHFLC2 <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC2Genes$Gene),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = NA, # with respect to expression
+                                                ConditionName = "All",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+# No results to show
+# Please make sure that the organism is correct or set significant = FALSE
+
+
+# run with all genes 
+gprofilerResetScoreENHFLC2All <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC2$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreENHFLC2All$shortLink
+
+###########################################################################################
+#### Run first function from RESET with C2 as normal####
+
+# Get C2 FL only samples
+matchRNAseqC2 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 2)][- c(92:96)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC2 <- matchRNAseqC2[! is.na(matchRNAseqC2)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC2])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC2 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC2]),
+                           colnames(BetaMatrix_T1))
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC2]), colnames(RNAseqT3ProteinCode[, matchRNAseqC2]))
+# TRUE
+
+methNorSelOutputC2 <- methNorSel(normal.mtx = BetaMatrix_T1[matchTSSProbes, matchRNAseqBetaC2],
+                                 probe.list = promoter.probes.list)
+# this function first extract the data regarding the selected probes, and later based on the beta-values prepare two seperate normal-sample data-sets:
+## 1. hypermethylated probes in normal condition: Enh.probes
+## 2. hypomethylated probes in normal condition: Sil.probes
+names(methNorSelOutputC2) # "normal.sil.probes" "normal.enh.probes"
+typeof(methNorSelOutputC2)
+dim(methNorSelOutputC2$normal.sil.probes) # 40718     64
+dim(methNorSelOutputC2$normal.enh.probes) # 1715  64
+class(methNorSelOutputC2$normal.sil.probes)
+normal.sil.probesC2 <- data.frame(methNorSelOutputC2$normal.sil.probes, rowMedians = rowMedians(methNorSelOutputC2$normal.sil.probes))
+
+ggplot(normal.sil.probesC2, aes(x = c(1:40718), y = rowMedians)) + # plot rowMeans of sil.probes
+  geom_point(size = 2) +
+  labs(x = "probe", y = "Median Beta Value") +
+  theme_bw() + 
+  theme(text = element_text(size = 20), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold")) +
+  scale_color_manual(values = c("#d6604d", "#66bd63", "#4575b4")) +
+  theme(aspect.ratio = 1, 
+        legend.position = "right", 
+        panel.background = element_rect(colour = "black", size=1.5),  
+        axis.title =  element_text(face = "bold"))
+
+silProbesFLC2 <- gsub(".*@", "", rownames(methNorSelOutputC2$normal.sil.probes))
+length(silProbesFLC2) # 40718
+# write.csv(silProbesFLC2, file = "RESET_HypermethylatedProbesNormalCondition_Enhancers.csv")
+source("26_Gprofiler.R")
+gprofilersilProbesFLC2 <- GProfilerAnalysis(GeneIDs = list(silProbesFLC2),
+                                            Organism = "hsapiens",
+                                            OrderedQuery = TRUE,
+                                            PvalAlphaLevel = 0.01,
+                                            PositiveorNegFC = NA, # with respect to expression
+                                            ConditionName = "All",
+                                            ProduceImages = "Yes", 
+                                            PNGorPDF = "png")
+gprofilersilProbesFLC2$shortLink  # "https://biit.cs.ut.ee/gplink/l/ZLxq3tvKRC"
+
+
+
+enhProbesFLC2 <- gsub(".*@", "", rownames(methNorSelOutputC2$normal.enh.probes))
+length(enhProbesFLC2) # 1715
+# write.csv(enhProbesFL, file = "RESET_HypomethylatedProbesNormalCondition_Silencers.csv")
+normal.enh.probesC2 <- data.frame(methNorSelOutputC2$normal.enh.probes, rowMedians = rowMedians(methNorSelOutputC2$normal.enh.probes))
+
+ggplot(normal.enh.probesC2, aes(x = c(1:1715), y = rowMedians)) + # plot rowMeans of enh.probes
+  geom_point(size = 2) +
+  labs(x = "probe", y = "Median Beta Value") +
+  theme_bw() + 
+  theme(text = element_text(size = 20), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold")) +
+  scale_color_manual(values = c("#d6604d", "#66bd63", "#4575b4")) +
+  theme(aspect.ratio = 1, 
+        legend.position = "right", 
+        panel.background = element_rect(colour = "black", size=1.5),  
+        axis.title =  element_text(face = "bold"))
+silProbesFLC2 <- gsub(".*@", "", rownames(methNorSelOutput$normal.sil.probes))
+
+gprofilerenhProbesFLC2 <- GProfilerAnalysis(GeneIDs = list(silProbesFLC2),
+                                            Organism = "hsapiens",
+                                            OrderedQuery = TRUE,
+                                            PvalAlphaLevel = 0.01,
+                                            PositiveorNegFC = NA, # with respect to expression
+                                            ConditionName = "All",
+                                            ProduceImages = "Yes", 
+                                            PNGorPDF = "png")
+gprofilerenhProbesFLC2$shortLink # "https://biit.cs.ut.ee/gplink/l/Aw1-UW-RS_"
+
+
+
+
+#### RESET_HypermethylatedProbesFL_(T3 with C1 samples as tumor)_HypomethylatedNormalC2(Silencers) ####
+
+# Get C1 FL only samples
+matchRNAseqC1 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 1)][-c(1:10)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC1 <- matchRNAseqC1[! is.na(matchRNAseqC1)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC1])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC1 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC1]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC1]), colnames(RNAseqT3ProteinCode[, matchRNAseqC1]))
+# TRUE
+
+
+# Run reset function on C1 tumor samples - enhancers - FL only
+resetResultsSILFLC1againstC2 <- reset(normal.db = methNorSelOutputC2$normal.sil.probes,
+                                      meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC1],
+                                      transcriptome = RNAseqT3ProteinCode[, matchRNAseqC1],
+                                      methylation.event = c('sil'),
+                                      FDR.permutation.no = 100, 
+                                      seed = 100)
+dim(resetResultsSILFLC1againstC2$FDR.res) # 1103    2
+range(resetResultsSILFLC1againstC2$Score.report$Score, na.rm = TRUE) # 0.00333016 1.70897569
+
+SILFLmeth.tumor.status.allC1againstC2 <- data.frame(resetResultsSILFLC1againstC2$meth.tumor.status.all, 
+                                                    Gene = gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$meth.tumor.status.all)),
+                                                    Score = )
+head(SILFLmeth.tumor.status.allC1againstC2)
+dim(SILFLmeth.tumor.status.allC1againstC2) # 40718    58
+dim(resetResultsSILFLC1againstC2$meth.tumor.all) # 40718    57
+dim(resetResultsSILFLC1againstC2$transcriptome) # 40718    57
+resetResultsSILFLC1againstC2$score.cutoff # 1.708976
+
+genelist <- c("MME", "PPP1R14C")
+testingGene <- genelist[1]
+SILFLmeth.tumor.status.allC1againstC2[which(SILFLmeth.tumor.status.allC1againstC2$Gene == testingGene), ]
+rowSums(SILFLmeth.tumor.status.allC1againstC2[which(SILFLmeth.tumor.status.allC1againstC2$Gene == testingGene), c(1:57)])
+
+
+
+plotting <- function() {
+  
+  which(rownames(resetResultsSILFLC1againstC2$normal.meth) == "cg22001630@p1@MME") # probe with highest score of 1.7
+  # If one probe
+  if(length(which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$normal.meth)) == testingGene)[5]) == 1) {
+    testingDataFrame <- data.frame(Values = c(resetResultsSILFLC1againstC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$normal.meth)) == testingGene)[5], ],
+                                              resetResultsSILFLC1againstC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$meth.tumor.all)) == testingGene)[5], ],
+                                              resetResultsSILFLC1againstC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$transcriptome)) == testingGene)[5], ]),
+                                   Type = c(rep("C2Methylation", 64), rep("C1Methylation", 57), rep("C1RNAseq", 57)))
+    dim(testingDataFrame) # 247 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "C1RNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "C1RNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsSILFLC1againstC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsSILFLC1againstC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsSILFLC1againstC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC1againstC2$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hyperProbes <- which(SILFLmeth.tumor.status.allC2[which(SILFLmeth.tumor.status.allC2$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ],
+                                                    resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), hyperProbes],
+                                                    resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), hyperProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hyperProbes)), rep("TumorRNAseq", length(hyperProbes))))
+    dim(testingDataFrameStatus) # 9  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsSILFLC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFLC2$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsSILFLC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFLC2$meth.tumor.all)) == testingGene), hyperProbes]),
+                                      MeanTranscriptome = mean(resetResultsSILFLC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFLC2$transcriptome)) == testingGene), hyperProbes]))
+    
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 247   4
+    
+    
+    testingDataFrame %>%  # highest score: cg01941671@p1@BMP3 methylation only
+      melt(id.vars = "Type")  %>%
+      filter(variable == "cg01941671.p1.BMP3") %>% # highest score: cg01941671@p1@BMP3
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg01941671.p1.BMP3") %>% # highest score: cg01941671.p1.BMP3
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg01941671.p1.BMP3") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg01941671.p1.BMP3 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsSILFL104only$normal.meth[which(gsub(".*@", "", rownames(resetResultsSILFL104only$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsSILFL104only$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsSILFL104only$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsSILFL104only$transcriptome[which(gsub(".*@", "", rownames(resetResultsSILFL104only$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+  }
+}
+
+
+resetScoreSILFLC1againstC2 <- data.frame(resetResultsSILFLC1againstC2$Score.report[which(! is.na(resetResultsSILFLC1againstC2$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreSILFLC1againstC2)) {
+  resetScoreSILFLC1againstC2[i, 6] <- resetResultsSILFLC1againstC2$FDR.res$FDR[which(resetScoreSILFLC1againstC2$Score[i] == resetResultsSILFLC1againstC2$FDR.res$observed.scores)]
+}
+head(resetScoreSILFLC1againstC2)
+dim(resetScoreSILFLC1againstC2) #  1103    6
+range(resetScoreSILFLC1againstC2$FDR, na.rm = TRUE) # 0.0700000 0.9888551
+length(unique(resetScoreSILFLC1againstC2$Gene)) # 647
+range(resetScoreSILFLC1againstC2$Score) # 0.00333016 1.70897569
+resetScoreSILFLC1againstC2[which(resetScoreSILFLC1againstC2$Gene == testingGene), ]
+
+# View(resetScoreSILFLC1againstC2)
+# write.csv(resetScoreSILFLC1againstC2, file = "RESET_HypomethylatedProbes_FL_Silencers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC1againstC2 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot No.Methylation.Events vs Score
+resetScoreSILFLC1againstC2 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreSILFLC1againstC2 %>% 
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in C1")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreSILFLC1againstC2 %>%  
+  filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypermethylated Probes in C1")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+# run with all genes 
+gprofilerResetScoreSILFLC2All <- GProfilerAnalysis(GeneIDs = list(resetScoreSILFLC1againstC2$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreSILFLC2All$shortLink
+# "https://biit.cs.ut.ee/gplink/l/KBybBHDXSV"
+
+
+
+#### RESET_HypomethylatedProbes_FL_(T3 with C1 samples as tumor)_HypermethylatedNormalC2(Enhancers) ####
+
+
+# Get C1 FL only samples
+matchRNAseqC1 <- match(InfiniumClustLabels$ID[which(InfiniumClustLabels$Cluster == 1)][-c(1:10)],
+                       colnames(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalized))
+matchRNAseqC1 <- matchRNAseqC1[! is.na(matchRNAseqC1)]
+colnames(RNAseqT3ProteinCode[, matchRNAseqC1])# double check
+
+
+# Match samples between RNAseq and methylation - 104 tumor samples
+matchRNAseqBetaC1 <- match(colnames(RNAseqT3ProteinCode[, matchRNAseqC1]),
+                           colnames(BetaMatrix_T1))
+
+
+# ENSURE identical colnames
+identical(colnames(BetaMatrix_T1[, matchRNAseqBetaC1]), colnames(RNAseqT3ProteinCode[, matchRNAseqC1]))
+# TRUE
+
+
+# Run reset function on C1 tumor samples - enhancers - FL only
+resetResultsENHFLC1againstC2 <- reset(normal.db = methNorSelOutputC2$normal.enh.probes,
+                                      meth.tumor = BetaMatrix_T1[, matchRNAseqBetaC1],
+                                      transcriptome = RNAseqT3ProteinCode[, matchRNAseqC1],
+                                      methylation.event = c('enh'),
+                                      FDR.permutation.no = 100, 
+                                      seed = 100)
+dim(resetResultsENHFLC1againstC2$FDR.res) #  12   2
+head(resetResultsENHFLC1againstC2$meth.tumor.status.all)
+ENHFLmeth.tumor.status.allC1againstC2 <- data.frame(resetResultsENHFLC1againstC2$meth.tumor.status.all, Gene = gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$meth.tumor.status.all)))
+head(ENHFLmeth.tumor.status.allC1againstC2)
+dim(ENHFLmeth.tumor.status.allC1againstC2) # 1715  58
+dim(resetResultsENHFLC1againstC2$meth.tumor.all) # 1715  57
+dim(resetResultsENHFLC1againstC2$transcriptome) # 1715  57
+resetResultsENHFLC1againstC2$FDR.res
+range(resetResultsENHFLC1againstC2$Score.report$Score, na.rm = TRUE) # 0.1814491 0.5201030
+
+
+
+genelist <- c("AQP8")
+testingGene <- genelist[1]
+ENHFLmeth.tumor.status.allC1againstC2[which(ENHFLmeth.tumor.status.allC1againstC2$Gene == testingGene), ]
+rowSums(ENHFLmeth.tumor.status.allC1againstC2[which(ENHFLmeth.tumor.status.allC1againstC2$Gene == testingGene), c(1:57)])
+
+
+# If one probe
+plotting <- function() {
+  if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$normal.meth)) == testingGene)) == 1) {
+    
+    
+    testingDataFrame <- data.frame(Values = c(resetResultsENHFLC1againstC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$normal.meth)) == testingGene), ],
+                                              resetResultsENHFLC1againstC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$meth.tumor.all)) == testingGene), ],
+                                              resetResultsENHFLC1againstC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$transcriptome)) == testingGene), ]),
+                                   Type = c(rep("C2Methylation", 64), rep("C1Methylation", 57), rep("C1RNAseq", 57)))
+    dim(testingDataFrame) # 178 2
+    head(testingDataFrame)
+    
+    testingDataFrame %>%  # methylation only
+      filter(Type != "C1RNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrame %>%  # RNAseq only
+      filter(Type   == "C1RNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = mean(resetResultsENHFLC1againstC2$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = mean(resetResultsENHFLC1againstC2$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = mean(resetResultsENHFLC1againstC2$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1againstC2$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    hypoProbes <- which(ENHFLmeth.tumor.status.allC1[which(ENHFLmeth.tumor.status.allC1$Gene == testingGene), ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ],
+                                                    resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), hypoProbes],
+                                                    resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) #  133   2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  } else if(length(which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)) > 1) {
+    
+    # IF MULTIPLE probes
+    testingDataFrame <- data.frame(rbind(t(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                         t(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ]),
+                                         t(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ])),
+                                   Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", 121), rep("TumorRNAseq", 121)))
+    dim(testingDataFrame) # 250   4
+    
+    
+    testingDataFrame %>%  # highest score: cg20802515.p1.SPO11 methylation only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 RNAseq only
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      filter(variable  == "cg20802515.p1.SPO11") %>% # highest score: cg20802515.p1.SPO11
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: cg20802515.p1.SPO11") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrame %>% # highest score: cg20802515.p1.SPO11 methylation + RNAseq
+      melt(id.vars = "Type")  %>%
+      data.frame() %>%
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "value", fill = "Type", add = "jitter",
+                        ylab = "Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Beta Value: all 3 probes") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrame <- data.frame(MeanNormal = rowMeans(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene), ]),
+                                MeanMethTumor = rowMeans(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene), ]),
+                                MeanTranscriptome = rowMeans(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene), ]))
+    
+    MeanDataFrame %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    
+    
+    
+    # only looking at samples with a status marked as 1
+    # look at 2nd probe with highest score
+    hypoProbes <- which(ENHFLmeth.tumor.status.all[which(ENHFLmeth.tumor.status.all$Gene == testingGene)[2], ] == 1)
+    testingDataFrameStatus <- data.frame(Values = c(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)[2], ],
+                                                    resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene)[2], hypoProbes],
+                                                    resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene)[2], hypoProbes]),
+                                         Type = c(rep("RLNMethylation", 5), rep("TumorMethylation", length(hypoProbes)), rep("TumorRNAseq", length(hypoProbes))))
+    dim(testingDataFrameStatus) # 25  2
+    head(testingDataFrameStatus)
+    
+    
+    testingDataFrameStatus %>%  # methylation only
+      filter(Type != "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    testingDataFrameStatus %>%  # RNAseq only
+      filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    testingDataFrameStatus %>%  # All
+      #filter(Type   == "TumorRNAseq") %>%
+      ggpubr::ggboxplot(x = "Type", y = "Values", fill = "Type", add = "jitter",
+                        ylab = "Values", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+    MeanDataFrameStatus <- data.frame(MeanNormal = mean(resetResultsENHFLC1$normal.meth[which(gsub(".*@", "", rownames(resetResultsENHFLC1$normal.meth)) == testingGene)[2], ]),
+                                      MeanMethTumor = mean(resetResultsENHFLC1$meth.tumor.all[which(gsub(".*@", "", rownames(resetResultsENHFLC1$meth.tumor.all)) == testingGene)[2], hypoProbes]),
+                                      MeanTranscriptome = mean(resetResultsENHFLC1$transcriptome[which(gsub(".*@", "", rownames(resetResultsENHFLC1$transcriptome)) == testingGene)[2], hypoProbes]))
+    
+    MeanDataFrameStatus %>%
+      reshape2::melt() %>%
+      ggpubr::ggboxplot(x = "variable", y = "value", fill = "variable", add = "jitter",
+                        ylab = "Mean Value", 
+                        font.label = list(size = 20, color = "black")) +
+      ggtitle("Type vs. Mean Value") +
+      stat_compare_means() + stat_n_text()
+    
+    
+  }
+}
+
+plottingRecRobert <- function() {
+  
+  RNAseqT3ProteinCodeNorm <- RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalizedWithAnnotations[which(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsNormalizedWithAnnotations$type == "protein_coding"), ]
+  dim(RNAseqT3ProteinCodeNorm) # 17190   136
+  
+  
+  identical(rownames(resetResultsENHFLC1againstC2$meth.tumor.all),
+            rownames(resetResultsENHFLC1againstC2$transcriptome))
+  
+  
+  dim(resetResultsENHFLC1againstC2$meth.tumor.all) # 1715  57
+  dim(resetResultsENHFLC1againstC2$transcriptome) # 1715  57
+  
+  
+  MethDataUpdate <- data.frame(resetResultsENHFLC1againstC2$meth.tumor.all[- which(is.na(rowSums(resetResultsENHFLC1againstC2$transcriptome)) == TRUE), ])
+  TranscriptDataUpdate <- data.frame(resetResultsENHFLC1againstC2$transcriptome[- which(is.na(rowSums(resetResultsENHFLC1againstC2$transcriptome)) == TRUE), ])
+  
+  # getting normalized counts
+  matchNames <- match(sub(".*@", "", rownames(TranscriptDataUpdate)), RNAseqT3ProteinCodeNorm$name)
+  matchColNames <- match(colnames(TranscriptDataUpdate), colnames(RNAseqT3ProteinCodeNorm))
+  RNAseqT3ProteinCodeNormMatched <- RNAseqT3ProteinCodeNorm[matchNames, c(1:4, matchColNames) ]
+  
+  # dataframes - tumor
+  rawDataFrame <- data.frame(Meth = MethDataUpdate, RNAseq = TranscriptDataUpdate)
+  normDataFrame <- data.frame(Meth = MethDataUpdate,  RNAseq = RNAseqT3ProteinCodeNormMatched)
+  
+  # plot(MethDataUpdate$LY_FL_013_T1, TranscriptDataUpdate$LY_FL_013_T1)
+  # plot(MethDataUpdate$LY_FL_013_T1, RNAseqT3ProteinCodeNormMatched$LY_FL_013_T1)
+  
+  # non-normalized counts
+  rawPlot <- ggplot2::ggplot(rawDataFrame, aes(x = Meth.LY_FL_013_T1, y = RNAseq.LY_FL_013_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  # normalized counts
+  normPlotLY_FL_013 <- ggplot2::ggplot(normDataFrame, aes(x = Meth.LY_FL_013_T1, y = RNAseq.LY_FL_013_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_032 <- ggplot2::ggplot(normDataFrame, aes(x = Meth.LY_FL_032_T1, y = RNAseq.LY_FL_032_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_038 <- ggplot2::ggplot(normDataFrame, aes(x = Meth.LY_FL_038_T1, y = RNAseq.LY_FL_038_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_046 <- ggplot2::ggplot(normDataFrame, aes(x = Meth.LY_FL_046_T1, y = RNAseq.LY_FL_046_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  library(magrittr)
+  library(multipanelfigure)
+  figure1 <- multipanelfigure::multi_panel_figure(columns = 2, rows = 2, panel_label_type = "upper-alpha")
+  figure1 %<>%
+    fill_panel(normPlotLY_FL_013, column = 1, row = 1) %<>%
+    fill_panel(normPlotLY_FL_032, column = 2, row = 1) %<>%
+    fill_panel(normPlotLY_FL_038, column = 1, row = 2) %<>%
+    fill_panel(normPlotLY_FL_046, column = 2, row = 2)
+  figure1
+  
+  
+  # dataframes - Normal
+  
+  matchNames <- match(sub(".*@", "", rownames((methNorSelOutputC2$normal.enh.probes))), 
+                          RNAseqT3ProteinCodeNorm$name)
+  matchColNames <- match(colnames(methNorSelOutputC2$normal.enh.probes), colnames(RNAseqT3ProteinCodeNorm))
+  RNAseqT3ProteinCodeNormMatchedNorm <- RNAseqT3ProteinCodeNorm[matchNames, c(1:4, matchColNames) ]
+  
+  normDataFrameC2normal <- data.frame(Meth = methNorSelOutputC2$normal.enh.probes,  RNAseq = RNAseqT3ProteinCodeNormMatchedNorm)
+  
+  
+  # normalized counts
+  normPlotLY_FL_008_T1 <- ggplot2::ggplot(normDataFrameC2normal, aes(x = Meth.LY_FL_008_T1, y = RNAseq.LY_FL_008_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_012_T1 <- ggplot2::ggplot(normDataFrameC2normal, aes(x = Meth.LY_FL_012_T1, y = RNAseq.LY_FL_012_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_018_T1 <- ggplot2::ggplot(normDataFrameC2normal, aes(x = Meth.LY_FL_018_T1, y = RNAseq.LY_FL_018_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+  normPlotLY_FL_020_T1 <- ggplot2::ggplot(normDataFrameC2normal, aes(x = Meth.LY_FL_020_T1, y = RNAseq.LY_FL_020_T1)) + 
+    geom_point() +
+    theme_bw() + 
+    theme(text = element_text(size = 20), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_text(face = "bold"),
+          axis.text.y = element_text(face = "bold"))
+  
+}
+
+
+resetScoreENHFLC2againstC2 <- data.frame(resetResultsENHFLC1againstC2$Score.report[which(! is.na(resetResultsENHFLC1againstC2$Score.report$Score) == TRUE), ], FDR = NA)
+for (i in 1:nrow(resetScoreSILFLC2againstC2)) {
+  resetScoreENHFLC2againstC2[i, 6] <- resetResultsENHFLC1againstC2$FDR.res$FDR[which(resetScoreENHFLC2againstC2$Score[i] == resetResultsENHFLC1againstC2$FDR.res$observed.scores)]
+}
+head(resetScoreENHFLC2againstC2)
+dim(resetScoreENHFLC2againstC2) #  12  6
+range(resetScoreENHFLC2againstC2$FDR) # 0.659 1.920
+length(unique(resetScoreENHFLC2againstC2$Gene)) # 12
+range(resetScoreENHFLC2againstC2$Score) # 0.1814491 0.5201030
+resetScoreENHFLC2againstC2[which(resetScoreENHFLC2againstC2$Gene == testingGene), ]
+# ProbID Gene Promoter.no    Score No.Methylation.Events  FDR
+# cg19984833@p1@AQP8 CG19984833 AQP8          P1 0.520103                     8 1.92
+
+
+# View(resetScoreENHFLC2againstC2)
+# write.csv(resetScoreENHFLC2againstC2, file = "RESET_HypermethylatedProbes_FL_Enhancers.csv")
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC2againstC2 %>%
+  ggplot(aes(x = No.Methylation.Events, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor()
+
+# Plot No.Methylation.Events vs Score
+resetScoreENHFLC2againstC2 %>%
+  ggplot(aes(x = FDR, y = Score)) + geom_point() + 
+  geom_smooth(method = lm) +
+  stat_cor() +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+# Plot top 100 Genes vs Score
+resetScoreENHFLC2againstC2 %>%  
+  #filter(FDR < 0.5) %>% # FDR < 0.5
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL - C1")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+
+resetScoreENHFLC2againstC2 %>%  
+  #filter(FDR < 0.5) %>% # FDR < 0.1
+  arrange(desc(Score)) %>% # arrange highest to lowest by score value
+  dplyr::distinct(Gene, .keep_all = TRUE) %>% # keep only distinct entries (unique genes)
+  top_n(- 100) %>%  # select top 100 genes based on score
+  ggplot(aes(x = reorder(Gene, -Score), y = Score, fill = FDR)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Gene") +
+  ggtitle(paste0("Plot of Hypomethylated Probes in FL")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 15))
+
+
+# GProfilerAnalysis
+# get gene list of those with FDR < 0.5
+resetScoreENHFLC1Genes <- resetScoreENHFLC2againstC2 %>%  
+  dplyr::filter(FDR < 0.5) %>% 
+  dplyr::select(Gene)
+
+gprofilerResetScoreENHFLC1 <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC1Genes$Gene),
+                                                Organism = "hsapiens",
+                                                OrderedQuery = TRUE,
+                                                PvalAlphaLevel = 0.01,
+                                                PositiveorNegFC = NA, # with respect to expression
+                                                ConditionName = "All",
+                                                ProduceImages = "Yes", 
+                                                PNGorPDF = "png")
+gprofilerResetScoreENHFLC1$shortLink
+# "https://biit.cs.ut.ee/gplink/l/PC-KEBe5Rj"
+
+# run with all genes 
+gprofilerResetScoreENHFLC1All <- GProfilerAnalysis(GeneIDs = list(resetScoreENHFLC1$Gene),
+                                                   Organism = "hsapiens",
+                                                   OrderedQuery = TRUE,
+                                                   PvalAlphaLevel = 0.01,
+                                                   PositiveorNegFC = NA, # with respect to expression
+                                                   ConditionName = "All",
+                                                   ProduceImages = "Yes", 
+                                                   PNGorPDF = "png")
+gprofilerResetScoreENHFLC1All$shortLink
+# "https://biit.cs.ut.ee/gplink/l/MABDo3KOQG"
+
+
+
+
+
+
+# use reset for SNF
+# bind tumor + normal samples
+identical(rownames(ENHFLmeth.tumor.status.allC1againstC2), 
+          rownames(methNorSelOutputC2$normal.enh.probes)) # TRUE
+
+dim(methNorSelOutputC2$normal.enh.probes) # 1715   64
+ 
+EventMatrix <- cbind(ENHFLmeth.tumor.status.allC1againstC2[, 1:57], methNorSelOutputC2$normal.enh.probes)
+dim(EventMatrix) # 1715  121
+EventMatrix[, c(58:121)] <- 0
+
+
+
+
+TumorPurity <- readRDS(file = paste0(MethylationDirPath, "/Purity_281probes_10Jan2020.rds"))
+dim(TumorPurity) # 170   1
+
+ClinicalFile_T1Cluster <- data.frame(ClinicalFile_T1, "CLUSTER" = InfiniumClustLabels$Cluster)
+RNAseqQC18June2020T3Samples132 <- QCRNAseq(RNAseqCountMatrix = RNAseqCountMatrixMatched, 
+                                           QCMatrix = RNAseqQCFile, 
+                                           RNAseqAnnotationFile = ENSMBLid, 
+                                           BetaMatrix = BetaMatrix_T1,  
+                                           MvalueMatrix = MvalueMatrix_T1, 
+                                           TumorPurity = TumorPurity,
+                                           ClinicalFile = ClinicalFile_T1Cluster,
+                                           SurvivalFile = SurvivalFile,
+                                           RNAseqSampleCufoffUniqMapReadCount = 10000000, 
+                                           RNAseqSampleCufoffUniqMapReadPercentage = 0,
+                                           RNAseqSampleCufoffReadsMappedMultipleLoci = 100,
+                                           RNAseqSampleCutoffRRNAcontam = 100, 
+                                           RNAseqFeatureSelectionMethod = "edgeR",
+                                           RNAseqFeatureSelectionCutOff = NA,
+                                           RNAseqFeatureSelectionNumberofProbes = NA,
+                                           RNAseqNormalizationMethod = "edgeR",
+                                           ImageName = "35_QCRNAseq_T3",
+                                           PNGorPDF = "png",
+                                           ProduceImages = "No")
+
+# cluster only RNAseq protein coding genes
+RNAseqQC18June2020T3Samples132Protein <- RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations[which(RNAseqQC18June2020T3Samples132$RNASeqCountMatrixMatchedSampleFilteredFeatureFilteredNoSexENSEMBLIDsWithAnnotations$type == "protein_coding"), ]
+dim(RNAseqQC18June2020T3Samples132Protein) # 17190   135
+RNAseqQC18June2020T3Samples132Protein <- as.matrix(RNAseqQC18June2020T3Samples132Protein[, c(4:135)])
+dim(RNAseqQC18June2020T3Samples132Protein) # 17190   132
+
+
+TargetedDNAseqDirPath <- "~/Desktop/UHN/FLOMICS/TargetedSequencing"
+mutMergedT1Robert <- read.csv(paste0(TargetedDNAseqDirPath, "/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl_25Aug2020.csv"), row.names = 1)
+dim(mutMergedT1Robert) # 55 138
+colnames(mutMergedT1Robert)
+class(mutMergedT1Robert)
+
+# Fixed in mut.merged.df.T1.poor.cov.excl_25Aug2020 file 
+# mutMergedT1Robert[, which(colnames(mutMergedT1Robert) == "LY_FL_179_T1")] # NA values
+# mutMergedT1Robert[, which(colnames(mutMergedT1Robert) == "LY_FL_181_T1")] # NA values
+# which(is.na(colSums(mutMergedT1Robert)) == TRUE) # LY_FL_179_T1 50; LY_FL_181_T1  51 
+# mutMergedT1Robert[, c(50, 51)] <- 0
+which(is.na(colSums(mutMergedT1Robert)) == TRUE) # named integer(0)
+
+
+
+
+matchRNAseqMutation <- match(colnames(RNAseqQC18June2020T3Samples132Protein), colnames(mutMergedT1Robert))
+dim(mutMergedT1Robert[, matchRNAseqMutation[! is.na(matchRNAseqMutation)]]) # 55 101
+
+mutMergedT1Robert101 <- mutMergedT1Robert[, matchRNAseqMutation[! is.na(matchRNAseqMutation)]]
+dim(mutMergedT1Robert101) # 55 101
+
+matchDNAseqBeta <- match(colnames(mutMergedT1Robert101), colnames(EventMatrix))
+
+matchDNAseqRNAseq <- match(colnames(mutMergedT1Robert101), colnames(RNAseqQC18June2020T3Samples132Protein))
+
+matchDNAseqClinicalFile <- match(colnames(mutMergedT1Robert101), ClinicalFile_T1$SAMPLE_ID)
+
+
+# Combine mutations with BCL2 and BCL6 translocations
+BCL2BCL6BreakapartPredictions <- data.table::fread(file = paste0(MethylationDirPath, "/2020-07-05_BCL2_BCL6_rearrangements.txt"))
+BCL2BCL6BreakapartPredictions <- data.frame(BCL2BCL6BreakapartPredictions)
+dim(BCL2BCL6BreakapartPredictions) # 183   3
+rownames(BCL2BCL6BreakapartPredictions) <- BCL2BCL6BreakapartPredictions$External_ID
+BCL2BCL6BreakapartPredictions <- BCL2BCL6BreakapartPredictions[, -1]
+matchMutationRearrangements <- match(colnames(mutMergedT1Robert101), rownames(BCL2BCL6BreakapartPredictions))
+rearrangementsT1Robert108 <- BCL2BCL6BreakapartPredictions[matchMutationRearrangements, ]
+identical(colnames(t(rearrangementsT1Robert108)), colnames(mutMergedT1Robert101)) #TRUE
+mutRearrT1Robert101 <- rbind(mutMergedT1Robert101, t(rearrangementsT1Robert108))
+dim(mutRearrT1Robert101) # 57 101
+
+which(is.na(colSums(mutRearrT1Robert101)) == TRUE)
+#LY_FL_244_T1 LY_FL_253_T1 LY_FL_264_T1 
+#62           71           82
+mutRearrT1Robert101[56:57, which(is.na(colSums(mutRearrT1Robert101)) == TRUE)]
+# manual adjustment
+mutRearrT1Robert101[56:57, 62] <- c(0, 0)
+mutRearrT1Robert101[56:57, 71] <- c(1, 0)
+mutRearrT1Robert101[56:57, 82] <- c(0, 0)
+
+# check
+mutRearrT1Robert101[56:57, c(62, 71, 82)] 
+
+
+
+
+
+ClusteringSNFMethEventRESET101 <- SNFClustering(RNAseqCountMatrix = as.matrix(RNAseqQC18June2020T3Samples132Protein[, matchDNAseqRNAseq]), 
+                                                 MvalueMatrix = EventMatrix[, matchDNAseqBeta],
+                                                 BetaMatrix = EventMatrix[, matchDNAseqBeta], 
+                                                 TargetedSeqMatrix = mutRearrT1Robert101,
+                                                 MethylationAnnotationFile = EPICAnnotationFile,
+                                                 RNAseqAnnotationFile = ENSMBLid, 
+                                                 QCMatrix = RNAseqQC18June2020T3Samples132$QCMatrixMatchedSampleFiltered[matchDNAseqRNAseq, ],
+                                                 TumorPurity = as.matrix(TumorPurity[matchDNAseqBeta, ], ncol = 1),
+                                                 ClinicalFile = ClinicalFile_T1[matchDNAseqClinicalFile, ], 
+                                                 SurvivalFile = SurvivalFile,
+                                                 NumberOfClusters = 2,
+                                                 ImageName = paste0("Image_MethEvents", date()),
+                                                 PNGorPDF = "png",
+                                                 ProduceImages = "Yes") 
+
+SNFClusterLabels$SampleID[SNFClusterLabels$SampleID %in% colnames(ENHFLmeth.tumor.status.allC1againstC2[, 1:57])]
+table(SNFClusterLabels$Cluster[SNFClusterLabels$SampleID %in% colnames(ENHFLmeth.tumor.status.allC1againstC2[, 1:57])])
+#  1  2 
+# 5 44 
+
+
+ClusteringSNFMethEventRESET101 <- SNFClusterLabels$Cluster
+
+table(ClusteringSNFMethEventRESET101)
+
+InfiniumClustLabels <- readRDS(file = paste0(MethylationDirPath, "/InfiniumClustLabels2.RDS"))
+InfSNFMethEvents <- match(colnames(EventMatrix[, matchDNAseqBeta]), InfiniumClustLabels$ID)
+identical(colnames(EventMatrix[, matchDNAseqBeta]), unfactor(InfiniumClustLabels$ID[InfSNFMethEvents]))
+# TRUE
+table(ClusteringSNFMethEventRESET101, InfiniumClustLabels$Cluster[InfSNFMethEvents])
+chisq.test(table(ClusteringSNFMethEventRESET101, InfiniumClustLabels$Cluster[InfSNF5000SD]))
+
+
+
+ClinicalFile_T1SNFCluster <- data.frame(ClinicalFile_T1[matchDNAseqClinicalFile, ], "CLUSTER" = ClusteringSNFMethEventRESET101)
+DifferentialMethylationProbesSNF <- DifferentialMethylation(ClinicalFile = ClinicalFile_T1SNFCluster, 
+                                                            MvalueMatrix = MvalueMatrix_T1[, matchDNAseqBeta], 
+                                                            BetaMatrix = BetaMatrix_T1[, matchDNAseqBeta],
+                                                            ProbeOrGene = "Probe", 
+                                                            ContrastColumnName = "CLUSTER", 
+                                                            RGChannelSet = NA, 
+                                                            SampleSheet = NA, 
+                                                            ProduceImages = "Yes", 
+                                                            PNGorPDF = "png")
+
+MethylationDensityOutput <- MethylationDensityPlot(AnnotationCategoryToVisualize = "Relation_to_Island", 
+                                                   ClusterLabels = ClusteringSNFMethEventRESET101, 
+                                                   PlotWithinAnnotationCategories = "No", 
+                                                   ClinicalCategoryToVisualize = "CLUSTER", 
+                                                   BetaMatrix = BetaMatrix_T1[, matchDNAseqBeta], 
+                                                   AnnotationFile = EPICAnnotationFile, 
+                                                   ClinicalFile = ClinicalFile_T1SNFCluster, 
+                                                   SampleSheet = NA, 
+                                                   FigureGenerate = "Yes", 
+                                                   ImageName = paste0("MethylationPlot_SNFNoMeth", ImageName), 
+                                                   PNGorPDF = "png")
+
+
+#### save image ####
+save.image("40_RESET_RNAseqVsMethFC_script.RData")
 # [END]
+
+
