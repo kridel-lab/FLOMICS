@@ -34,41 +34,9 @@ genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
 genes_class = unique(genes_class[,c("ensgene", "symbol")])
 
 exp <- fread("2020-06-18STAR_quantmode_counts_matrix_FL_136_patients.txt")
-#exp = as.data.table(filter(exp, gene %in% genes_class$ensgene))
 
 #these are raw counts
 #normalize gene counts using EdgeR
-
-muts <- fread("2020-06-08_opossum_variant_FL_rna-seq_filtered.txt")
-qc = as.data.table(read_excel("FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
-
-length(unique(muts$SAMPLE_ID))
-muts = as.data.table(filter(muts, Tumor_Sample_Barcode %in% qc$rna_seq_file_sample_ID))
-length(unique(muts$SAMPLE_ID))
-
-#remove bad quality rnaseq samples
-#Uniquely mapped reads >= 70 [Keep]
-#Uniquely.mapped.reads..
-#reads mapped to multiple loci < 20 [Keep]
-#X..of.reads.mapped.to.multiple.loci
-#Uniquely mapped > 30000000 [Keep] here try 10000000
-#rrna contamination > 40 [Remove]
-
-muts <- as.data.table(filter(muts, rrna_contam < 40, Uniquely.mapped > 10000000))
-z = which(muts$'X..of.reads.mapped.to.multiple.loci' < 20)
-muts = muts[z,]
-z = which(muts$'Uniquely.mapped.reads..' > 60)
-muts = muts[z,]
-
-#how many patients here?
-length(unique(muts$SAMPLE_ID)) #68
-
-z = c(1,which(colnames(exp) %in% muts$Tumor_Sample_Barcode))
-exp = exp[,..z]
-
-#groups
-
-pats = unique(muts[,c("Tumor_Sample_Barcode", "CLUSTER_InfiniumClust", "STAGE")])
 
 #set up edgeR?
 exp = as.data.frame(exp)
