@@ -27,7 +27,7 @@ setwd("/Users/kisaev/github/FLOMICS/Data")
 #----------------------------------------------------------------------
 
 #gene annotations
-#UCSC gene classes - only protein coding genes 
+#UCSC gene classes - only protein coding genes
 genes_class = as.data.table(grch37)
 genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
 genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
