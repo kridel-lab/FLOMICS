@@ -14,6 +14,9 @@ options(stringsAsFactors=F)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 
+#load functions to analyze seurat
+source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
+
 #output directory
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
 
