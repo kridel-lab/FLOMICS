@@ -1,12 +1,12 @@
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #001_Seurat_tutorial.R
 #karin isaev (using base code from RK)
 #September 30th 2020
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #load functions and libraries
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 options(stringsAsFactors=F)
 
@@ -25,17 +25,19 @@ packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #purpose
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 #the purpose is obtain clusters from snRNAseq that are representative
 #of cell types which we can then use to convolute what cell types are present
 #in the bulk RNA-seq samples
 
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #analysis
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
+#1. read in data++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Following vignette in https://satijalab.org/seurat/v3.2/pbmc3k_tutorial.html latest updated version
 # and this one for integration of multiple seurat objects:
@@ -62,54 +64,30 @@ expression_matrix_FL064 <- Read10X(data.dir = data_dir_FL064)
 expression_matrix_FL076 <- Read10X(data.dir = data_dir_FL076)
 expression_matrix_FL227 <- Read10X(data.dir = data_dir_FL227)
 
-# Setup the Seurat objects
-object_FL062 <- CreateSeuratObject(counts = expression_matrix_FL062, project = "FL", min.cells = 3, min.features = 200)
-object_FL062$sample <- "FL062"
-object_FL062[["percent.mt"]] <- PercentageFeatureSet(object_FL062, pattern = "^MT-")
-object_FL062 <- subset(object_FL062, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+#2. Setup the Seurat objects and normalize++++++++++++++++++++++++++++++++++++++
 
-object_FL064 <- CreateSeuratObject(counts = expression_matrix_FL064, project = "FL", min.cells = 3, min.features = 200)
-object_FL064$sample <- "FL064"
-object_FL064[["percent.mt"]] <- PercentageFeatureSet(object_FL064, pattern = "^MT-")
-object_FL064 <- subset(object_FL064, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+exp_matrices = list(expression_matrix_FL062, expression_matrix_FL064, expression_matrix_FL076, expression_matrix_FL227)
+names(exp_matrices) = c("FL062", "FL064", "FL076", "FL227")
+samps = c("FL062", "FL064", "FL076", "FL227")
 
-object_FL076 <- CreateSeuratObject(counts = expression_matrix_FL076, project = "FL", min.cells = 3, min.features = 200)
-object_FL076$sample <- "FL076"
-object_FL076[["percent.mt"]] <- PercentageFeatureSet(object_FL076, pattern = "^MT-")
-object_FL076 <- subset(object_FL076, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
-
-object_FL227 <- CreateSeuratObject(counts = expression_matrix_FL227, project = "FL", min.cells = 3, min.features = 200)
-object_FL227$sample <- "FL227"
-object_FL227[["percent.mt"]] <- PercentageFeatureSet(object_FL227, pattern = "^MT-")
-object_FL227 <- subset(object_FL227, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
-
-# Normalize the Seurat objects
-object_FL062 <- NormalizeData(object_FL062)
-object_FL064 <- NormalizeData(object_FL064)
-object_FL076 <- NormalizeData(object_FL076)
-object_FL227 <- NormalizeData(object_FL227)
-
-# FindVariableFeatures
-object_FL062 <- FindVariableFeatures(object_FL062, selection.method = "vst", nfeatures = 2000)
-object_FL064 <- FindVariableFeatures(object_FL064, selection.method = "vst", nfeatures = 2000)
-object_FL076 <- FindVariableFeatures(object_FL076, selection.method = "vst", nfeatures = 2000)
-object_FL227 <- FindVariableFeatures(object_FL227, selection.method = "vst", nfeatures = 2000)
-object_list <- list(object_FL062, object_FL064, object_FL076, object_FL227)
+all_objects = mapply(doSeuratProc, exp_matrices, samps)
 
 # plot variable features with and without labels (before sample integration)
 pdf(paste(output, "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
 for(i in 1:4){
   print(i)
   # Identify the 10 most highly variable genes in the first sample of the list
-  top10 <- head(VariableFeatures(object_list[[i]]), 20)
-  plot1 <- VariableFeaturePlot(object_list[[i]]) + ggtitle(object_list[[i]]@meta.data$sample[1])
+  top10 <- head(VariableFeatures(all_objects[[i]]), 20)
+  plot1 <- VariableFeaturePlot(all_objects[[i]]) + ggtitle(all_objects[[i]]@meta.data$sample[1])
   plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
   p = plot1 + plot2
   print(p)
 }
 dev.off()
 
-anchors <- FindIntegrationAnchors(object.list = object_list, dims = 1:20)
+#3. Set up anchors++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+anchors <- FindIntegrationAnchors(object.list = all_objects, dims = 1:20)
 combined <- IntegrateData(anchorset = anchors, dims = 1:20)
 DefaultAssay(combined) <- "integrated"
 
