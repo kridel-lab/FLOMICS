@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-#001_Seurat_tutorial.R
+#001_Seurat.R
 #karin isaev (using base code from RK)
 #September 30th 2020
 #-------------------------------------------------------------------------------
@@ -24,7 +24,8 @@ output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
 packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 	"stringr",
   "Seurat",
-  "cowplot")
+  "cowplot",
+	"patchwork")
 
 lapply(packages, require, character.only = TRUE)
 
@@ -90,26 +91,72 @@ dev.off()
 
 #3. Set up anchors++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-anchors <- FindIntegrationAnchors(object.list = all_objects, dims = 1:20)
-combined <- IntegrateData(anchorset = anchors, dims = 1:20)
+anchors <- FindIntegrationAnchors(object.list = all_objects, dims = 1:30)
+
+#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
+#The returned object will contain a new Assay, which holds an integrated
+#(or 'batch-corrected') expression matrix for all cells, enabling them to be jointly analyzed.
+
+combined <- IntegrateData(anchorset = anchors, dims = 1:30)
+
+#After running IntegrateData, the Seurat object will contain a new Assay with
+#the integrated expression matrix. Note that the original (uncorrected values)
+#are still stored in the object in the other assay, so you can switch back and forth.
+
+#We can then use this new integrated matrix for downstream analysis and
+#visualization. Here we scale the integrated data, run PCA, and
+#visualize the results with UMAP. The integrated datasets cluster by cell type, instead of by technology.
+
+# switch to integrated assay. The variable features of this assay are automatically
+# set during IntegrateData
+
 DefaultAssay(combined) <- "integrated"
+
+#4. Run clustering++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Run the standard workflow for visualization and clustering
 combined <- ScaleData(combined, verbose = FALSE)
+
+combined <- FindNeighbors(combined, dims = 1:10)
+combined <- FindClusters(combined, resolution = 0.5)
+
+head(Idents(combined), 5)
+
 combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
+combined <- RunUMAP(combined, reduction = "pca", dims = 1:10)
+combined <- RunUMAP(combined, dims = 1:10)
+
+pdf(paste(output, "seurat_integrated_samples_clusters.pdf", sep=""), width=16, height=8)
+p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
+p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
+p1 + p2
+dev.off()
+
+saveRDS(combined, file = "combined_processed_snRNAseq_FL.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # t-SNE and Clustering
 combined <- RunUMAP(combined, reduction = "pca", dims = 1:20)
 combined <- FindNeighbors(combined, reduction = "pca", dims = 1:20)
 combined <- FindClusters(combined, resolution = 0.5)
-
-# Visualization
-pdf(paste(output, "seurat_integrated_samples_clusters.pdf", sep=""), width=16, height=8)
-p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
-p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
-print(plot_grid(p1, p2))
-print(DimPlot(combined, reduction = "umap", split.by = "sample"))
-dev.off()
 
 DefaultAssay(combined) <- "RNA"
 markers <- FindConservedMarkers(combined, ident.1 = 1, grouping.var = "sample", verbose = FALSE)
