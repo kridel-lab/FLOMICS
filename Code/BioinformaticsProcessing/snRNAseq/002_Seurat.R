@@ -158,7 +158,7 @@ for(i in 0:12){
 
 current.cluster.ids = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 new.cluster.ids = c("Malignant B cells_0", "Norm B cells_1", "CD4  Tfh cells_2", "CD8 cytotoxic T cells cells_3",
-                    "Malignant B cells_4", "CD4 Tfh cells_5", "Macrophages_6", "CD4 T cells_7", "cluster_8",
+                    "Malignant B cells_4", "CD4 Tfh cells_5", "stromal cells_6", "CD4 T cells_7", "cluster_8",
 									"Macrophages_9", "Norm B cells_10", "Monocytes_11", "Monocytes_12")
 names(x = new.cluster.ids) <- levels(x = combined)
 combined <- RenameIdents(object = combined, new.cluster.ids)

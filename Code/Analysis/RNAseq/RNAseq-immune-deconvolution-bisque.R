@@ -5,67 +5,19 @@
 #cells present in each sample
 #----------------------------------------------------------------------
 
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #load functions and libraries
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-options(stringsAsFactors = F)
-#avoid scientific notation
-options(scipen=999)
-#load libraries
-packages <- c("dplyr", "readr", "ggplot2", "tidyr",
-"data.table", "plyr",
-"ggrepel", "stringr", "maftools", "ggpubr", "readxl", "skimr",
- "edgeR", "annotables", "EnvStats")
-library(gridExtra)
-lapply(packages, require, character.only = TRUE)
-library(limSolve)
-library(xCell)
-library(tibble)
-library(immunedeconv) #<- main package with tools for immune deconvolution
-set_cibersort_binary("Analysis-Files/Immune-Deconvolution/CIBERSORT.R")
-set_cibersort_mat("Analysis-Files/Immune-Deconvolution/LM22.txt")
+#in terminal go to UHN FLOMICS folder or set this as working directory in
+#Rstudio
+#/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS for example
 
-#date
-date=Sys.Date()
-
-#getwd() --> FLOMICS teams folder
-#cd /Users/kisaev/UHN/kridel-lab - Documents/FLOMICS
+source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 
 #----------------------------------------------------------------------
-#data filtering
+#data
 #----------------------------------------------------------------------
-
-#gene annotations
-#UCSC gene classes - only protein coding genes
-genes_class = as.data.table(grch37)
-genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
-genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
-genes_class = unique(genes_class[,c("ensgene", "symbol")])
-#keep only one ens id per gene name
-z = which(duplicated(genes_class$symbol))
-genes_class = genes_class[-z,]
-
-#load in results from kallisto
-tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt", data.table=F)
-colnames(tpm)[1] = "ensgene"
-tpm = merge(tpm, genes_class, by = "ensgene")
-tpm = as.data.frame(tpm)
-rownames(tpm) = tpm$symbol
-tpm$symbol = NULL
-tpm$ensgene = NULL
-
-# All FLOMICS samples included - load sample information
-all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv")
-
-#sample info with rna-seq qc
-rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
-
-#load in results from STAR containing raw counts++++++++++++++++++++++++++++++++
-exp <- fread("RNAseq/counts/2020-06-18STAR_quantmode_counts_matrix_FL_136_patients.txt")
-
-# All FLOMICS samples included - load sample information++++++++++++++++++++++++
-all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv")
 
 bisque = readRDS("Analysis-Files/Seurat/bisque_decomposed_samples.rds")
 

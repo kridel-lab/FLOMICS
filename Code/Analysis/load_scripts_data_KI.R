@@ -46,8 +46,8 @@ date=Sys.Date()
 #1. gene annotations
 #UCSC gene classes - only protein coding genes
 genes_class = as.data.table(grch37)
-genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
-genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
+#genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
+#genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
 genes_class = unique(genes_class[,c("ensgene", "symbol")])
 #keep only one ens id per gene name
 z = which(duplicated(genes_class$symbol))
