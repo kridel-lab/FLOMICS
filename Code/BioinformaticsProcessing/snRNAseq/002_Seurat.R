@@ -28,7 +28,7 @@ packages <- c("readr", "data.table", "plyr",
 	"stringr",
   "Seurat",
   "cowplot",
-	"patchwork")
+	"patchwork", "Biobase")
 
 lapply(packages, require, character.only = TRUE)
 
@@ -68,6 +68,27 @@ cell_markers_single_cell = cSplit(cell_markers_single_cell, "proteinName", ",", 
 cell_markers_single_cell = cell_markers_single_cell %>% select(tissueType, cellType, cellName, proteinName)
 colnames(cell_markers_single_cell)[4] = "gene"
 
+#data from nature methods paper for CellAssign
+fl_combined_wov = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/41592_2019_529_MOESM4_ESM_HGSC_FL_combined_edited.csv")
+fl_cells = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/41592_2019_529_MOESM4_ESM_FL_light_chain.csv")
+fl_lightchain = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/41592_2019_529_MOESM4_ESM_FL_celltype.csv")
+
+fl_combined_wov = melt(fl_combined_wov)
+fl_combined_wov$data = "fl_combined_wov"
+
+fl_cells = melt(fl_cells)
+fl_cells$data = "fl_cells"
+
+fl_lightchain = melt(fl_lightchain)
+fl_lightchain$data = "fl_lightchain"
+
+all_cellassign = rbind(fl_lightchain, fl_combined_wov, fl_cells)
+colnames(all_cellassign)[1:2] = c("gene", "cell")
+all_cellassign = as.data.table(filter(all_cellassign, value==1))
+
+#data from christian steidl paper (manually put into spreadsheet)
+steidl = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/FL_cells_types_aoki_cancerdiscovery.csv")
+
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------
@@ -79,15 +100,18 @@ DefaultAssay(combined) <- "integrated"
 
 combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
 	 min.pct = 0.25, logfc.threshold = 0.25, test.use="roc")
+combined.markers = as.data.table(combined.markers)
+write.csv(combined.markers, file="seurat_roc_cluster_marker_genes_minPCT_25_logFCthresh_25.csv",
+quote=F, row.names=F)
 
 #visualize markers across clusters
 
 pdf(paste(output, "seurat_integrated_samples_clusters_wMarkers.pdf", sep=""), width=18, height=12)
 
-VlnPlot(combined, features = c("CD79A", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3"))
+VlnPlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3", "CD19"))
 
 #overlay on UMAP clusters
-FeaturePlot(combined, features = c("CD79A", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3", "BCL2", "BCL6"),
+FeaturePlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3", "BCL2", "CD19"),
 cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 
 top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_diff)
@@ -103,19 +127,39 @@ clusters_cells_1 = merge(clusters_genes, cell_markers, by="gene")
 clusters_cells_2 = merge(clusters_genes, cells, by="gene")
 clusters_cells_3 = merge(clusters_genes, imsig_cells, by="gene")
 clusters_cells_4 = merge(clusters_genes, cell_markers_single_cell, by="gene")
+clusters_cells_5 = merge(clusters_genes, all_cellassign, by="gene")
+clusters_cells_6 = merge(clusters_genes, steidl, by="gene")
+
+#based on some results above plot expression of those genes across clusters
+pdf(paste(output, "seurat_integrated_samples_clusters_wMarkers_B_cells.pdf", sep=""), width=18, height=12)
+
+VlnPlot(combined, features = c("BCL2"))
+#overlay on UMAP clusters
+FeaturePlot(combined, features = c("IGKC", "IGLC2", "IGLC3", "BCL2", "STAT3", "CD27", "CD19", "IGHM"),
+cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+
+dev.off()
+
+#diff B cell genes
+pdf(paste(output, "seurat_integrated_samples_clusters_wMarkers_cellAssign.pdf", sep=""), width=18, height=12)
+#overlay on UMAP clusters
+FeaturePlot(combined, features = c("CD3G", "CD8A", "BANK1", "VIM", "LYZ", "ST8SIA1", "ICA1", "IL7R", "TRAC", "CTLA4", "IKZF2"),
+cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+
+dev.off()
 
 #I think using imsig_cells seems like it makes the most sense
 
 #3. Label clusters based on marker genes++++++++++++++++++++++++++++++++++++++++
 
 for(i in 0:12){
-	print(filter(clusters_cells_3, cluster==i))
+	print(filter(clusters_cells_5, cluster==i))
 }
 
 current.cluster.ids = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-new.cluster.ids = c("B cells_0", "cluster1", "T cells_2", "Tcells_3",
-                    "B cells_4", "T cells_5", "Macrophages_6", "T cells_7", "cluster_8",
-									"Macrophages_9", "B cells_10", "Monocytes_11", "Monocytes_12")
+new.cluster.ids = c("Malignant B cells_0", "Norm B cells_1", "CD4  Tfh cells_2", "CD8 cytotoxic T cells cells_3",
+                    "Malignant B cells_4", "CD4 Tfh cells_5", "Macrophages_6", "CD4 T cells_7", "cluster_8",
+									"Macrophages_9", "Norm B cells_10", "Monocytes_11", "Monocytes_12")
 names(x = new.cluster.ids) <- levels(x = combined)
 combined <- RenameIdents(object = combined, new.cluster.ids)
 
