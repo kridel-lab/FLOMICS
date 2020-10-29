@@ -84,3 +84,10 @@ With the 30 patients from pilot dataset, a total of x samples.
 - Mutation calling and annotation from targeted DNA sequencing [Code]
 - Visualization of mutations across clusters and stages [Code]
 - Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
+
+#### Immune deconvolution
+- Seurat analysis using snRNAseq data [[Code]](Code/BioinformaticsProcessing/snRNAseq/) 
+- Bisque analysis using seurat clusters and bulk rna-seq count matrix [[Code]](Code/Analysis/snRNAseq/)
+- Plotting estimated immune fractions [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque.R)
+- Estimated immune fractions versus mutation status [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-mutation-correlation-summary-results.R)
+
