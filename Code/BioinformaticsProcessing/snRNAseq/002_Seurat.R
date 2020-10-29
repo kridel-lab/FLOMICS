@@ -104,6 +104,22 @@ combined.markers = as.data.table(combined.markers)
 write.csv(combined.markers, file="seurat_roc_cluster_marker_genes_minPCT_25_logFCthresh_25.csv",
 quote=F, row.names=F)
 
+#additional markers
+
+pdf(paste(output, "seurat_integrated_samples_clusters_wAdditional_Markers.pdf", sep=""), width=18, height=12)
+
+genes=c("CD3D", "CD4", "CD8A", "NCAM1", "MS4A1", "PTPRC", "BCL6",
+"FOXP3", "PDCD1", "CD68", "CD163", "CXCR5", "CD69", "CD45RA", "CD45RO", "CCR7", "IL7R")
+
+VlnPlot(combined, features = genes)
+
+#overlay on UMAP clusters
+FeaturePlot(combined, features = genes,
+cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+
+dev.off()
+
+
 #visualize markers across clusters
 
 pdf(paste(output, "seurat_integrated_samples_clusters_wMarkers.pdf", sep=""), width=18, height=12)
@@ -156,15 +172,19 @@ for(i in 0:12){
 	print(filter(clusters_cells_5, cluster==i))
 }
 
+#combine cluster 2 and 8
+
 current.cluster.ids = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-new.cluster.ids = c("Malignant B cells_0", "Norm B cells_1", "CD4  Tfh cells_2", "CD8 cytotoxic T cells cells_3",
-                    "Malignant B cells_4", "CD4 Tfh cells_5", "stromal cells_6", "CD4 T cells_7", "cluster_8",
-									"Macrophages_9", "Norm B cells_10", "Monocytes_11", "Monocytes_12")
+new.cluster.ids = c("Malignant B cells", "Malignant B cells", "CD4 reg or Tfh cells_2",
+					"CD8 cytotoxic T cells cells_3",
+                    "Malignant B cells", "CD4 FTH cells_5",
+										"stromal cells_6", "CD4 T cells_7", "CD4 reg or Tfh cells_2",
+									"Macrophages_9", "Predicted Norm B cells_10", "potential_Monocytes_11", "Endothelial cells_12")
 names(x = new.cluster.ids) <- levels(x = combined)
 combined <- RenameIdents(object = combined, new.cluster.ids)
 
 pdf(paste(output, "seurat_integrated_samples_cell_types_prelim.pdf", sep=""), width=18, height=12)
-DimPlot(object = combined, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+DimPlot(object = combined, reduction = "umap", label = TRUE, pt.size = 0.5)
 dev.off()
 
 #4. save seurat object for bisque analysis

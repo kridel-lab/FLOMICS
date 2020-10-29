@@ -48,7 +48,7 @@ date=Sys.Date()
 genes_class = as.data.table(grch37)
 #genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
 #genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
-genes_class = unique(genes_class[,c("ensgene", "symbol")])
+genes_class = unique(genes_class[,c("ensgene", "symbol", "biotype")])
 #keep only one ens id per gene name
 z = which(duplicated(genes_class$symbol))
 genes_class = genes_class[-z,]

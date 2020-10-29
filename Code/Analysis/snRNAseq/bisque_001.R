@@ -22,9 +22,12 @@ source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 colnames(exp)[1] = "ensgene"
 exp = merge(exp, genes_class, by = "ensgene")
 exp = as.data.frame(exp)
+
+#prep protein coding bulk data
 rownames(exp) = exp$symbol
 exp$ensgene = NULL
 exp$symbol = NULL
+exp$biotype = NULL
 exp = as.matrix(exp)
 #change sample names in bulk rnaseq data to match them here (1,2,3,4)
 z = which(colnames(exp) %in% c("LY_FL_062_T1", "LY_FL_064_T1", "LY_FL_076_T1", "LY_FL_227_T1"))

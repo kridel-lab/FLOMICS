@@ -73,12 +73,12 @@ muts_immune = fread("Analysis-Files/Immune-Deconvolution/all_methods_full_immune
 #----------------------------------------------------------------------
 
 #1. remove cells types that we don't need
-muts_immune = as.data.table(filter(muts_immune, !(cell_type %in% c("Endothelial cell",
-"Myeloid dendritic cell",  "Common myeloid progenitor" ,
-"Mast cell", "Myeloid dendritic cell activated", "microenvironment score", "Eosinophil", "Neutrophil",
-"immune score", "Plasmacytoid dendritic cell", "Macrophage M1", "Macrophage M2",
-"Monocyte", "Macrophage", "Granulocyte-monocyte progenitor", "Mast cell resting",
-"Macrophage M0", "Mast cell activated", "uncharacterized cell", "Myeloid dendritic cell resting"))))
+#muts_immune = as.data.table(filter(muts_immune, !(cell_type %in% c("Endothelial cell",
+#"Myeloid dendritic cell",  "Common myeloid progenitor" ,
+#"Mast cell", "Myeloid dendritic cell activated", "microenvironment score", "Eosinophil", "Neutrophil",
+#"immune score", "Plasmacytoid dendritic cell", "Macrophage M1", "Macrophage M2",
+#"Monocyte", "Macrophage", "Granulocyte-monocyte progenitor", "Mast cell resting",
+#"Macrophage M0", "Mast cell activated", "uncharacterized cell", "Myeloid dendritic cell resting"))))
 
 #2. filter those comparisons where the median was 0 or around 0
 muts_immune = as.data.table(filter(muts_immune, median > 0.05))
@@ -90,7 +90,7 @@ muts_immune$cell_gene = paste(muts_immune$gene, muts_immune$cell_type, sep="_")
 write.xlsx(muts_immune, file="Analysis-Files/Immune-Deconvolution/Cell_Type_Mutation_Associations_CleanedUp.xlsx")
 
 #4. keep only those with sig association in at least one method
-muts_immune = as.data.table(filter(muts_immune, Wilcox_Pval < 0.05))
+muts_immune = as.data.table(filter(muts_immune, Wilcox_Pval < 0.1))
 gene_cell = as.data.table(table(muts_immune$cell_gene))
 gene_cell = gene_cell[order(-N)]
 
@@ -108,6 +108,5 @@ ggplot(muts_immune, aes(x = cell_type, y = gene, fill = -log10(Wilcox_Pval))) +
       geom_tile(aes(fill = -log10(Wilcox_Pval)), colour = "grey50") +
       labs(x = "Cell Type", y = "Gene with mutation", fill = "-log10(Wilcox P value)") +
       theme_classic() + rotate_x_text()+
-      scale_fill_gradient(low = "yellow", high = "red", na.value = NA)+
-      geom_text(aes(label=method_used), size=1)
+      scale_fill_gradient(low = "yellow", high = "red", na.value = NA)
 dev.off()
