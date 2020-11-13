@@ -27,15 +27,11 @@ echo $index
 path1=${index}_R1.fastq
 path2=${index}_R2.fastq
 genome=/cluster/projects/kridelgroup/FLOMICS/genome_files
-out=/cluster/projects/kridelgroup/burst2/TGL_BAM_RNASEQ_sorted_FASTQ
+out=/cluster/projects/burst2
 
-#export TMPDIR=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
-#export TEMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
-#export TMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+export TMPDIR=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+export TEMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
+export TMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
 
-export TMPDIR=/cluster/projects/burst2
-export TEMP=/cluster/projects/burst2
-export TMP=/cluster/projects/burst2
-
-zcat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${out}/${index}_R1_sorted.fastq
-zcat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${out}/${index}_R2_sorted.fastq
+zcat $path1 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > $out/${index}_R1_sorted.fastq
+zcat $path2 | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > $out/${index}_R2_sorted.fastq
