@@ -13,10 +13,10 @@ module load annovar
 module load bam-readcount
 module load kallisto
 
-cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MIXCR_ANALYSIS/sorted_input
+cd /cluster/projects/burst2
 index_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/transcripts.idx
 output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/KALLISTO
-gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v27.annotation.gtf
+gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v27lift37.annotation.gtf
 chrs=/cluster/projects/kridelgroup/FLOMICS/genome_files/hg19.chrlist
 
 index=$1 #this refers to the sample ID
