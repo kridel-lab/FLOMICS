@@ -16,7 +16,7 @@ module load kallisto
 cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MIXCR_ANALYSIS/sorted_input
 index_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/transcripts.idx
 output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/KALLISTO
-gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
+gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v27.annotation.gtf
 chrs=/cluster/projects/kridelgroup/FLOMICS/genome_files/hg19.chrlist
 
 index=$1 #this refers to the sample ID

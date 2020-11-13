@@ -47,7 +47,7 @@ files <- file.path(getwd(), samples$run, "abundance.h5")
 names(files) <- samples$run
 
 #test
-#files = files[1:5]
+files = files[1:2]
 
 #read in all files into matrix
 txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)

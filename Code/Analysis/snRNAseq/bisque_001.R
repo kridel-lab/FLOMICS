@@ -23,7 +23,7 @@ colnames(exp)[1] = "ensgene"
 exp = merge(exp, genes_class, by = "ensgene")
 exp = as.data.frame(exp)
 
-#prep protein coding bulk data
+#prep bulk data
 rownames(exp) = exp$symbol
 exp$ensgene = NULL
 exp$symbol = NULL
