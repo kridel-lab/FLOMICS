@@ -27,7 +27,7 @@ echo $index
 path1=${index}_R1.fastq
 path2=${index}_R2.fastq
 genome=/cluster/projects/kridelgroup/FLOMICS/genome_files
-out=/cluster/projects/burst2
+out=/cluster/projects/burst2/TGL_BAM_RNASEQ_sorted_FASTQ
 
 export TMPDIR=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
 export TEMP=/cluster/projects/kridelgroup/FLOMICS/DATA/TGL_FASTQ_RNASEQ
