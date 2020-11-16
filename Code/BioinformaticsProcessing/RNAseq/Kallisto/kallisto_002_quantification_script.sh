@@ -13,7 +13,7 @@ module load annovar
 module load bam-readcount
 module load kallisto
 
-cd /cluster/projects/burst2
+cd /cluster/projects/burst2/TGL_BAM_RNASEQ_sorted_FASTQ
 index_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/transcripts.idx
 output=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/KALLISTO
 gtf=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v27lift37.annotation.gtf
