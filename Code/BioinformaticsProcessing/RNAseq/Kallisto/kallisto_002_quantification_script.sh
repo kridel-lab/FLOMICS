@@ -26,4 +26,4 @@ mkdir ${output}/${index}
 
 #need to use sorted FASTQ files
 kallisto quant -i $index_file -o ${output}/${index} \
--b 100 ${index}_R1_sorted.fastq.gz ${index}_R2_sorted.fastq.gz --genomebam --gtf $gtf --chromosomes $chrs
+-b 100 ${index}_R1_sorted.fastq ${index}_R2_sorted.fastq --genomebam --gtf $gtf --chromosomes $chrs
