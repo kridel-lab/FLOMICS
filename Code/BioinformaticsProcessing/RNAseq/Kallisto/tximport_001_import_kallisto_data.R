@@ -24,7 +24,19 @@ library(readr)
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 dir <- system.file("extdata", package = "tximportData")
 library(readr)
-tx2gene <- read_csv(file.path(dir, "tx2gene.gencode.v27.csv"))
+
+library(GenomicFeatures)
+txdb <- makeTxDbFromGFF(file="/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v27lift37.annotation.gtf")
+saveDb(x=txdb, file = "gencode.v27.annotation.TxDb")
+k <- keys(txdb, keytype = "TXNAME")
+tx2gene <- select(txdb, k, "GENEID", "TXNAME")
+head(tx2gene)
+dim(tx2gene)
+
+#tx2gene = read.csv("/cluster/projects/kridelgroup/FLOMICS/genome_files/tx2gene.gencode.v27.lift37.csv")
+#tx2gene$X = NULL
+tx2gene$TXNAME = sapply(tx2gene$TXNAME, function(x){unlist(strsplit(x, "_"))[1]})
+tx2gene$GENEID = sapply(tx2gene$GENEID, function(x){unlist(strsplit(x, "_"))[1]})
 head(tx2gene)
 
 #----------------------------------------------------------------------------------
@@ -47,12 +59,15 @@ files <- file.path(getwd(), samples$run, "abundance.h5")
 names(files) <- samples$run
 
 #test
-#files = files[1:2]
+files = files[1:2]
 
 #read in all files into matrix
-txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
+#txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
 txi.kallisto <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
 head(txi.kallisto$counts)
+
+txi.kallisto_t <- tximport(files, type = "kallisto", txOut = TRUE)
+head(txi.kallisto_t$counts)
 
 tpm = txi.kallisto$counts
 #remove the "." in the gene id
