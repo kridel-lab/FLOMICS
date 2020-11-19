@@ -138,7 +138,7 @@ get_integrated_obj = function(dat, dim, anch_features){
 	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_samples_clusters.pdf", sep=""), width=16, height=8)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
 	p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
-	p1 + p2
+	print(p1 + p2)
 	dev.off()
 
 	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features,  "_samples_clusters.rds", sep=""))
