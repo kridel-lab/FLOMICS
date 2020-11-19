@@ -12,4 +12,4 @@ module load R/4.0.0
 #pwd
 cd /cluster/projects/kridelgroup/FLOMICS
 
-Rscript /cluster/home/kisaev/
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat.R
