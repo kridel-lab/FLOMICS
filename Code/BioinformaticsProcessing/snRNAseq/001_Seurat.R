@@ -99,6 +99,9 @@ dev.off()
 
 get_integrated_obj = function(dat, dim, anch_features){
 
+	print(dim)
+	print(anch_features)
+
 	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim, anchor.features = anch_features)
 
 	#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
@@ -130,15 +133,16 @@ get_integrated_obj = function(dat, dim, anch_features){
 	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
 	combined <- FindClusters(combined, resolution = 0.5)
 
-	head(Idents(combined), 5)
+	#head(Idents(combined), 5)
 
-	pdf(paste(output, "seurat_integrated_dim_", dim , anch_features, "_samples_clusters.pdf", sep=""), width=16, height=8)
+	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_samples_clusters.pdf", sep=""), width=16, height=8)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
 	p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
 	p1 + p2
 	dev.off()
 
-	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , anch_features,  "_samples_clusters.rds", sep=""))
+	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features,  "_samples_clusters.rds", sep=""))
+	print("finished this analysis")
 
 }
 
