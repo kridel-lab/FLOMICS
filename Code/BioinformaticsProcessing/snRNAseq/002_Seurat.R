@@ -84,11 +84,13 @@ get_marker_genes = function(dat){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f)
 
-	v2 = VlnPlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3", "CD19"))
-	print(v2)
+	#v2 = VlnPlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5", "ICOS", "IGKC",
+	#"IGLC2", "IGLC3", "CD19"))
+	#print(v2)
 
 	#overlay on UMAP clusters
-	f2 = FeaturePlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5", "ICOS", "IGKC", "IGLC2", "IGLC3", "BCL2", "CD19"),
+	f2 = FeaturePlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5",
+	"ICOS", "IGKC", "IGLC2", "IGLC3", "BCL2", "CD19"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f2)
 
@@ -102,7 +104,8 @@ get_marker_genes = function(dat){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f3)
 
-	f4 = FeaturePlot(combined, features = c("CD3G", "CD8A", "BANK1", "VIM", "LYZ", "ST8SIA1", "ICA1", "IL7R", "TRAC", "CTLA4", "IKZF2"),
+	f4 = FeaturePlot(combined, features = c("CD3G", "CD8A", "BANK1", "VIM", "LYZ",
+	"ST8SIA1", "ICA1", "IL7R", "TRAC", "CTLA4", "IKZF2"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f4)
 
@@ -112,4 +115,5 @@ get_marker_genes = function(dat){
 
 }
 
-llply(all_perms, get_marker_genes, .progress=".text")
+get_marker_genes("seurat_integrated_dim_10_2000_samples_clusters.rds")
+#llply(all_perms, get_marker_genes, .progress=".text")

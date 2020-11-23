@@ -154,3 +154,5 @@ get_integrated_obj = function(dat, dim, anch_features){
 get_integrated_obj(all_objects, 10, 2000) #final choice for seurat objects and clustering
 #get_integrated_obj(all_objects, 20, 2000)
 #get_integrated_obj(all_objects, 30, 2000)
+
+sessionInfo()

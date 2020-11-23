@@ -50,18 +50,6 @@ combined = readRDS()
 #analysis
 #-------------------------------------------------------------------------------
 
-#2. Link markers to cell types++++++++++++++++++++++++++++++++++++++++++++++++++
-
-clusters_genes = as.data.table(table(combined.markers$gene, combined.markers$cluster)) #569 unique genes left
-colnames(clusters_genes)=c("gene", "cluster", "N")
-clusters_genes = as.data.table(filter(clusters_genes, N >0))
-clusters_cells_1 = merge(clusters_genes, cell_markers, by="gene")
-clusters_cells_2 = merge(clusters_genes, cells, by="gene")
-clusters_cells_3 = merge(clusters_genes, imsig_cells, by="gene")
-clusters_cells_4 = merge(clusters_genes, cell_markers_single_cell, by="gene")
-clusters_cells_5 = merge(clusters_genes, all_cellassign, by="gene")
-clusters_cells_6 = merge(clusters_genes, steidl, by="gene")
-
 #I think using imsig_cells seems like it makes the most sense
 
 #based on review of gene markers across the clusters
