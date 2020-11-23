@@ -1,3 +1,5 @@
+library(data.table)
+
 doSeuratProc <- function(exp, samp){
 
     print(samp)

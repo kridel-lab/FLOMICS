@@ -97,7 +97,8 @@ get_marker_genes = function(dat){
 	print(h)
 
 	#overlay on UMAP clusters
-	f3= FeaturePlot(combined, features = c("STAT3", "CD27", "CD19", "IGHM", "PTPRG"),
+	f3= FeaturePlot(combined, features = c("STAT3", "CD27", "CCR5", "CCR4", "CXCR4", "LAG3",
+	"CD19", "IGHM", "PTPRG", "TNFRSF18", "TNFRSF4", "FAS"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f3)
 
