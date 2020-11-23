@@ -24,14 +24,14 @@ doSeuratProc <- function(exp, samp){
     print(feature_plot)
 
     #4. Filter cells that have unique feature counts over 2,500 or less than 200
-    object_fl <- subset(object_fl, subset = nFeature_RNA > 200 & percent.mt < 5 & nFeature_RNA < 3000)
+    object_fl <- subset(object_fl, subset = nFeature_RNA > 200 & percent.mt < 5 & nFeature_RNA < 5000)
     #change nFeature_RNA < 5000 instead of 2500
 
     #5. Normalize the Seurat objects
     object_fl <- NormalizeData(object_fl)
 
     #6. FindVariableFeatures
-    object_fl <- FindVariableFeatures(object_fl, selection.method = "vst", nfeatures = 3000) #changed nfeatures from 2000 to 5000
+    object_fl <- FindVariableFeatures(object_fl, selection.method = "vst", nfeatures = 5000) #changed nfeatures from 2000 to 5000
 
     return(object_fl)
 
