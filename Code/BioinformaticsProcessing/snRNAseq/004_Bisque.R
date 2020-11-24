@@ -15,7 +15,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
 
 #output directory
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
+setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/")
 
 #load libraries
 library(ellipsis)
@@ -40,7 +40,7 @@ lapply(packages, require, character.only = TRUE)
 #-------------------------------------------------------------------------------
 
 #1. read in processed seurat object
-combined = readRDS("combined_processed_snRNAseq_FL_seurat_object.rds")
+combined = readRDS("seurat_integrated_dim_10_2000_samples_clusters.rds")
 
 #-------------------------------------------------------------------------------
 #analysis
