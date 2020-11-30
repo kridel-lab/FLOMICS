@@ -32,12 +32,14 @@ exp = as.matrix(exp)
 
 y <- DGEList(counts=exp)
 y$samples
-keep <- filterByExpr(y)
+keep <- filterByExpr(y, min.prop=0.1)  #Minimum proportion of samples in the smallest group that express the gene.
 y <- y[keep, , keep.lib.sizes=FALSE]
 
 dge <- calcNormFactors(y, method = "TMM")
 dge$samples
 tmm <- cpm(dge)
+tmm=as.data.frame(tmm)
+tmm$symbol = rownames(tmm)
 
 write.table(tmm, file="/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/RNAseq/TMM/tmm_matrix_via_star_counts.txt",
 quote=F, row.names=F)
