@@ -43,7 +43,6 @@ get_bisque_summ = function(dat){
   immune_cells$SNFClust = factor(immune_cells$SNFClust)
   immune_cells$tSeqClust = factor(immune_cells$tSeqClust)
   patients_dat = unique(immune_cells[,c("SAMPLE_ID", "STAGE", "TYPE", "SNFClust", "InfinumClust", "tSeqClust")])
-
   head(immune_cells)
 
   #plot distribution of each cell type frequency across disease and stages
