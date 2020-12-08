@@ -74,7 +74,9 @@ exp_matrices = list(expression_matrix_FL062, expression_matrix_FL064, expression
 names(exp_matrices) = c("FL062", "FL064", "FL076", "FL227")
 samps = c("FL062", "FL064", "FL076", "FL227")
 
+pdf(paste(output, "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
 all_objects = mapply(doSeuratProc, exp_matrices, samps)
+dev.off()
 
 # plot variable features with and without labels (before sample integration)
 pdf(paste(output, "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
@@ -91,44 +93,66 @@ dev.off()
 
 #3. Set up anchors++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-anchors <- FindIntegrationAnchors(object.list = all_objects, dims = 1:30)
+#dat = all_objects
+#dim = 10
+#anch_features = 3000
 
-#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
-#The returned object will contain a new Assay, which holds an integrated
-#(or 'batch-corrected') expression matrix for all cells, enabling them to be jointly analyzed.
+get_integrated_obj = function(dat, dim, anch_features){
 
-combined <- IntegrateData(anchorset = anchors, dims = 1:30)
+	set.seed(100)
+	print(dim)
+	print(anch_features)
 
-#After running IntegrateData, the Seurat object will contain a new Assay with
-#the integrated expression matrix. Note that the original (uncorrected values)
-#are still stored in the object in the other assay, so you can switch back and forth.
+	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim, anchor.features = anch_features)
 
-#We can then use this new integrated matrix for downstream analysis and
-#visualization. Here we scale the integrated data, run PCA, and
-#visualize the results with UMAP. The integrated datasets cluster by cell type, instead of by technology.
+	#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
+	#The returned object will contain a new Assay, which holds an integrated
+	#(or 'batch-corrected') expression matrix for all cells, enabling them to be jointly analyzed.
 
-# switch to integrated assay. The variable features of this assay are automatically
-# set during IntegrateData
+	combined <- IntegrateData(anchorset = anchors, dims = 1:dim)
 
-DefaultAssay(combined) <- "integrated"
+	#After running IntegrateData, the Seurat object will contain a new Assay with
+	#the integrated expression matrix. Note that the original (uncorrected values)
+	#are still stored in the object in the other assay, so you can switch back and forth.
 
-#4. Run clustering++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	#We can then use this new integrated matrix for downstream analysis and
+	#visualization. Here we scale the integrated data, run PCA, and
+	#visualize the results with UMAP. The integrated datasets cluster by cell type, instead of by technology.
 
-# Run the standard workflow for visualization and clustering
-combined <- ScaleData(combined, verbose = FALSE)
-combined <- FindNeighbors(combined, dims = 1:10)
-combined <- FindClusters(combined, resolution = 0.5)
+	# switch to integrated assay. The variable features of this assay are automatically
+	# set during IntegrateData
 
-head(Idents(combined), 5)
+	DefaultAssay(combined) <- "integrated"
 
-combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
-combined <- RunUMAP(combined, reduction = "pca", dims = 1:10)
-combined <- RunUMAP(combined, dims = 1:10)
+	#4. Run clustering++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-pdf(paste(output, "seurat_integrated_samples_clusters.pdf", sep=""), width=16, height=8)
-p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
-p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
-p1 + p2
-dev.off()
+	# Run the standard workflow for visualization and clustering
+	combined <- ScaleData(combined, verbose = FALSE)
+	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
+	# t-SNE and Clustering
+	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
+	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
+	combined <- FindClusters(combined, resolution = 0.5)
 
-saveRDS(combined, file = "combined_processed_snRNAseq_FL.rds")
+	#head(Idents(combined), 5)
+
+	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_samples_clusters.pdf", sep=""), width=16, height=8)
+	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
+	p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
+	print(p1 + p2)
+	dev.off()
+
+	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features,  "_samples_clusters.rds", sep=""))
+	print("finished this analysis")
+
+}
+
+#get_integrated_obj(all_objects, 10, 3000)
+#get_integrated_obj(all_objects, 20, 3000)
+#get_integrated_obj(all_objects, 30, 3000)
+
+get_integrated_obj(all_objects, 10, 2000) #final choice for seurat objects and clustering
+#get_integrated_obj(all_objects, 20, 2000)
+#get_integrated_obj(all_objects, 30, 2000)
+
+sessionInfo()
