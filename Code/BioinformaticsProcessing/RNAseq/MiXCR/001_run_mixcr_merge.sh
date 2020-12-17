@@ -14,4 +14,4 @@ module load annovar
 module load bedtools
 module load R/3.6.1
 
-Rscript /cluster/home/srussell/mixcr_concatenate_all_clonotypes.R
+Rscript /cluster/home/srussell/002_mixcr_concatenate_all_clonotypes.R
