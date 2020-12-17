@@ -9,7 +9,7 @@
 #-------------------------------------------------------------------------------
 
 options(stringsAsFactors=F)
-date=Sys.Sys.Date()
+date=Sys.Date()
 
 #make sure loading R/3.6.1 before running this script
 
