@@ -1,0 +1,36 @@
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ERV/Telescope workflow
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#1. run Telescope
+  sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/001_running_TELESCOPE_on_BAM_files.sh
+  #secondary script for files that needed to be run on veryhimem (if necessary)
+  #sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/001_B_running_TELESCOPE_on_BAM_files_veryhimem.sh
+
+#2. concatenate telescope files
+  sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/002_concatenating_TELESCOPE_results.sh
+
+#3. get ERV counts into matrix
+  sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/003_A_get_ERV_counts_into_matrix_job.sh
+
+#4. perform DE analysis for clusters + stages (003_B_Clusters_differential_expression_analysis.R + 003_B_Stages_differential_expression_analysis.R)
+  sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/003_run_DE_analysis.sh
+
+#5. visualize DE ERVs
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/telescope_erv_visualization.R
+
+#6. Gene Expression - Differential Gene Expression RNA-Seq
+  ##FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/edgeR_GeneExpression.R
+
+#7. Differential methylation
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/ERVs_diffMethylation
+
+#8. format and merge DE ERVs with ERV annotations
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/format_DM_CpGs.R
+
+#9. Find ERV CpG overlaps
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/findOverlaps_ERV_CpG.R
+
+#10. take differentially expressed ERVs from and performs rGREAT analysis to obtain cis associated genes. Overlap between these genes and DEGs
+#is then performed and used in gprofiler anaysis for pathway enrichment.
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/ERVsDetection/rGREAT_gprofiler_enrichment.R
