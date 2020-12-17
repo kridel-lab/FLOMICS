@@ -47,6 +47,18 @@ for(i in 1:length(tr_imm$data)){
   repetoire=list(data=dat,meta=met)
 }
 
+#could also filter for IG chains only, just looking at BCR set of data
+#br_imm=immdata
+#x=''
+#for(i in 1:length(br_imm$data)){
+#  br_imm$data[[i]] <-br_imm$data[[i]][grepl("IG",br_imm$data[[i]]$V.name),]
+#  x[i]=nrow(br_imm$data[[i]]) > 0
+#  z=names(br_imm$data[as.logical(x)])
+#  dat=br_imm$data[as.logical(x)]
+#  met=(filter(bcr_metrics, sample %in% z)) %>% select(sample,stage,type,cluster,SITE_BIOPSY,TYPE_BIOPSY,GRADE) 
+#  b_repetoire=list(data=dat,meta=met)
+#}
+
 #calculate diversity metrics
     div_chao <- as.data.frame(repDiversity(repetoire$data, "chao1"))
     div_chao$Sample=rownames(div_chao)
@@ -349,6 +361,10 @@ all_clones_filt$chain <- ifelse(grepl("TRA",all_clones_filt$vhits)==TRUE, "TRA",
                                                      ifelse(grepl("IGH",all_clones_filt$vhits)==TRUE,"IGH",
                                                             ifelse(grepl("IGK",all_clones_filt$vhits)==TRUE,"IGK","IGL"))))))
 all_TR=filter(all_clones_filt, chain %in% c("TRA","TRB"))
+
+#could also filter for BCR chains
+#all_BR=filter(all_clones_filt, chain %in% c("IGH","IGK","IGL"))
+
 
 CDR3_counts=data.frame(acast(all_TR, sample~aaSeqCDR3, value.var="count", fun.aggregate=sum))
 
