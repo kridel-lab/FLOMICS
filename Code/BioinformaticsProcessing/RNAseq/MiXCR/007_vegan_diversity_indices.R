@@ -113,6 +113,10 @@ all_TR=filter(all_clones_filt, chain %in% c("TRA","TRB"))
 #> dim(all_TR)
 #[1] 7919   10
 
+
+#could also filter for all BCR sequences only 
+#all_BR=filter(all_clones_filt, chain %in% c("IGH","IGL","IGK))
+
 #calculate USR (unqiue sequencing read) ; defined as a sequence read having no identity in TRV, TRJ
 #and deduced amino acid sequence of CDR3 with the other sequence reads; Concatenate string of “TRV gene name”_”
 #deduced amino acid sequence of CDR3 region”_” TRJ gene name” of individual USR (for example: TRBV1_CASTRVVJFG_TRBJ2-5)
