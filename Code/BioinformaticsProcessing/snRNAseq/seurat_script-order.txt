@@ -1,0 +1,21 @@
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Seurat/Bisque workflow
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#1. run seurat
+  sbatch FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_run.sh
+
+#2. get gene marker plots
+  sbatch FLOMICS/Code/BioinformaticsProcessing/snRNAseq/002_get_markers.sh
+
+#3. rename clusters
+  #FLOMICS/Code/BioinformaticsProcessing/snRNAseq/003_Seurat.R
+
+#4. prepare seurat object for bisque
+  #FLOMICS/Code/BioinformaticsProcessing/snRNAseq/004_Bisque.R
+
+#5. perform DE analysis between clusters of interest
+  #FLOMICS/Code/BioinformaticsProcessing/snRNAseq/005_Seurat.R
+
+#6. cell cycle regression from seurat object
+  #FLOMICS/Code/BioinformaticsProcessing/snRNAseq/006_Seurat.R
