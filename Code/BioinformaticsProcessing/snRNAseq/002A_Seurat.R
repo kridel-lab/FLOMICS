@@ -10,7 +10,7 @@
 
 options(stringsAsFactors=F)
 
-#make sure loading R/3.6.1 before running this script
+#make sure loading R/4.0.0 before running this script
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 
