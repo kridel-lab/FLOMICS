@@ -72,10 +72,11 @@ get_degs = function(dat,clus1,clus2){
 	combined = dat
 
 	#1. Find cluster markers that are differentially expressed between clusters
-	DefaultAssay(combined) <- "integrated"
+	DefaultAssay(combined) <- "RNA"
+	combined <- NormalizeData(combined)
 
 	#find markers
-	diffexp.markers <- FindMarkers(comb, ident.1 = clus1, ident.2 = clus2, min.pct = 0.25,
+	diffexp.markers <- FindMarkers(combined, ident.1 = clus1, ident.2 = clus2, min.pct = 0.25,
 		 		logfc.threshold = log(2), test.use="roc")
 	
 	diffexp.markers$gene=rownames(diffexp.markers)
@@ -84,44 +85,9 @@ get_degs = function(dat,clus1,clus2){
 	output_file = paste(clus1,"vs",clus2,"_diffexp_markers.csv", sep="")
 	write.csv(diffexp.markers, file=output_file, quote=F, row.names=F)
 
-	#2. Visualize cluster markers+++++++++++++++++++++++++++++++++++++++++++++++++
-	pdf(paste("additional_markers.pdf", sep=""), width=18, height=12)
-
-	genes=c("ICA1", "TOX2", "CTLA4", "ICOS", "TOX", "PTPRG", "BANK1",
-	"IGHM", "CDK14", "BCL11A", "IKZF2", "MKI67", "TOP2A")
-
-	v = VlnPlot(combined, features = genes)
-	print(v)
-
-	#overlay on UMAP clusters
-	f = FeaturePlot(combined, features = genes,
-	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
-	print(f)
-
-	dev.off()
 	print("done")
 
 }
 
 get_degs(clusters,clus1="5",clus2="3")
-get_degs(clusters,clus1="5",clus2="4")
-get_degs(clusters,clus1="5",clus2="6")
-get_degs(clusters,clus1="5",clus2="15")
-
-get_degs(clusters,clus1="4",clus2="6")
-get_degs(clusters,clus1="4",clus2="3")
-
-get_degs(clusters,clus1="5",clus2="3")
-get_degs(clusters,clus1="5",clus2="4")
-
-###additional clusters
-#get_degs(clusters,clus1="1",clus2="2")
-		#no features pass logfc threshold
-#get_degs(clusters,clus1="0",clus2="1")
-		#no features pass logfc threshold
-get_degs(clusters,clus1="0",clus2="2") #passed
-
-get_degs(clusters,clus1="2",clus2="12")
-get_degs(clusters,clus1="10",clus2="11")
-get_degs(clusters,clus1="7",clus2="14")
 
