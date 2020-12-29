@@ -9,8 +9,7 @@
   sbatch FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/001_run_mixcr_merge.sh
 
 #3. examine the distribution of clonotypes found within TCR & BCR
-  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/003A_TCR_count_mixcr_processing.R
-  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/003B_BCR_count_mixcr_processing.R
+  #FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/003_count_mixcr_processing.R
 
 #4. examine the distribution of the top clonotype (highest clonal fraction) found within each samples
     #ran interactively
