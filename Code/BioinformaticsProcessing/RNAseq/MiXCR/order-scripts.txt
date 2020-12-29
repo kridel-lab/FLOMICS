@@ -25,7 +25,8 @@
   #FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/006_immunarch_diversity_indices.R
 
 #7. concatenated MiXCR results and calculates different diversity metrics and MiXCR summary metrics using the "vegan" package.
-    #ran interactively
+    #ran interactively    
+    #added last part for getting vegan package diversity with added metadata
   #FLOMICS/Code/BioinformaticsProcessing/RNAseq/MiXCR/007_vegan_diversity_indices.R
 
 #8. Use MiXCR metrics and to plot survival statistics
