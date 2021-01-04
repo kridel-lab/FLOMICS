@@ -63,40 +63,26 @@ get_bisque_summ = function(dat){
 
   g3 = ggboxplot(immune_cells, x="cell_type", y="value", fill="InfinumClust",palette = "jco") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  stat_compare_means(aes(group = Cluster), label = "p.signif")+
+  stat_compare_means(aes(group = InfinumClust), label = "p.signif")+
   ggtitle(paste(names(table(patients_dat$InfinumClust)[1]), table(patients_dat$InfinumClust)[1],
  names(table(patients_dat$InfinumClust)[2]), table(patients_dat$InfinumClust)[2]))
 
-  g4 = ggboxplot(immune_cells, x="cell_type", y="value", fill="SNFClust",palette = "jco") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  stat_compare_means(aes(group = Cluster), label = "p.signif")+
-  ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
- names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
-
   g5 = ggboxplot(filter(immune_cells, !(is.na(SNFClust))), x="cell_type", y="value", fill="SNFClust",palette = "jco") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  stat_compare_means(aes(group = Cluster), label = "p.signif")+
+  stat_compare_means(aes(group = SNFClust), label = "p.signif")+
   ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
  names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
-
-  g6 = ggboxplot(immune_cells, x="cell_type", y="value", fill="tSeqClust",palette = "jco") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  stat_compare_means(aes(group = Cluster), label = "p.signif")+
-  ggtitle(paste(names(table(patients_dat$tSeqClust)[1]), table(patients_dat$tSeqClust)[1],
- names(table(patients_dat$tSeqClust)[2]), table(patients_dat$tSeqClust)[2]))
 
   g7 = ggboxplot(filter(immune_cells, !(is.na(tSeqClust))), x="cell_type", y="value", fill="tSeqClust",palette = "jco") +
   theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  stat_compare_means(aes(group = Cluster), label = "p.signif")+
+  stat_compare_means(aes(group = tSeqClust), label = "p.signif")+
   ggtitle(paste(names(table(patients_dat$tSeqClust)[1]), table(patients_dat$tSeqClust)[1],
  names(table(patients_dat$tSeqClust)[2]), table(patients_dat$tSeqClust)[2]))
 
   print(g1)
   print(g2)
   print(g3)
-  #print(g4)
   print(g5)
-  #print(g6)
   print(g7)
 
   dev.off()
