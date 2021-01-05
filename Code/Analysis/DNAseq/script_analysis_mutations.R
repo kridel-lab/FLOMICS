@@ -2,7 +2,9 @@
 packages <- c("dplyr", "ggplot2", "data.table", "EnvStats", "ggpubr")
 lapply(packages, require, character.only = TRUE)
 
-# setwd("~/FLOMICS/") <- FLOMICS teams folder
+date <- Sys.Date()
+
+# setwd("~/github/FLOMICS/") <- FLOMICS teams folder
 
 # This script explores mutation data
 
@@ -100,6 +102,25 @@ mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
   filter(Hugo_Symbol %in% genes.common) # n = 945
+
+# Percentage of mutations per gene in merged cohort (max 1 mutation per gene per sample counted)
+mut.merged %>%
+  mutate(TIME_POINT = substr(SAMPLE_ID, 11, 12)) %>%
+  filter(TIME_POINT != "T2") %>%
+  group_by(Hugo_Symbol, SAMPLE_ID) %>%
+  summarize(count = n()) %>%
+  group_by(Hugo_Symbol) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) %>%
+  mutate(percentage = count/136*100) %>%
+  filter(percentage > 5) %>% 
+  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
+  ggplot(aes(x = Hugo_Symbol, y = percentage)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(axis.text.x = element_text(face = "italic", angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.x = element_blank())
+ggsave(paste0("img/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
