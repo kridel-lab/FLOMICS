@@ -65,7 +65,7 @@ get_bisque_summ = function(dat){
   res_stage_analysis = as.data.table(stage_analysis %>% group_by(cell_type) %>%
         dplyr::summarize(pval = wilcox.test(value ~ STAGE)$p.value))
   res_stage_analysis$fdr = p.adjust(res_stage_analysis$pval)
-  res_stage_analysis$fdr=round(res_stage_analysis$fdr, digits=2)
+  res_stage_analysis$fdr=round(res_stage_analysis$fdr, digits=4)
   stage_analysis=merge(stage_analysis, res_stage_analysis)
   z = which(duplicated(stage_analysis[,c("cell_type", "fdr")]))
   stage_analysis$fdr[z] = ""
@@ -75,7 +75,7 @@ get_bisque_summ = function(dat){
   res_type_analysis = as.data.table(type_analysis %>% group_by(cell_type) %>%
         dplyr::summarize(pval = kruskal.test(value ~ TYPE)$p.value))
   res_type_analysis$fdr = p.adjust(res_type_analysis$pval)
-  res_type_analysis$fdr=round(res_type_analysis$fdr, digits=2)
+  res_type_analysis$fdr=round(res_type_analysis$fdr, digits=4)
   type_analysis=merge(type_analysis, res_type_analysis)
   z = which(duplicated(type_analysis[,c("cell_type", "fdr")]))
   type_analysis$fdr[z] = ""
@@ -85,7 +85,7 @@ get_bisque_summ = function(dat){
   res_infi_analysis = as.data.table(infi_analysis %>% group_by(cell_type) %>%
         dplyr::summarize(pval = wilcox.test(value ~ InfinumClust)$p.value))
   res_infi_analysis$fdr = p.adjust(res_infi_analysis$pval)
-  res_infi_analysis$fdr=round(res_infi_analysis$fdr, digits=2)
+  res_infi_analysis$fdr=round(res_infi_analysis$fdr, digits=4)
   infi_analysis=merge(infi_analysis, res_infi_analysis)
   z = which(duplicated(infi_analysis[,c("cell_type", "fdr")]))
   infi_analysis$fdr[z] = ""
@@ -95,7 +95,7 @@ get_bisque_summ = function(dat){
   res_snf_analysis = as.data.table(snf_analysis %>% group_by(cell_type) %>%
         dplyr::summarize(pval = wilcox.test(value ~ SNFClust)$p.value))
   res_snf_analysis$fdr = p.adjust(res_snf_analysis$pval)
-  res_snf_analysis$fdr=round(res_snf_analysis$fdr, digits=2)
+  res_snf_analysis$fdr=round(res_snf_analysis$fdr, digits=4)
   snf_analysis=merge(snf_analysis, res_snf_analysis)
   z = which(duplicated(snf_analysis[,c("cell_type", "fdr")]))
   snf_analysis$fdr[z] = ""
@@ -105,7 +105,7 @@ get_bisque_summ = function(dat){
   res_tseq_analysis = as.data.table(tseq_analysis %>% group_by(cell_type) %>%
         dplyr::summarize(pval = wilcox.test(value ~ tSeqClust)$p.value))
   res_tseq_analysis$fdr = p.adjust(res_tseq_analysis$pval)
-  res_tseq_analysis$fdr=round(res_tseq_analysis$fdr, digits=2)
+  res_tseq_analysis$fdr=round(res_tseq_analysis$fdr, digits=4)
   tseq_analysis=merge(tseq_analysis, res_tseq_analysis)
   z = which(duplicated(tseq_analysis[,c("cell_type", "fdr")]))
   tseq_analysis$fdr[z] = ""
