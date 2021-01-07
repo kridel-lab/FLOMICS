@@ -22,6 +22,6 @@
 
 #7. represent boxplots of bisque cell fractions
   #FLOMICS/Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque.R
-  
+
 #8. generate descriptive table for bisque boxplots
   #FLOMICS/Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque-table.R
