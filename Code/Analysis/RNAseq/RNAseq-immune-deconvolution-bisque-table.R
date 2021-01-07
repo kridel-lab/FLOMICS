@@ -12,10 +12,10 @@
 #Rstudio
 #/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS for example
 
-setwd("/Users/sarahrussell/UHN/kridel-lab - FLOMICS")
-source("/Users/srussell/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
+setwd("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS")
+source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 library(doBy)
-output("/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/clustering/")
+output = "Analysis-Files/Seurat/clustering/"
 
 #----------------------------------------------------------------------
 #data
@@ -23,10 +23,10 @@ output("/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/clust
 
 setwd(output)
 #load in dim20 and dim30 seurat objects
-bisque_20 = readRDS("/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/seurat_objects/bisque_decomposed_samples_rmFL277dim20_prelim.rds")
-bisque_30 = readRDS("/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/seurat_objects/bisque_decomposed_samples_rmFL277dim30_prelim.rds")
+bisque_20 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/seurat_objects/bisque_decomposed_samples_rmFL277dim20_prelim.rds")
+bisque_30 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/seurat_objects/bisque_decomposed_samples_rmFL277dim30_prelim.rds")
 
-labels = fread("/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
 colnames(labels)[2] = "SAMPLE_ID"
 rnaseq_qc = merge(rnaseq_qc, labels, by="SAMPLE_ID")
 
@@ -113,7 +113,6 @@ get_bisque_summstat = function(dat){
 bisque_stat_20=get_bisque_summstat(bisque_20)
 write.csv(bisque_stat_20, file="/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/clustering/dim20_3samples/summary_stats_20.csv",
 quote=F, row.names=F)
-
 
 bisque_stat_30=get_bisque_summstat(bisque_30)
 write.csv(bisque_stat_30, file="/Users/sarahrussell/UHN/kridel-lab - FLOMICS/Analysis-Files/Seurat/clustering/dim30_3samples/summary_stats_30.csv",
