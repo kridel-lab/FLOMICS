@@ -41,7 +41,7 @@ all_clones = as.data.table(ldply(llply(results, get_res)))
 #[1] 134
 
 ###information regarding each sample and which stage of disease and cluster they are part of
-sample_info = as.data.table(read_excel("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.xlsx"))
+sample_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
 
 ###only keep ERVs from Telescope Annotation file in the main Telescope results
 all_clones_filtered = as.data.table(filter(all_clones, sample %in% sample_info$rna_seq_file_sample_ID))
