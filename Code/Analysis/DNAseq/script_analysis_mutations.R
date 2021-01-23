@@ -76,8 +76,13 @@ mut.FLOMICS %>%
 
 # Identify poor coverage samples and filter them out
 poor.coverage.samples <- coverage.samples %>%
-  filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples
+  filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples (16=T1 and 2=T2)
 length(poor.coverage.samples)
+
+# Mean coverage of remaining samples
+coverage.samples %>%
+  filter(!External_identifier %in% poor.coverage.samples) %>%
+  summarize(mean = mean(mean_cov))
 
 # Nb of mutations per gene in FLOMICS (max 1 mutation per gene per sample counted)
 mut.FLOMICS %>%
@@ -119,7 +124,8 @@ mut.merged %>%
   geom_bar(stat = "identity") +
   theme_bw() +
   theme(axis.text.x = element_text(face = "italic", angle = 90, vjust = 0.5, hjust = 1),
-        axis.title.x = element_blank())
+        axis.title.x = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ggsave(paste0("img/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
@@ -230,6 +236,31 @@ mut.lim.vs.adv <- mut.merged %>%
          CI2 = fisher(ADVANCED, not.ADVANCED, LIMITED, not.LIMITED)[[4]])
 
 mut.lim.vs.adv$fdr <- p.adjust(mut.lim.vs.adv$p, method = "fdr")
+
+# Nb mutations by SNF cluster
+# Compare mutations by stage
+# Need sample annotation
+cluster.annotation <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv", header = T) %>%
+  select(SAMPLE_ID = ID, SNFClust) %>%
+  filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED))
+
+sample.no.mut <- data.frame(SAMPLE_ID  = "LY_FL_179_T1", Cohort = "FLOMICS", count = 0, SNFClust = "1", TIME_POINT = "T1")
+
+mut.merged %>%
+  distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
+  group_by(SAMPLE_ID, Cohort) %>%
+  summarize(count = n()) %>%
+  right_join(cluster.annotation) %>%
+  filter(!is.na(SNFClust)) %>%
+  mutate(count = ifelse(is.na(count), 0, count)) %>%
+  mutate(TIME_POINT = substr(SAMPLE_ID, 11, 12)) %>%
+  filter(TIME_POINT == "T1") %>%
+  data.frame() %>%
+  rbind(sample.no.mut) %>%
+  ggpubr::ggboxplot(x = "SNFClust", y = "count", color = "SNFClust", add = "jitter")+
+  stat_compare_means() + stat_n_text()
+ggsave(paste0("img/",  date, " Mutation_count_by_SNFcluster.pdf"), width = 10, height = 8, units = "cm")
+# higher nb of mutations in C2 vs C1
 
 # Mutation matrix
 no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, mut.merged$SAMPLE_ID)
