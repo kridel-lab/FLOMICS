@@ -415,7 +415,9 @@ chrom_states_output %>%
   theme(axis.title.y = element_blank(),
         axis.title.x = element_blank(),
         axis.text.y = element_text(size = 10),
-        axis.text.x = element_text(size = 10))
+        axis.text.x = element_text(size = 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 ggsave(paste0("img/",  date, " RK-chrom-states.pdf"), width = 12, height = 8, units = "cm")
 
 # Perform fisher test
