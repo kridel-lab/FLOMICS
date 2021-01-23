@@ -263,18 +263,26 @@ length(hypometh_FL_intersect_genes)
 AnnotationFile %>%
   mutate(methyl.FL.status = ifelse(V1 %in% hypermeth_FL_intersect, "hypermethylated",
                             ifelse(V1 %in% hypometh_FL_intersect, "hypomethylated",
-                            ifelse(V1 %in% not.diff.methylated, "not.diff.methylated", NA)))) %>%
+                            ifelse(V1 %in% not.diff.methylated, "other", NA)))) %>%
   filter(!is.na(methyl.FL.status)) %>%
   select(V1, Relation_to_Island, methyl.FL.status) %>%
   group_by(Relation_to_Island, methyl.FL.status) %>%
   summarize(proportion = n()) %>%
-  mutate(methyl.FL.status = factor(methyl.FL.status, levels = c("hypomethylated", "not.diff.methylated", "hypermethylated"))) %>%
+  mutate(methyl.FL.status = factor(methyl.FL.status, levels = c("hypomethylated", "other", "hypermethylated"))) %>%
   ggplot(aes(x = methyl.FL.status, y = proportion, fill = Relation_to_Island)) + 
   geom_bar(position = "fill", stat = "identity") +
   # geom_bar(position="stack", stat="identity") +
   theme_bw() +
-  theme(axis.title.x = element_blank()) +
-  scale_fill_brewer(palette="Set3")
+  theme(axis.title.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_fill_manual(values=c(
+    "Island" = "#a6cee3", 
+    "N_Shelf" = "#1f78b4", 
+    "N_Shore" = "#fb9a99", 
+    "OpenSea" = "#fdbf6f", 
+    "S_Shelf" = "#ff7f00", 
+    "S_Shore" = "#cab2d6"))
 
 ggsave(paste0("img/",  date, " RK-diff-meth-probes-by-region.pdf"), width = 14, height = 10, units = "cm")
 
