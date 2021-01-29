@@ -59,6 +59,28 @@ all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv
 #3. sample info with rna-seq qc+++++++++++++++++++++++++++++++++++++++++++++++++
 rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
 
+#T1 only patients
+t1_patients=rnaseq_qc
+z1 = which(t1_patients$rRNAcontam > 40)
+z2 = which(t1_patients$Uniquely.mapped < 10000000)
+z3 = which(t1_patients$'Uniquely.mapped.reads..' < 70)
+z4 = which(t1_patients$'X..of.reads.mapped.to.multiple.loci' > 20)
+total_lost = unique(c(z1, z2, z3, z4))
+t1_patients=t1_patients[-total_lost]
+
+#T2 only patients
+t2_patients = rnaseq_qc
+z1 = which(t2_patients$rRNAcontam > 40)
+z2 = which(t2_patients$Uniquely.mapped < 10000000)
+z3 = which(t2_patients$'Uniquely.mapped.reads..' < 50)
+z4 = which(t2_patients$'X..of.reads.mapped.to.multiple.loci' > 20)
+
+total_lost = unique(c(z1, z2, z3, z4))
+t2_patients=t2_patients[-total_lost]
+
+#T3 only patients
+t3_patients = rnaseq_qc
+
 #4. load cluster labels from SNF
 snf = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
 

@@ -36,6 +36,7 @@ lapply(packages, require, character.only = TRUE)
 #-------------------------------------------------------------------------------
 #data
 #-------------------------------------------------------------------------------
+
 all_perms = list.files(output, pattern=".rds")
 setwd(output)
 
@@ -143,7 +144,5 @@ top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_diff)
 
 }
 
-get_more_markers("seurat_integrated_dim_30_2000_samples_clusters.rds")
-
-
-#llply(all_perms, get_marker_genes, .progress=".text")
+get_more_markers("seurat_integrated_dim_20_2000_samples_clusters.rds")
+#get_more_markers("seurat_integrated_dim_30_2000_samples_clusters.rds")

@@ -61,12 +61,13 @@ data_dir_FL076 <- "snRNAseq/200420_A00827_0152_AHT2YJDMXX_Kridel_Robert/Kridel_R
 list.files(data_dir_FL062)
 list.files(data_dir_FL064)
 list.files(data_dir_FL076)
+
 #list.files(data_dir_FL227) #"barcodes.tsv.gz" "features.tsv.gz" "matrix.mtx.gz"
 
 expression_matrix_FL062 <- Read10X(data.dir = data_dir_FL062)
 expression_matrix_FL064 <- Read10X(data.dir = data_dir_FL064)
 expression_matrix_FL076 <- Read10X(data.dir = data_dir_FL076)
-expression_matrix_FL227 <- Read10X(data.dir = data_dir_FL227)
+#expression_matrix_FL227 <- Read10X(data.dir = data_dir_FL227)
 
 #2. Setup the Seurat objects and normalize++++++++++++++++++++++++++++++++++++++
 
@@ -80,7 +81,7 @@ dev.off()
 
 # plot variable features with and without labels (before sample integration)
 pdf(paste(output, "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
-for(i in 1:4){
+for(i in 1:3){
   print(i)
   # Identify the 10 most highly variable genes in the first sample of the list
   top10 <- head(VariableFeatures(all_objects[[i]]), 20)
@@ -147,12 +148,7 @@ get_integrated_obj = function(dat, dim, anch_features){
 
 }
 
-#get_integrated_obj(all_objects, 10, 3000)
-#get_integrated_obj(all_objects, 20, 3000)
-#get_integrated_obj(all_objects, 30, 3000)
-
-#get_integrated_obj(all_objects, 10, 2000) #final choice for seurat objects and clustering
 get_integrated_obj(all_objects, 20, 2000)
-get_integrated_obj(all_objects, 30, 2000)
+#get_integrated_obj(all_objects, 30, 2000)
 
 sessionInfo()
