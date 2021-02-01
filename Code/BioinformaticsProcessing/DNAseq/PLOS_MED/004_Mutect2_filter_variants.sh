@@ -5,7 +5,7 @@
 #SBATCH --mem=61440M
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
 #SBATCH -J MUTECT2
-#SBATCH --array=0-130 # job array index
+#SBATCH --array=0-483 # job array index
 
 module load java/8  #8
 module load samtools
