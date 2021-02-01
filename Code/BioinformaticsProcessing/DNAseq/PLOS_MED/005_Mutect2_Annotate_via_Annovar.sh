@@ -5,7 +5,7 @@
 #SBATCH --mem=31440M
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
 #SBATCH -J ANNOVAR
-#SBATCH --array=0-130 # job array index
+#SBATCH --array=0-483 # job array index
 
 module load java/8  #8
 module load samtools
@@ -15,7 +15,7 @@ module load annovar
 module load tabix
 module load vt
 
-cd /cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2
+cd /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_calls
 #ls *filtered.vcf.gz > all_vcf_files_FL #make once
 
 samples=all_vcf_files_FL
@@ -33,11 +33,13 @@ vt normalize $sample -r $fasta_file -o ${sample}.normalized.vcf.gz
 
 #RUN ANNOVAR
 anno_input=${sample}.normalized.vcf.gz
-out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2
+out_folder=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_calls/MUTECT2
 
 table_annovar.pl --buildver hg19 ${anno_input} /cluster/tools/software/annovar/humandb \
 --protocol ensGene,gnomad211_genome,cosmic68,avsnp142 --operation g,f,f,f \
 --outfile ${out_folder}/${sample}_annovar.vcf.gz --vcfinput
+
+cd /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_calls/MUTECT2
 
 mv ${sample}_annovar.vcf.gz.hg19_multianno.vcf annovar
 rm *${sample}_annovar*
