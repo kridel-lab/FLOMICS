@@ -10,7 +10,7 @@
 options(stringsAsFactors=F)
 date=Sys.Date()
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2/annovar")
+setwd("/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_calls/MUTECT2/annovar")
 
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "vcfR", "tidyr", "mclust", "data.table", "plyr",
@@ -117,4 +117,4 @@ clean_up_001 = function(paired_vcf){
 
 all_muts = as.data.table(ldply(llply(files, clean_up_001, .progress="text")))
 write.table(all_muts, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/",
-date, "_Mutect2_filtered_mutations_FL.txt", sep=""), quote=F, row.names=F, sep=";")
+date, "_Mutect2_filtered_mutations_PLOS_MED.txt", sep=""), quote=F, row.names=F, sep=";")
