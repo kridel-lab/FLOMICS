@@ -13,17 +13,17 @@ module load python3
 module load gatk
 module load annovar
 
-cd /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/BC_TargetSeq_Aug2020
-ls *.bam > all_bam_files_PLOS
+cd /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_data_processing
+#ls *.bam > all_bam_files_PLOS
 
-samples=all_bam_files_FL
+samples=all_bam_files_PLOS
 names=($(cat $samples))
 sample=${names[${SLURM_ARRAY_TASK_ID}]}
 echo $sample
 
 gtf_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/gencode.v19.annotation.gtf
 fasta_file=/cluster/projects/kridelgroup/FLOMICS/genome_files/human_g1k_v37.decompressed.fasta
-out_folder=/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/MUTECT2
+out_folder=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_calls
 
 ints=/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/EGA_data_processing/interval_lists/${sample}_amplicon.interval_list
 
