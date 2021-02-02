@@ -92,7 +92,7 @@ clean_up_001 = function(paired_vcf){
 	print(paste("number of variants that passed pcg muts only", dim(gt)[1]))
 
   #8. generate bed file - summary of mutation and coordinates to intersect with cnvkit output
-  #pat = unlist(strsplit(paired_vcf, ".filter."))[1]
+  pat_short = unlist(strsplit(paired_vcf, ".filter."))[1]
 	pat=paired_vcf
 	gt$sample=pat
 
@@ -106,10 +106,11 @@ clean_up_001 = function(paired_vcf){
 	gt$Variant_Type = "SNP"
 	gt$Tumor_Sample_Barcode = gt$sample
 	gt$Var_Freq = gt$gt_AF
+	gt$sample_name = pat_short
 
 	gt = gt[,c("Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele",
 	"Tumor_Seq_Allele2", "avsnp142", "cosmic68", "AAChange.ensGene",
-	"Variant_Classification", "Variant_Type", "Tumor_Sample_Barcode", "Var_Freq")]
+	"Variant_Classification", "Variant_Type", "Tumor_Sample_Barcode", "sample_name", "Var_Freq")]
 
 	return(gt)
 
