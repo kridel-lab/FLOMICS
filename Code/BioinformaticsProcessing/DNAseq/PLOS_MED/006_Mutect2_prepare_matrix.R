@@ -92,7 +92,8 @@ clean_up_001 = function(paired_vcf){
 	print(paste("number of variants that passed pcg muts only", dim(gt)[1]))
 
   #8. generate bed file - summary of mutation and coordinates to intersect with cnvkit output
-  pat = unlist(strsplit(paired_vcf, ".filter."))[1]
+  #pat = unlist(strsplit(paired_vcf, ".filter."))[1]
+	pat=paired_vcf
 	gt$sample=pat
 
 	colnames(gt)[which(colnames(gt)=="hg19.ensemblToGeneName.value")] = "Hugo_Symbol"
