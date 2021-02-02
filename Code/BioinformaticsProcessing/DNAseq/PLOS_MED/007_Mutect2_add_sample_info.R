@@ -34,6 +34,7 @@ muts=fread(list.files(pattern="Mutect2_filtered_mutations_PLOS_MED")[length(list
 
 #samples
 samp_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample-annot_PLOSMED.tsv")
+colnames(samp_info)[3] = "sample_name"
 
 #----------------------------------------------------------------------
 #analysis
@@ -44,48 +45,35 @@ samp_info = fread("/cluster/projects/kridelgroup/FLOMICS/DATA/Sample_Info/sample
 #Reference_Allele %in% c("A", "C", "G", "T")))
 
 z = which(str_detect(muts$Tumor_Seq_Allele2, ","))
-muts = muts[-z,]
+if(!(length(z)==0)){
+muts = muts[-z,]}
 
-muts$sample_mut = paste(muts$Chromosome, muts$Start_Position, muts$Tumor_Sample_Barcode, sep="_")
+muts$sample_mut = paste(muts$Chromosome, muts$Start_Position, muts$sample_name, sep="_")
 all_pairs = unique(muts$sample_mut)
 
 get_mut_info = function(pair){
 
 	mut_dat = as.data.table(filter(muts, sample_mut == pair))
-	mut_dat$rnaseq_detect = ""
-	mut_dat$old_muts = ""
-	mut_dat$platypus = ""
+	pat_clean= unlist(strsplit(mut_dat$sample_name, "T1"))[1]
 
-	pat_clean= unlist(strsplit(mut_dat$Tumor_Sample_Barcode, "_T1"))[1]
-
-	#[1] check if in old mutation data
-	old = as.data.table(filter(old_muts, Chromosome == as.numeric(mut_dat$Chromosome),
-		Start_Position == mut_dat$Start_Position ,
-		External_ID %in% c(pat_clean, mut_dat$Tumor_Sample_Barcode)))
-	if(!(dim(old)[1]) == 0){
-			mut_dat$old_muts = "yes"
-	}
-
-	#[2] check if in rnaseq data
-	rna = as.data.table(filter(rnaseq_muts, chr == as.numeric(mut_dat$Chromosome),
-		Start_Position == mut_dat$Start_Position ,
-		Tumor_Sample_Barcode %in% c(pat_clean, mut_dat$Tumor_Sample_Barcode)))
-	if(!(dim(rna)[1]) == 0){
-		mut_dat$rnaseq_detect = "yes"
-	}
-
-	#[3] check if in platypus data
-	#plat = as.data.table(filter(platypus_muts, as.numeric(CHROM) == as.numeric(mut_dat$Chromosome),
-	#	POS == mut_dat$Start_Position ,
-	#	Indiv %in% c(pat_clean, mut_dat$Tumor_Sample_Barcode)))
-	#if(!(dim(plat)[1]) == 0){
-	#	mut_dat$platypus = "yes"
-	#}
+	#add sample information
+	mut_dat$clean_sample = pat_clean
 
 	return(mut_dat)
 }
 
 
 all_muts_checked = as.data.table(ldply(llply(all_pairs, get_mut_info, .progress="text")))
+
+unique(all_muts_checked$sample_name[which(!(all_muts_checked$sample_name %in% samp_info$sample_name))])
+#[1] "FL1176T2" "FL1177T2" "FL1185T2" "FL1216T2"
+
+#merge with sample information
+all_muts_checked = merge(all_muts_checked, samp_info, by="sample_name")
+all_muts_checked$Tumor_Sample_Barcode = NULL
+
+length(unique(all_muts_checked$patient_id))
+#[1] 277
+
 write.table(all_muts_checked, file=paste("/cluster/projects/kridelgroup/FLOMICS/DATA/",
-date, "_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt", sep=""), quote=F, row.names=F, sep=";")
+date, "_Mutect2_filtered_mutations_PLOS_MED_mut_info.txt", sep=""), quote=F, row.names=F, sep=";")
