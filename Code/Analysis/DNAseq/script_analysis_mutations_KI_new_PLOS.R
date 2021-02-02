@@ -97,16 +97,15 @@ mut.FLOMICS %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # Read in mutation calls for PLOSMED
-mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv", header = T) %>%
-  mutate(Cohort = "PLOSMED") %>%
-  select(SAMPLE_ID, Hugo_Symbol, Cohort)
-# n = 380 rows
+mut.PLOSMED <- read.csv("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_Feb2021.csv")
+# n = 272 rows
+mut.PLOSMED = mut.PLOSMED[,c("SAMPLE_ID", "Hugo_Symbol", "Cohort")]
 
 # Merge FLOMICS and PLOSMED
 mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 945
+  filter(Hugo_Symbol %in% genes.common) # n = 862
 
 # Percentage of mutations per gene in merged cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -126,7 +125,8 @@ mut.merged %>%
   theme(axis.text.x = element_text(face = "italic", angle = 90, vjust = 0.5, hjust = 1),
         axis.title.x = element_blank(),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-ggsave(paste0("img/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
+#ggsave(paste0("img/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
+ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
 
 # Compare average nb of mutations by cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -135,7 +135,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 7.32 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
+# on average, PLOSMED cases have 6.06 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -259,7 +259,9 @@ mut.merged %>%
   rbind(sample.no.mut) %>%
   ggpubr::ggboxplot(x = "SNFClust", y = "count", color = "SNFClust", add = "jitter")+
   stat_compare_means() + stat_n_text()
-ggsave(paste0("img/",  date, " Mutation_count_by_SNFcluster.pdf"), width = 10, height = 8, units = "cm")
+#ggsave(paste0("img/",  date, " Mutation_count_by_SNFcluster.pdf"), width = 10, height = 8, units = "cm")
+ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
+
 # higher nb of mutations in C2 vs C1
 
 # Mutation matrix
