@@ -11,7 +11,7 @@ lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
 
-# setwd("~/FLOMICS")
+# setwd("~/github/FLOMICS/")
 
 # Read in sample annotation
 sample.annotation <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T)
@@ -68,6 +68,21 @@ final.BA.results <- sample.annotation %>%
   mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% c("LY_FL_235_T1", "LY_FL_237_T1", "LY_FL_247_T1"), 1, BCL6_BA_consensus)) %>%
   mutate(FLOMICS.131 = ifelse(SAMPLE_ID %in% sample.annotation.FLOMICS.131$SAMPLE_ID, "YES", "NO")) %>%
   select(SAMPLE_ID, TIME_POINT, FLOMICS.131, STAGE, BCL2_BA_consensus, BCL6_BA_consensus)
+
+# # file for Daniel Xia:
+# final.BA.results <- sample.annotation %>%
+#   filter(TYPE == "FL") %>%
+#   select(SAMPLE_ID, STAGE, TIME_POINT, TRANSLOC_14_18) %>%
+#   left_join(BCL2.BA.merged[,c("External_identifier", "BCL2_BA_consensus")], by = c("SAMPLE_ID" = "External_identifier")) %>%
+#   left_join(BCL6.BA.predictions, by = c("SAMPLE_ID" = "External_identifier")) %>%
+#   mutate(BCL2_BA_consensus = ifelse(is.na(BCL2_BA_consensus) & !is.na(TRANSLOC_14_18), TRANSLOC_14_18, BCL2_BA_consensus)) %>%
+#   mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% sample.annotation.FLOMICS.131$SAMPLE_ID & is.na(BCL6_BA_MANTA), 0, BCL6_BA_MANTA)) %>%
+#   mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% c("LY_FL_235_T1", "LY_FL_237_T1", "LY_FL_247_T1"), 1, BCL6_BA_consensus)) %>%
+#   mutate(FLOMICS.131 = ifelse(SAMPLE_ID %in% sample.annotation.FLOMICS.131$SAMPLE_ID, "YES", "NO")) %>%
+#   filter(TIME_POINT == "T1") %>%
+#   select(SAMPLE_ID, STAGE, TRANSLOC_14_18, BCL2_BA_consensus)
+# write.table(final.BA.results, file = "DNAseq/Mutation_and_BA_matrices/BCL2_transloc_for_Daniel.txt",
+#             sep = "\t", row.names = FALSE)
 
 # 8 cases in FLOMICS have T2 and T1 sequenced
 # for LY_FL_449, there is BCL2 prediction for T2 but not for T1
