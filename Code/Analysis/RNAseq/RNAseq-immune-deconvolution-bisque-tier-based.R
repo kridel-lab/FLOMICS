@@ -48,7 +48,7 @@ get_bisque_summ = function(dat, tier){
   head(immune_cells)
   immune_cells$cell_facet=""
   z=which(immune_cells$cell_type %in% c("B cells_0", "B cells_1", "B cells_2", "naive B or malignant B_9",
-"proliferating B cell_11", "memory B cell_12"))
+"proliferating B cell_11", "memory B cell_12", "Cluster 13"))
   immune_cells$cell_facet[z] = "B cells"
   z=which(immune_cells$cell_type %in% c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5",
 "naive T cells_7", "memory T cells_8", "proliferating T cell_17"))
@@ -114,48 +114,54 @@ get_bisque_summ = function(dat, tier){
 
   #plotting - automate for all the groups
 
-  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tier, "_BISQUE_results.pdf", sep=""), width=15)
+  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tier, "_BISQUE_results.pdf", sep=""), width=9,height=6)
 
   #STAGE
-  g1 = ggboxplot(stage_analysis, x="cell_type", y="value", fill="STAGE",group="STAGE") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  g1 = ggboxplot(stage_analysis, x="cell_type", y="value", fill="STAGE",group="STAGE", outlier.shape=20) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste(names(table(patients_dat$STAGE)[1]), table(patients_dat$STAGE)[1],
   names(table(patients_dat$STAGE)[2]), table(patients_dat$STAGE)[2]))#+
   g1 = facet(g1, facet.by="cell_facet", scales = "free")+
-     geom_text(aes(label = fdr, y=0.55), size=2)
+     geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+  g1 = ggpar(g1, legend="bottom")
 
   #TYPE
-  g2 = ggboxplot(type_analysis, x="cell_type", y="value", fill="TYPE") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  g2 = ggboxplot(type_analysis, x="cell_type", y="value", fill="TYPE", outlier.shape=20) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste(names(table(patients_dat$TYPE)[1]), table(patients_dat$TYPE)[1],
     names(table(patients_dat$TYPE)[2]), table(patients_dat$TYPE)[2],
     names(table(patients_dat$TYPE)[3]), table(patients_dat$TYPE)[3]))
   g2 = facet(g2, facet.by="cell_facet", scales = "free")+
-       geom_text(aes(label = fdr, y=0.55), size=2)
+       geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+   g2 = ggpar(g2, legend="bottom")
 
   #InfinumClust
-  g3 = ggboxplot(infi_analysis, x="cell_type", y="value", fill="InfinumClust",palette = "jco") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  g3 = ggboxplot(infi_analysis, x="cell_type", y="value", fill="InfinumClust",palette = "jco", outlier.shape=20) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste(names(table(patients_dat$InfinumClust)[1]), table(patients_dat$InfinumClust)[1],
  names(table(patients_dat$InfinumClust)[2]), table(patients_dat$InfinumClust)[2]))
   g3 = facet(g3, facet.by="cell_facet", scales = "free")+
-      geom_text(aes(label = fdr, y=0.55), size=2)
+      geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+  g3 = ggpar(g3, legend="bottom")
 
-  #SNF
-  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", fill="SNFClust",palette = "jco") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  #SNF "1" = "#4363D8", "2" = "#F58231"
+  snf_analysis$SNFClust = factor(snf_analysis$SNFClust, levels=c(1,2))
+  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", fill="SNFClust",palette = c("#4363D8", "#F58231"), outlier.shape=20) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
  names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
   g4 = facet(g4, facet.by="cell_facet", scales = "free")+
-     geom_text(aes(label = fdr, y=0.55), size=2)
+     geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+  g4 = ggpar(g4, legend="bottom")
 
   #tSeqClust
-  g5 = ggboxplot(tseq_analysis, x="cell_type", y="value", fill="tSeqClust",palette = "jco") +
-  theme_minimal() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  g5 = ggboxplot(tseq_analysis, x="cell_type", y="value", fill="tSeqClust",palette = "jco", outlier.shape=20) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   ggtitle(paste(names(table(patients_dat$tSeqClust)[1]), table(patients_dat$tSeqClust)[1],
  names(table(patients_dat$tSeqClust)[2]), table(patients_dat$tSeqClust)[2]))
   g5 = facet(g5, facet.by="cell_facet", scales = "free")+
-    geom_text(aes(label = fdr, y=0.55), size=2)
+    geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+  g5 = ggpar(g5, legend="bottom")
 
   print(g1)
   print(g2)

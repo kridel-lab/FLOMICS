@@ -29,6 +29,8 @@ packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
+date=Sys.Date()
+
 #-------------------------------------------------------------------------------
 #purpose
 #-------------------------------------------------------------------------------
@@ -136,14 +138,15 @@ get_integrated_obj = function(dat, dim, anch_features){
 	combined <- FindClusters(combined, resolution = 0.5)
 
 	#head(Idents(combined), 5)
-
-	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_samples_clusters.pdf", sep=""), width=16, height=8)
-	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")
-	p2 <- DimPlot(combined, reduction = "umap", label = TRUE)
+	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
+	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
+	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
+	p2 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=6)+
+	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
 	print(p1 + p2)
 	dev.off()
 
-	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features,  "_samples_clusters.rds", sep=""))
+	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
 	print("finished this analysis")
 
 }

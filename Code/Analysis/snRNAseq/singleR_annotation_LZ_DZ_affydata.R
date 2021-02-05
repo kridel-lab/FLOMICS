@@ -8,6 +8,8 @@ library(Seurat)
 library(SingleR)
 library(ggpubr)
 
+date=Sys.Date()
+
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/JD_AZ_stem_cells")
 mypal = c("#E5DFD9","#EAD286" ,"#D1EB7B", "#96897F" ,"#E5C0A6" ,
   "#72A93B", "#74DAE3" ,"#49B98D" ,"#D97B8F" ,"#70A2A4", "#64709B" ,"#DFBF38" ,"#61EA4F" ,
@@ -35,7 +37,9 @@ exprmat_CB <- exprmat_CB %>%
 rownames(exprmat_CB) <- genes
 
 #get Seurat object and normalize it
-SeuratObject=readRDS("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/combined_processed_seurat_object_rmFL277dim20.rds")
+#SeuratObject=readRDS("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/combined_processed_seurat_object_rmFL277dim20.rds")
+SeuratObject = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
+
 DefaultAssay(SeuratObject) <- "RNA"
 SeuratObject <- NormalizeData(SeuratObject)
 
@@ -48,8 +52,9 @@ pred_CBheme_singleR
 
 # Add SingleR Labels to Seurat object
 SeuratObject$SingleR.label <- pred_CBheme_singleR$labels
-pdf("SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes.pdf")
-DimPlot(SeuratObject, group.by = 'SingleR.label', label = FALSE) #+ NoLegend()
+pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes.pdf", sep=""))
+DimPlot(SeuratObject, group.by = 'SingleR.label', label = FALSE) + #+ NoLegend()
+theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
 dev.off()
 
 # Add individual SingleR scores to Seurat metadata
@@ -77,6 +82,6 @@ cell_types$seurat_cluster = as.numeric(cell_types$seurat_cluster)
 cell_types = cell_types[order(seurat_cluster)]
 cell_types$seurat_cluster = factor(cell_types$seurat_cluster, levels=unique(cell_types$seurat_cluster))
 
-pdf("SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes_barplot.pdf")
+pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes_barplot.pdf", sep=""))
 ggbarplot(cell_types, x="seurat_cluster", y="seurat_explained_by_singleR", fill="singleR_label", palette=mypal)
 dev.off()
