@@ -55,7 +55,14 @@ get_bisque_summ = function(dat, tier){
   immune_cells$cell_facet[z] = "T cells"
   immune_cells$cell_facet[immune_cells$cell_facet==""] = "The others"
   immune_cells = immune_cells[order(cell_facet, cell_type)]
-  immune_cells$cell_type = factor(immune_cells$cell_type, levels=unique(immune_cells$cell_type))
+#  immune_cells$cell_type = factor(immune_cells$cell_type, levels=unique(immune_cells$cell_type))
+
+  immune_cells$cell_type = factor(immune_cells$cell_type, levels=c("B cells_0", "B cells_1",
+"B cells_2", "naive B or malignant B_9", "proliferating B cell_11", "memory B cell_12",
+"Cluster 13", "Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7", "memory T cells_8",
+"proliferating T cell_17", "Cluster 6", "macrophage or monocyte_10", "stromal cells_14",
+"endothelial cells_15", "Cluster 16", "macrophage or monocyte_18" ,"Cluster 19"))
+
   immune_cells$cell_facet = factor(immune_cells$cell_facet, levels=unique(immune_cells$cell_facet))
 
   #plot distribution of each cell type frequency across disease and stages
