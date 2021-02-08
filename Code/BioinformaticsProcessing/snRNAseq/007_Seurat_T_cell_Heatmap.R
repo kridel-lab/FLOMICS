@@ -53,7 +53,8 @@ combined = r
 #-------------------------------------------------------------------------------
 genesall = c("CD3D", "CD3G", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
 	"TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
-	"PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", "ICOS", "MKI67", "TCF7", "TOP2A")
+	"PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", "ICOS",
+	"MKI67", "TCF7", "TOP2A")
 
 cells_t=c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7",
 "memory T cells_8", "proliferating T cell_17")

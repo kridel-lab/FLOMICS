@@ -1,4 +1,3 @@
-
 packages <- c("dplyr", "ggplot2", "data.table", "EnvStats", "ggpubr")
 lapply(packages, require, character.only = TRUE)
 
@@ -98,14 +97,14 @@ mut.FLOMICS %>%
 
 # Read in mutation calls for PLOSMED
 mut.PLOSMED <- read.csv("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_Feb2021.csv")
-# n = 272 rows
+# n = 266 rows
 mut.PLOSMED = mut.PLOSMED[,c("SAMPLE_ID", "Hugo_Symbol", "Cohort")]
 
 # Merge FLOMICS and PLOSMED
 mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 862
+  filter(Hugo_Symbol %in% genes.common) # n = 867
 
 # Percentage of mutations per gene in merged cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -135,7 +134,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.06 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
+# on average, PLOSMED cases have 6.19 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
