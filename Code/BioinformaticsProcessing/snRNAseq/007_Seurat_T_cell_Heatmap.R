@@ -10,7 +10,14 @@
 
 options(stringsAsFactors=F)
 
-#make sure loading R/3.6.1 before running this script
+#make sure loading R/4.0.0 before running this script
+
+library(dittoSeq)
+library(scater)
+library(loomR)
+library(Seurat)
+library(scRNAseq)
+library(SingleCellExperiment)
 
 setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq")
 
@@ -24,7 +31,7 @@ output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
 #load libraries
 library(ellipsis)
 library(tidyverse)
-library(splitstackshape)
+#library(splitstackshape)
 packages <- c("readr", "data.table", "plyr",
 	"stringr",
   "Seurat",
@@ -66,11 +73,15 @@ combined <- NormalizeData(combined)
 combined <- ScaleData(combined, verbose = TRUE)
 
 combined_t <- subset(combined, idents = cells_t)
+counts <- GetAssayData(combined_t, assay="RNA", slot="data") #normalized counts
 
-dittoHeatmap(combined, genes,
-    annot.by = c("ident", "sample"))
+combined_t.sce <- as.SingleCellExperiment(combined_t)
 
-h = DoHeatmap(combined_t, features = genesall,assay="RNA", size=2)
+genes = genesall
+# Annotating and ordering cells by some meaningful feature(s):
+dittoHeatmap(combined_t.sce, genes)
+
+h = DoHeatmap(combined_t, features = genesall, assay="RNA", size=2)
 pdf(paste(date, "_" , "rmFL277dim20_Tcells_only_markers.pdf", sep=""))
 print(h)
 dev.off()
