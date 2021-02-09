@@ -134,7 +134,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.19 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
+# on average, PLOSMED cases have 6.06 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -174,8 +174,6 @@ mut.merged %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
   stat_compare_means() + stat_n_text()
 # still slight increase of nb of mutations in advanced vs limited, statistically significant (wilcoxon p-value = 0.038)
-# i.e. difference previously seen is in part artifact of differences between FLOMICS and PLOSMED
-# but also smaller sample size now in advanced
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
 tmp <- mut.merged %>%
@@ -296,105 +294,3 @@ write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matr
 write.csv(mut.merged.df.T1, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.csv", row.names = FALSE)
 write.csv(mut.merged.df.T1.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
 
-# Added by Anjali - generate counts by stage
-# Nb of mutations per gene in FLOMICS (max 1 mutation per gene per sample counted)
-length(unique(mut.FLOMICS$sample_mut)) # 128
-
-mut.FLOMICS$sample_mut <- gsub(".*LY", "LY", mut.FLOMICS$sample_mut)
-matchingEntries <- match(mut.FLOMICS$sample_mut, ClinicalFile_T1$SAMPLE_ID)
-ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]]
-length(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]]) # 440 entries
-length(unique(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]])) # 105
-
-
-
-mut.FLOMICS.Stage <- data.frame(mut.FLOMICS[match(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]], mut.FLOMICS$sample_mut), ],
-                                STAGE = ClinicalFile_T1$STAGE[matchingEntries[! is.na(matchingEntries)]],
-                                TYPE = ClinicalFile_T1$TYPE[matchingEntries[! is.na(matchingEntries)]],
-                                TRANSLOCATION1418 = ClinicalFile_T1$TRANSLOC_14_18[matchingEntries[! is.na(matchingEntries)]])
-mut.FLOMICS.Stage
-dim(mut.FLOMICS.Stage) # 440  19
-length(unique(mut.FLOMICS.Stage$sample_mut)) # 105
-
-
-# All cases
-# Of 547 total cases, 440 entries when matched with 170 cases from methylation
-# Of these only 105 out of 440 are unique patient IDs;
-# This agrees with FLOMICs only cohort of Robert.
-mut.FLOMICS.Stage %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-
-# Advanced stage patients
-mut.FLOMICS.Stage %>%
-  filter(STAGE == "ADVANCED") %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-
-# Limited stage patients
-mut.FLOMICS.Stage %>%
-  filter(STAGE == "LIMITED") %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-
-# TYPE
-mut.FLOMICS.Stage %>%
-  filter(TYPE == "FL") %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-
-mut.FLOMICS.Stage %>%
-  filter(TRANSLOCATION1418 == "1") %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-mut.FLOMICS.Stage %>%
-  filter(TRANSLOCATION1418 == "0") %>%
-  group_by(Hugo_Symbol, Tumor_Sample_Barcode) %>%
-  summarize(count = n()) %>%
-  group_by(Hugo_Symbol) %>%
-  summarize(count = n()) %>%
-  arrange(desc(count)) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
-  ggplot(aes(x = Hugo_Symbol, y = count)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
