@@ -134,7 +134,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.19 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
+# on average, PLOSMED cases have 6.06 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -174,8 +174,6 @@ mut.merged %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
   stat_compare_means() + stat_n_text()
 # still slight increase of nb of mutations in advanced vs limited, statistically significant (wilcoxon p-value = 0.038)
-# i.e. difference previously seen is in part artifact of differences between FLOMICS and PLOSMED
-# but also smaller sample size now in advanced
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
 tmp <- mut.merged %>%
@@ -305,8 +303,6 @@ matchingEntries <- match(mut.FLOMICS$sample_mut, ClinicalFile_T1$SAMPLE_ID)
 ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]]
 length(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]]) # 440 entries
 length(unique(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]])) # 105
-
-
 
 mut.FLOMICS.Stage <- data.frame(mut.FLOMICS[match(ClinicalFile_T1$SAMPLE_ID[matchingEntries[! is.na(matchingEntries)]], mut.FLOMICS$sample_mut), ],
                                 STAGE = ClinicalFile_T1$STAGE[matchingEntries[! is.na(matchingEntries)]],
