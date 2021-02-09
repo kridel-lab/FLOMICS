@@ -16,6 +16,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq")
 
 #load functions to analyze seurat
 source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
+date=Sys.Date()
 
 #output directory
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
@@ -32,7 +33,8 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-r=readRDS("combined_processed_seurat_object_rmFL277dim20.rds")
+#r=readRDS("combined_processed_seurat_object_rmFL277dim20.rds")
+r=readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -69,6 +71,6 @@ dittoHeatmap(combined, genes,
     annot.by = c("ident", "sample"))
 
 h = DoHeatmap(combined_t, features = genesall,assay="RNA", size=2)
-pdf("rmFL277dim20_Tcells_only_markers.pdf")
+pdf(paste(date, "_" , "rmFL277dim20_Tcells_only_markers.pdf", sep=""))
 print(h)
 dev.off()
