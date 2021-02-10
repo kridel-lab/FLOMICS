@@ -23,8 +23,13 @@ bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-F
 bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/tier2_bisque_decomposed_samples.rds")
 bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/tier3_bisque_decomposed_samples.rds")
 
-labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+#labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+#colnames(labels)[2] = "SAMPLE_ID"
+
+#labels updated after mutations for n=31 plos medicine patients were reanalzyed
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_9Feb2021.csv")
 colnames(labels)[2] = "SAMPLE_ID"
+
 rnaseq_qc = merge(rnaseq_qc, labels, by="SAMPLE_ID")
 
 #----------------------------------------------------------------------
