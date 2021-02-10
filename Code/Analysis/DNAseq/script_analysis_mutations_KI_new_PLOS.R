@@ -1,58 +1,99 @@
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#script_analysis_mutations_KI_new_PLOS.R
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#this script takes in mutations from our FL cohort as well as mutation
+#calls from BC PLOS Med paper n=31 patient samples run through Mutect2 by KI
+#mutations from both sources are further filtered and combined
+
+# FLOMICS refers to current, UHN-led project.
+# PLOSMED refers to samples sequenced as part of Kridel and Chan et al, Plos Med, 2016
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#load packages
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 packages <- c("dplyr", "ggplot2", "data.table", "EnvStats", "ggpubr")
 lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
-
 # setwd("~/github/FLOMICS/") <- FLOMICS teams folder
 
-# This script explores mutation data
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#load data
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# FLOMICS refers to current, UHN-led project.
-# PLOSMED refers to samples sequenced as part of Kridel and Chan et al, Plos Med, 2016
-
-# Gene panel
+#1. Gene panel
 gene.panel <- read.csv("DNAseq/Final_target_files/coding_gene_panel_PLOSMED_FLOMICS.csv", header = TRUE)
 genes.common <- gene.panel %>%
   filter(PLOS_MED_PANEL == "YES" & FLOMICS_PANEL == "YES") %>%
   .$Gene.Name %>% as.character() # n = 57
 
-# All FLOMICS samples included
+#2. All FLOMICS samples included
 all.samples.DNAseq.FLOMICS <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
   filter(CAPSEQ_DATA == TRUE & CAPSEQ_DATA_YEAR == "2019" & CAPSEQ_INCLUDE == "YES") %>%
   .$SAMPLE_ID %>% as.character() # n=131 (n=123 T1, n=8 T2)
 
-# All PLOSMED samples included
+#3. All PLOSMED samples included
 all.samples.DNAseq.PLOSMED <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
   filter(CAPSEQ_DATA == TRUE & CAPSEQ_DATA_YEAR == "2015" & CAPSEQ_INCLUDE == "YES") %>%
   .$SAMPLE_ID %>% as.character() # n=31 (only T1)
 
-# Coverage FLOMICS DNAseq
+#4. Coverage FLOMICS DNAseq
 coverage.samples <- read.csv("DNAseq/Targeted_Seq_Coverage/08-07-2020/2020-08-07_sample_based_coverage_summary.csv")
 
-# Read in mutation calls for FLOMICS
+#5. Read in mutation calls for FLOMICS and filter
 mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
   mutate(Cohort = "FLOMICS") %>%
   filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
 
+#6. Hotspot mutations curated by RK
 hotspots <- read.table("DNAseq/hotspot_mutations.txt", sep = "\t", header = T) %>%
   mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>% .$mutation_id
 
+#7. rescued FL mutations
 mut.FLOMICS.rescued <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
   mutate(Cohort = "FLOMICS") %>%
   filter(Var_Freq <= 0.1 & Var_Freq > 0.05) %>%
   mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>%
   filter(cosmic68 != "." | mutation_id %in% hotspots) %>%
   select(-mutation_id)
-
 dim(mut.FLOMICS.rescued)
 
+#8. combined FL mutations
 mut.FLOMICS <- mut.FLOMICS %>% rbind(mut.FLOMICS.rescued)
-
 dim(mut.FLOMICS)
-length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
-# n = 818 rows & 131 unique patients
+length(unique(mut.FLOMICS$Tumor_Sample_Barcode)) # n = 818 rows & 131 unique patients
+
+#9. read in mutation calls for PLOS MED and filter
+mut.PLOSMED <- fread("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_unfiltered_Feb2021.txt") %>%
+  mutate(Cohort = "PLOSMED") %>%
+  filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
+  filter(Var_Freq > 0.1)
+dim(mut.PLOSMED)
+
+#10. rescued PLOS mutations
+mut.PLOSMED.rescued <- fread("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_unfiltered_Feb2021.txt") %>%
+  mutate(Cohort = "PLOSMED") %>%
+  filter(Var_Freq <= 0.1 & Var_Freq > 0.05) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>%
+  filter(cosmic68 != "." | mutation_id %in% hotspots) %>%
+  select(-mutation_id)
+dim(mut.PLOSMED.rescued)
+
+#11. combined PLOS mutations
+mut.PLOSMED <- mut.PLOSMED %>% rbind(mut.PLOSMED.rescued)
+dim(mut.PLOSMED)
+
+mut.PLOSMED = mut.PLOSMED[,c("SAMPLE_ID", "Hugo_Symbol", "Cohort")]
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Analyze FLOMICS data in more detail
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Plot nb of mutations per sample in FLOMICS
 mut.FLOMICS %>%
@@ -96,10 +137,9 @@ mut.FLOMICS %>%
   geom_bar(stat="identity") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-# Read in mutation calls for PLOSMED
-mut.PLOSMED <- read.csv("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_Feb2021.csv")
-# n = 272 rows
-mut.PLOSMED = mut.PLOSMED[,c("SAMPLE_ID", "Hugo_Symbol", "Cohort")]
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#combine mutations FLOMICs and PLOS MED
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Merge FLOMICS and PLOSMED
 mut.merged <- mut.FLOMICS %>%
@@ -135,7 +175,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.06 mutations per sample, whereas FLOMICS have 4.31 mutations per sample
+# on average, PLOSMED cases have 6.16 mutations per sample, whereas FLOMICS have 4.80 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -296,4 +336,3 @@ write.csv(mut.merged.df.T1.T2, file = "DNAseq/Mutation_and_BA_matrices/mut.merge
 write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.T2.poor.cov.excl.csv", row.names = FALSE)
 write.csv(mut.merged.df.T1, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.csv", row.names = FALSE)
 write.csv(mut.merged.df.T1.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
-

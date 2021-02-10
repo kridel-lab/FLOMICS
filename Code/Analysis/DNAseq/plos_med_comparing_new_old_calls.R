@@ -46,6 +46,7 @@ length(unique(new_plos$OTHER_ID)) #31
 #2. keep only libraries from T1
 new_plos = filter(new_plos, sample_type  == "T1")
 length(unique(new_plos$OTHER_ID)) #31
+write.table(new_plos, file="DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_unfiltered_Feb2021.txt", sep=";", quote=F, row.names=F)
 
 #3. set up new data to look like old data
 
