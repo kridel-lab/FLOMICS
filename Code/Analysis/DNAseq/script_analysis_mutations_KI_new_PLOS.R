@@ -36,14 +36,15 @@ mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
 
+hotspots <- read.table("DNAseq/hotspot_mutations.txt", sep = "\t", header = T) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>% .$mutation_id
+
 mut.FLOMICS.rescued <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
   mutate(Cohort = "FLOMICS") %>%
-  filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
-  filter(Var_Freq <= 0.1) %>%
-  filter((Chromosome == "1" & Start_Position %in% c("150727482")) |                                                      # CTSS hotspot
-         (Chromosome == "7" & Start_Position %in% c("148506437", "148506467", "148508727", "148508728")) |               # EZH2 hotspots
-         (Chromosome == "8" & Start_Position %in% c("20074767", "20074768")) |                                           # ATP6V1B2 hotspots
-         (Chromosome == "12" & Start_Position %in% c("57496660", "57496661", "57496662", "57498345", "57499079")))       # STAT6 hotspots
+  filter(Var_Freq <= 0.1 & Var_Freq > 0.05) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>%
+  filter(cosmic68 != "." | mutation_id %in% hotspots) %>%
+  select(-mutation_id)
 
 dim(mut.FLOMICS.rescued)
 
@@ -51,7 +52,7 @@ mut.FLOMICS <- mut.FLOMICS %>% rbind(mut.FLOMICS.rescued)
 
 dim(mut.FLOMICS)
 length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
-# n = 692 rows & 130 unique patients
+# n = 818 rows & 131 unique patients
 
 # Plot nb of mutations per sample in FLOMICS
 mut.FLOMICS %>%
@@ -69,7 +70,7 @@ mut.FLOMICS %>%
   full_join(coverage.samples, by = c("Tumor_Sample_Barcode" = "External_identifier")) %>%
   mutate(count = ifelse(is.na(count), 0, count)) %>%
   ggplot(aes(x = mean_cov, y = count)) + geom_point() + geom_smooth(method = lm)
-# Conclusion: no correlation between coverage and nb of mutations
+# Conclusion: no positive correlation between coverage and nb of mutations
 # some of the very low coverage cases have high nb of mutations, however
 # this means we should probably filter such cases out.
 
@@ -97,14 +98,14 @@ mut.FLOMICS %>%
 
 # Read in mutation calls for PLOSMED
 mut.PLOSMED <- read.csv("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_Feb2021.csv")
-# n = 266 rows
+# n = 272 rows
 mut.PLOSMED = mut.PLOSMED[,c("SAMPLE_ID", "Hugo_Symbol", "Cohort")]
 
 # Merge FLOMICS and PLOSMED
 mut.merged <- mut.FLOMICS %>%
   select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort) %>%
   rbind(mut.PLOSMED) %>%
-  filter(Hugo_Symbol %in% genes.common) # n = 867
+  filter(Hugo_Symbol %in% genes.common) # n = 949
 
 # Percentage of mutations per gene in merged cohort (max 1 mutation per gene per sample counted)
 mut.merged %>%
@@ -173,7 +174,7 @@ mut.merged %>%
   rbind(sample.no.mut) %>%
   ggpubr::ggboxplot(x = "STAGE", y = "count", color = "STAGE", add = "jitter")+
   stat_compare_means() + stat_n_text()
-# still slight increase of nb of mutations in advanced vs limited, statistically significant (wilcoxon p-value = 0.038)
+# still slight increase of nb of mutations in advanced vs limited, statistically significant (wilcoxon p-value = 0.045)
 
 # Explore differences between cohorts, gene by gene, for advanced stage cases
 tmp <- mut.merged %>%
@@ -262,10 +263,11 @@ ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_me
 # higher nb of mutations in C2 vs C1
 
 # Mutation matrix
-no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, mut.merged$SAMPLE_ID)
-# n = 2 without mutation calls "LY_FL_179_T1" "LY_FL_399_T2"
+no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, unique(mut.merged$SAMPLE_ID))
+# n = 0
 
-mut.merged.df.incomplete <- mut.merged %>%
+mut.merged.df.T1.T2 <- mut.merged %>%
+# mut.merged.df.incomplete <- mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol) %>%
   left_join(sample.annotation) %>%
   select(SAMPLE_ID, Hugo_Symbol) %>%
@@ -273,13 +275,14 @@ mut.merged.df.incomplete <- mut.merged %>%
   reshape2::dcast(Hugo_Symbol ~ SAMPLE_ID) %>%
   replace(is.na(.), 0)
 
-no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.df.incomplete), 2,
-                               dimnames = list(c(), no.mut.cases)),
-                               stringsAsFactors = F)
-no.mut.cases.df[is.na(no.mut.cases.df)] <- 0
+# no.mut.cases.df <-  data.frame(matrix(vector(), nrow(mut.merged.df.incomplete), 2,
+#                                dimnames = list(c(), no.mut.cases)),
+#                                stringsAsFactors = F)
+# no.mut.cases.df[is.na(no.mut.cases.df)] <- 0
 
-mut.merged.df.T1.T2 <- cbind(mut.merged.df.incomplete, no.mut.cases.df)
-mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
+# mut.merged.df.T1.T2 <- cbind(mut.merged.df.incomplete, no.mut.cases.df)
+# mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
+# mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
 
 mut.merged.df.T1.T2.poor.cov.excl <- mut.merged.df.T1.T2[, c("Hugo_Symbol", setdiff(sample.annotation$SAMPLE_ID, poor.coverage.samples))]
 
