@@ -28,9 +28,9 @@ colnames(old_labels)[2] = "SAMPLE_ID"
 print(table(old_labels$SNFClust))
 
 #labels updated after mutations for n=31 plos medicine patients were reanalzyed
-labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_9Feb2021.csv")
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
 colnames(labels)[2] = "SAMPLE_ID"
-labels$SNFClust = labels$SNFClust9Feb2021
+labels$SNFClust = labels$SNFClust10Feb2021
 print(table(labels$SNFClust))
 
 rnaseq_qc = merge(rnaseq_qc, labels, by="SAMPLE_ID")
