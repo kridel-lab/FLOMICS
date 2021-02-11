@@ -24,7 +24,7 @@ output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
 #load libraries
 library(ellipsis)
 library(tidyverse)
-library(splitstackshape)
+#library(splitstackshape)
 packages <- c("readr", "data.table", "plyr",
 	"stringr",
   "Seurat",
