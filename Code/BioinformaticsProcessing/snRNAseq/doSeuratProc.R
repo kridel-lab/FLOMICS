@@ -1,8 +1,20 @@
 #library(data.table)
 
-doSeuratProc <- function(exp, samp){
+doSeuratProc <- function(exp, samp, mito_rm){
 
     print(samp)
+    print(mito_rm)
+    print(dim(exp))
+
+    if(mito_rm == "yes"){
+
+      MT.index <- grep(pattern = "^MT-", x = rownames(exp), value = FALSE)
+      print(length(MT.index))
+      # Remove MT genes from count.data
+      exp <- exp[-MT.index, ]
+    }
+
+    print(dim(exp))
 
     #1. create seurat object
     object_fl <- CreateSeuratObject(counts = exp,
