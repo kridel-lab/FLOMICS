@@ -78,7 +78,7 @@ names(exp_matrices) = c("FL062", "FL064", "FL076") #, "FL227")
 samps = c("FL062", "FL064", "FL076") #, "FL227")
 
 pdf(paste(output, "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
-all_objects = mapply(doSeuratProc, exp_matrices, samps)
+all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes")
 dev.off()
 
 # plot variable features with and without labels (before sample integration)
@@ -106,7 +106,8 @@ get_integrated_obj = function(dat, dim, anch_features){
 	print(dim)
 	print(anch_features)
 
-	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim, anchor.features = anch_features)
+	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim,
+		anchor.features = anch_features)
 
 	#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
 	#The returned object will contain a new Assay, which holds an integrated
@@ -125,6 +126,8 @@ get_integrated_obj = function(dat, dim, anch_features){
 	# switch to integrated assay. The variable features of this assay are automatically
 	# set during IntegrateData
 
+	# specify that we will perform downstream analysis on the corrected data note that the original
+	# unmodified data still resides in the 'RNA' assay
 	DefaultAssay(combined) <- "integrated"
 
 	#4. Run clustering++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

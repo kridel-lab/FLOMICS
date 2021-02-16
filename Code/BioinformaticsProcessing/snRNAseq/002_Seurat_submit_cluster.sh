@@ -12,4 +12,4 @@ module load R/4.0.0
 #pwd
 cd /cluster/projects/kridelgroup/FLOMICS
 
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/002_Seurat.R
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/002_Seurat_sarah_final_code_visualize_genes_across_clusters.R
