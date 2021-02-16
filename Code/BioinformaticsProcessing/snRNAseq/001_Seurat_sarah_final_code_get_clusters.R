@@ -184,7 +184,8 @@ get_integrated_obj = function(dat, dim, anch_features){
 	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
-	DoHeatmap(combined, features = top10$gene) + NoLegend()
+	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
+	print(markers_heatmap)
 	dev.off()
 
 	print("finished this analysis")
