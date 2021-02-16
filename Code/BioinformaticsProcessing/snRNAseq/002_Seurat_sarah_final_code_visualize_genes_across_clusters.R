@@ -37,7 +37,7 @@ lapply(packages, require, character.only = TRUE)
 #data
 #-------------------------------------------------------------------------------
 
-combined = readRDS(paste(output, "seurat_integrated_dim_20_2000_2021-02-05_samples_clusters.rds", sep=""))
+combined = readRDS(paste(output, "seurat_integrated_dim_20_2000_2021-02-16_samples_clusters.rds", sep=""))
 
 #-------------------------------------------------------------------------------
 #analysis
