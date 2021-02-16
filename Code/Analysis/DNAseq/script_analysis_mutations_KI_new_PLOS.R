@@ -151,12 +151,13 @@ mut.merged <- mut.FLOMICS %>%
 mut.merged %>%
   mutate(TIME_POINT = substr(SAMPLE_ID, 11, 12)) %>%
   filter(TIME_POINT != "T2") %>%
+  filter(!SAMPLE_ID %in% poor.coverage.samples) %>%
   group_by(Hugo_Symbol, SAMPLE_ID) %>%
   summarize(count = n()) %>%
   group_by(Hugo_Symbol) %>%
   summarize(count = n()) %>%
   arrange(desc(count)) %>%
-  mutate(percentage = count/136*100) %>%
+  mutate(percentage = count/138*100) %>%
   filter(percentage > 5) %>%
   mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
   ggplot(aes(x = Hugo_Symbol, y = percentage)) +
