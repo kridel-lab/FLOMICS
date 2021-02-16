@@ -162,8 +162,9 @@ mut.merged %>%
   ggplot(aes(x = Hugo_Symbol, y = percentage)) +
   geom_bar(stat = "identity") +
   theme_bw() +
-  theme(axis.text.x = element_text(face = "italic", angle = 90, vjust = 0.5, hjust = 1),
+  theme(axis.text.x = element_text(face = "italic", angle = 90, vjust = 0.5, hjust = 1, colour = "black"),
         axis.title.x = element_blank(),
+        axis.text.y = element_text(colour = "black"),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 #ggsave(paste0("img/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
 ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
@@ -175,7 +176,7 @@ mut.merged %>%
   group_by(Cohort) %>%
   summarize(count = n()) %>%
   mutate(mean.nb.mut.by.sample = ifelse(Cohort == "FLOMICS", count/131, count/length(all.samples.DNAseq.PLOSMED)))
-# on average, PLOSMED cases have 6.16 mutations per sample, whereas FLOMICS have 4.80 mutations per sample
+# on average, PLOSMED cases have 6.19 mutations per sample, whereas FLOMICS have 4.80 mutations per sample
 # possible reasons:
 # - no min VAF filter in PLOSMED
 # - adv st cases have likely more mutations on average as tumour content is higher
@@ -278,11 +279,11 @@ mut.lim.vs.adv$fdr <- p.adjust(mut.lim.vs.adv$p, method = "fdr")
 # Nb mutations by SNF cluster
 # Compare mutations by stage
 # Need sample annotation
-cluster.annotation <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv", header = T) %>%
-  select(SAMPLE_ID = ID, SNFClust) %>%
+cluster.annotation <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv", header = T) %>%
+  select(SAMPLE_ID = ID, SNFClust = SNFClust10Feb2021) %>%
   filter(SAMPLE_ID %in% c(all.samples.DNAseq.FLOMICS, all.samples.DNAseq.PLOSMED))
 
-sample.no.mut <- data.frame(SAMPLE_ID  = "LY_FL_179_T1", Cohort = "FLOMICS", count = 0, SNFClust = "1", TIME_POINT = "T1")
+# sample.no.mut <- data.frame(SAMPLE_ID  = "LY_FL_179_T1", Cohort = "FLOMICS", count = 0, SNFClust = "1", TIME_POINT = "T1")
 
 mut.merged %>%
   distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
@@ -294,13 +295,13 @@ mut.merged %>%
   mutate(TIME_POINT = substr(SAMPLE_ID, 11, 12)) %>%
   filter(TIME_POINT == "T1") %>%
   data.frame() %>%
-  rbind(sample.no.mut) %>%
+  # rbind(sample.no.mut) %>%
   ggpubr::ggboxplot(x = "SNFClust", y = "count", color = "SNFClust", add = "jitter")+
   stat_compare_means() + stat_n_text()
 #ggsave(paste0("img/",  date, " Mutation_count_by_SNFcluster.pdf"), width = 10, height = 8, units = "cm")
 ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_merged.pdf"), width = 14, height = 8, units = "cm")
 
-# higher nb of mutations in C2 vs C1
+# higher nb of mutations in C1 vs C2
 
 # Mutation matrix
 no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, unique(mut.merged$SAMPLE_ID))

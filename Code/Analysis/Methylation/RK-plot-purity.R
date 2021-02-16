@@ -5,7 +5,8 @@ library(ggpubr)
 
 date <- Sys.Date()
 
-SNF.clust <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+SNF.clust <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv") %>%
+  select(ID, SNFClust = SNFClust10Feb2021)
 
 purity <- read.csv("methylation/Purity_281probes_10Jan2020.csv") %>%
   left_join(SNF.clust[,c("ID", "SNFClust")], by = c("X" = "ID")) %>%

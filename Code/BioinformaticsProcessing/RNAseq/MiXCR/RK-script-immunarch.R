@@ -11,17 +11,20 @@ setwd("~/github/FLOMICS/")
 immdata <- repLoad("Analysis-Files/Mixcr/mixcr_data_immunarch/")
 immdata$meta$CLUSTER <- NULL
 
-SNF.clust <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+SNF.clust <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv") %>%
+  select(ID, SNFClust = SNFClust10Feb2021)
 
 immdata$meta <- immdata$meta %>%
   left_join(SNF.clust[,c("ID", "SNFClust")], by = c("Sample" = "ID")) %>%
   mutate(SNF_incl = ifelse(is.na(SNFClust), "NO", "YES"))
 
 clin <- read.csv("metadata/clinical_data_rcd11Aug2020.csv") %>%
-  mutate(LY_FL_ID = paste0(LY_FL_ID, "_T1"))
+  mutate(LY_FL_ID = paste0(LY_FL_ID, "_T1")) %>%
+  mutate(POD24 = ifelse(CODE_TTP == 1 & TTP < 2, "YES", "NO")) %>%
+  mutate(POD24_stage = paste0("POD24_", POD24, "_", TYPE))
 
 immdata$meta <- immdata$meta %>%
-  left_join(clin[,c("LY_FL_ID", "ANN_ARBOR_STAGE")], by = c("Sample" = "LY_FL_ID"))
+  left_join(clin[,c("LY_FL_ID", "ANN_ARBOR_STAGE", "POD24_stage")], by = c("Sample" = "LY_FL_ID"))
 
 #--
 # Quality control metrics
@@ -67,11 +70,11 @@ for(i in 1:length(tr_imm$data)){
 
 # Number of unique clonotypes by sample
 exp_vol <- repExplore(tr_imm$data, .method = "volume", .coding = TRUE)
-vis(exp_vol)
-p1 <- vis(exp_vol, .by = c("TYPE"), .meta = tr_imm$meta)
-p2 <- vis(exp_vol, .by = c("STAGE"), .meta = tr_imm$meta)
-p3 <- vis(exp_vol, .by = c("SNFClust"), .meta = tr_imm$meta)
-p1 + p2 + p3
+# vis(exp_vol)
+# p1 <- vis(exp_vol, .by = c("TYPE"), .meta = tr_imm$meta)
+# p2 <- vis(exp_vol, .by = c("STAGE"), .meta = tr_imm$meta)
+# p3 <- vis(exp_vol, .by = c("SNFClust"), .meta = tr_imm$meta)
+# p1 + p2 + p3
 
 # Number of clones by sample
 clones.nb.sample <- list()
@@ -85,11 +88,11 @@ clones.nb.sample <- data.frame(clones.nb.sample)
 clones.nb.sample$nb <- as.numeric(clones.nb.sample$nb)
 
 # Repertoire overlap
-imm_ov1 <- repOverlap(tr_imm$data, .method = "public", .verbose = F)
-imm_ov2 <- repOverlap(tr_imm$data, .method = "morisita", .verbose = F)
+# imm_ov1 <- repOverlap(tr_imm$data, .method = "public", .verbose = F)
+# imm_ov2 <- repOverlap(tr_imm$data, .method = "morisita", .verbose = F)
 
 # Gene usage computation
-imm_gu <- geneUsage(tr_imm$data, "hs.trbv")
+# imm_gu <- geneUsage(tr_imm$data, "hs.trbv")
 
 #--
 # Nb of clones vs. RNAseq nb uniquely mapped reads
@@ -136,6 +139,12 @@ p <- clones.nb.sample_qc %>%
   ggboxplot(x = "SNFClust", y = "nb_clones_norm", color = "SNFClust", add = "jitter")
 p + stat_compare_means(method = "wilcox.test")
 
+p <- clones.nb.sample_qc %>%
+  filter(POD24_stage %in% c("POD24_YES_ADVANCED", "POD24_NO_ADVANCED")) %>%
+  filter(Sample %in% tier3) %>%
+  ggboxplot(x = "POD24_stage", y = "nb_clones_norm", color = "POD24_stage", add = "jitter")
+p + stat_compare_means(method = "wilcox.test")
+
 #--
 # Unique clonotypes vs. RNAseq nb uniquely mapped reads
 #---
@@ -180,6 +189,12 @@ p <- exp_vol_qc %>%
   filter(Sample %in% tier3) %>%
   ggboxplot(x = "SNFClust", y = "nb_unique_clonotypes_norm", color = "SNFClust", add = "jitter")
 p + stat_compare_means(method = "wilcox.test")
+
+p <- exp_vol_qc %>%
+  filter(POD24_stage %in% c("POD24_YES_ADVANCED", "POD24_NO_ADVANCED")) %>%
+  filter(Sample %in% tier3) %>%
+  ggboxplot(x = "POD24_stage", y = "nb_unique_clonotypes_norm", color = "POD24_stage", add = "jitter")
+p + stat_compare_means(method = "wilcox.test")
   
 #--
 # Calculate diversity metrics
@@ -219,7 +234,7 @@ for(i in 1:length(all_div)){
   g1=ggboxplot(all_div[[i]], x = "TYPE", y = names(all_div[[i]][2]),
                title = "sample diversity estimation", ylab = names(all_div[i]), xlab = "Sample Type",
                color = "TYPE", palette = "jco")
-  my_comparisons1 <- list( c("DLBCL", "FL"), c("FL", "RLN"), c("DLBCL", "RLN") )
+  my_comparisons1 <- list(c("DLBCL", "FL"))
   
   #######
   
@@ -411,11 +426,11 @@ clones.nb.sample <- data.frame(clones.nb.sample)
 clones.nb.sample$nb <- as.numeric(clones.nb.sample$nb)
 
 # Repertoire overlap
-imm_ov1 <- repOverlap(br_imm$data, .method = "public", .verbose = F)
-imm_ov2 <- repOverlap(br_imm$data, .method = "morisita", .verbose = F)
+# imm_ov1 <- repOverlap(br_imm$data, .method = "public", .verbose = F)
+# imm_ov2 <- repOverlap(br_imm$data, .method = "morisita", .verbose = F)
 
 # Gene usage computation
-imm_gu <- geneUsage(br_imm$data, "macmul.IGHV")
+# imm_gu <- geneUsage(br_imm$data, "macmul.IGHV")
 
 #--
 # Nb of clones vs. RNAseq nb uniquely mapped reads
@@ -462,6 +477,12 @@ p <- clones.nb.sample_qc %>%
   ggboxplot(x = "SNFClust", y = "nb_clones_norm", color = "SNFClust", add = "jitter")
 p + stat_compare_means(method = "wilcox.test")
 
+p <- clones.nb.sample_qc %>%
+  filter(POD24_stage %in% c("POD24_YES_ADVANCED", "POD24_NO_ADVANCED")) %>%
+  filter(Sample %in% tier3) %>%
+  ggboxplot(x = "POD24_stage", y = "nb_clones_norm", color = "POD24_stage", add = "jitter")
+p + stat_compare_means(method = "wilcox.test")
+
 #--
 # Unique clonotypes vs. RNAseq nb uniquely mapped reads
 #---
@@ -505,6 +526,12 @@ p <- exp_vol_qc %>%
   filter(SNFClust %in% c("1", "2")) %>%
   filter(Sample %in% tier3) %>%
   ggboxplot(x = "SNFClust", y = "nb_unique_clonotypes_norm", color = "SNFClust", add = "jitter")
+p + stat_compare_means(method = "wilcox.test")
+
+p <- exp_vol_qc %>%
+  filter(POD24_stage %in% c("POD24_YES_ADVANCED", "POD24_NO_ADVANCED")) %>%
+  filter(Sample %in% tier3) %>%
+  ggboxplot(x = "POD24_stage", y = "nb_unique_clonotypes_norm", color = "POD24_stage", add = "jitter")
 p + stat_compare_means(method = "wilcox.test")
 
 #--
