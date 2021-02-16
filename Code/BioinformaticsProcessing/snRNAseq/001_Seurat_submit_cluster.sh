@@ -12,4 +12,10 @@ module load R/4.0.0
 #pwd
 cd /cluster/projects/kridelgroup/FLOMICS
 
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R
+#run once without mitochondrial genes and protein coding genes only
+nc_genes_rm=yes
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm
+
+#run once without mitochondrial genes and all genes in matrix
+nc_genes_rm=no
+Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm
