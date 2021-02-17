@@ -89,12 +89,12 @@ exp_matrices = list(expression_matrix_FL062, expression_matrix_FL064, expression
 names(exp_matrices) = c("FL062", "FL064", "FL076") #, "FL227")
 samps = c("FL062", "FL064", "FL076") #, "FL227")
 
-pdf(paste(output, "pc_genes_only_", input, "_", "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
+pdf(paste(output, "pc_genes_only_", input, "_", norm_type, "_", "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
 all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes", nc_rm=input, norm_type=norm_type)
 dev.off()
 
 # plot variable features with and without labels (before sample integration)
-pdf(paste(output, "pc_genes_only_", input, "_", "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
+pdf(paste(output, "pc_genes_only_", input, "_", norm_type, "_", "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
 for(i in 1:3){
   print(i)
   # Identify the 10 most highly variable genes in the first sample of the list
@@ -161,7 +161,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 		seurat_integrated <- FindClusters(object = seurat_integrated, resolution = c(0.4, 0.5, 0.6, 0.8, 1.0, 1.4))
 
 		# Assign identity of clusters
-		Idents(object = seurat_integrated) <- "integrated_snn_res.0.5"
+		Idents(object = seurat_integrated) <- "integrated_snn_res.0.4"
 		# Plot the UMAP
 		umap_integrated_res = DimPlot(seurat_integrated,
         reduction = "umap",
@@ -177,9 +177,10 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 		top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
 		markers_heatmap=DoHeatmap(seurat_integrated, features = top10$gene) + NoLegend()
 
-	  pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
+	  pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
 		print(umap_integrated_res)
 		print(markers_heatmap)
+		print("made plots for SC norm")
 		dev.off()
 
 	}
