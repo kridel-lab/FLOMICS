@@ -29,7 +29,17 @@ packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
+library(annotables)
+
 date=Sys.Date()
+
+args = commandArgs(trailingOnly = TRUE) #patient ID
+input = args[1]
+print(input) #whether only protein coding genes should be included or not
+
+#genes = as.data.table(grch38)
+genes = as.data.table(grch37)
+pc_genes = unique(filter(genes, biotype == "protein_coding")$symbol)
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -77,12 +87,12 @@ exp_matrices = list(expression_matrix_FL062, expression_matrix_FL064, expression
 names(exp_matrices) = c("FL062", "FL064", "FL076") #, "FL227")
 samps = c("FL062", "FL064", "FL076") #, "FL227")
 
-pdf(paste(output, "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
-all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes")
+pdf(paste(output, "pc_genes_only_", input, "_", "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
+all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes", nc_rm=input)
 dev.off()
 
 # plot variable features with and without labels (before sample integration)
-pdf(paste(output, "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
+pdf(paste(output, "pc_genes_only_", input, "_", "seurat_top10_genes_per_sample.pdf", sep=""), width=16, height=8)
 for(i in 1:3){
   print(i)
   # Identify the 10 most highly variable genes in the first sample of the list
@@ -134,14 +144,30 @@ get_integrated_obj = function(dat, dim, anch_features){
 
 	# Run the standard workflow for visualization and clustering
 	combined <- ScaleData(combined, verbose = FALSE)
-	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
+#	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
+	combined <- RunPCA(combined, verbose = FALSE)
+
+	# Examine and visualize PCA results a few different ways
+	print(combined[["pca"]], dims = 1:5, nfeatures = 5)
+	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_dimensionality_exploration", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
+	v = VizDimLoadings(combined, dims = 1:2, reduction = "pca")
+	d = DimHeatmap(combined, dims = 1:15, cells = 500, balanced = TRUE)
+
+	el = ElbowPlot(combined)
+
+	print(v)
+	print(d)
+	print(el)
+
+	dev.off()
+
 	# t-SNE and Clustering
-	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
 	combined <- FindClusters(combined, resolution = 0.5)
+	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 
 	#head(Idents(combined), 5)
-	pdf(paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
+	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
 	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
 	p2 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=6)+
@@ -149,12 +175,23 @@ get_integrated_obj = function(dat, dim, anch_features){
 	print(p1 + p2)
 	dev.off()
 
-	saveRDS(combined, file = paste(output, "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
+	saveRDS(combined, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
+
+	# find markers for every cluster compared to all remaining cells, report only the positive ones
+	combined.markers <- FindAllMarkers(combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+	combined.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
+
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+
+	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
+	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
+	print(markers_heatmap)
+	dev.off()
+
 	print("finished this analysis")
 
 }
 
 get_integrated_obj(all_objects, 20, 2000)
-#get_integrated_obj(all_objects, 30, 2000)
 
 sessionInfo()
