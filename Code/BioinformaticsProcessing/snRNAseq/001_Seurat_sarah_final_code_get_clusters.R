@@ -36,6 +36,8 @@ date=Sys.Date()
 args = commandArgs(trailingOnly = TRUE) #patient ID
 input = args[1]
 print(input) #whether only protein coding genes should be included or not
+norm_type = args[2]
+print(norm_type)
 
 #genes = as.data.table(grch38)
 genes = as.data.table(grch37)
@@ -88,7 +90,7 @@ names(exp_matrices) = c("FL062", "FL064", "FL076") #, "FL227")
 samps = c("FL062", "FL064", "FL076") #, "FL227")
 
 pdf(paste(output, "pc_genes_only_", input, "_", "seurat_objects_qc_vln_plots.pdf", sep=""), width=16, height=8)
-all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes", nc_rm=input)
+all_objects = mapply(doSeuratProc, exp_matrices, samps, mito_rm="yes", nc_rm=input, norm_type=norm_type)
 dev.off()
 
 # plot variable features with and without labels (before sample integration)
@@ -110,11 +112,79 @@ dev.off()
 #dim = 10
 #anch_features = 3000
 
-get_integrated_obj = function(dat, dim, anch_features){
+get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	set.seed(100)
 	print(dim)
 	print(anch_features)
+
+	if(norm_method_used == "SC"){
+
+		# Select the most variable features to use for integration
+		integ_features <- SelectIntegrationFeatures(object.list = dat,
+                                            nfeatures = 2000)
+
+		# Prepare the SCT list object for integration
+		dat <- PrepSCTIntegration(object.list = dat,
+			 anchor.features = integ_features)
+
+		# Find best buddies - can take a while to run
+		integ_anchors <- FindIntegrationAnchors(object.list = dat,
+			                                         normalization.method = "SCT",
+			                                         anchor.features = integ_features)
+
+		# Integrate across conditions
+		seurat_integrated <- IntegrateData(anchorset = integ_anchors, normalization.method = "SCT")
+
+		# Run PCA
+		seurat_integrated <- RunPCA(object = seurat_integrated)
+
+		# Plot PCA
+		pca_plot = PCAPlot(seurat_integrated,
+        split.by = "sample")
+
+		# Run UMAP
+		seurat_integrated <- RunUMAP(seurat_integrated,
+		                             dims = 1:dim, reduction = "pca")
+		# Plot UMAP
+		umap_plot = DimPlot(seurat_integrated)
+
+		#split by sample
+		bysample = DimPlot(seurat_integrated,
+        split.by = "sample")
+
+		# Determine the K-nearest neighbor graph
+		seurat_integrated <- FindNeighbors(object = seurat_integrated,
+				                                dims = 1:dim)
+
+		# Determine the clusters for various resolutions
+		seurat_integrated <- FindClusters(object = seurat_integrated, resolution = c(0.4, 0.5, 0.6, 0.8, 1.0, 1.4))
+
+		# Assign identity of clusters
+		Idents(object = seurat_integrated) <- "integrated_snn_res.0.5"
+		# Plot the UMAP
+		umap_integrated_res = DimPlot(seurat_integrated,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6)
+
+		saveRDS(seurat_integrated, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
+
+		# find markers for every cluster compared to all remaining cells, report only the positive ones
+		DefaultAssay(seurat_integrated) <- "RNA"
+		combined.markers <- FindAllMarkers(seurat_integrated, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+		combined.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
+		top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+		markers_heatmap=DoHeatmap(seurat_integrated, features = top10$gene) + NoLegend()
+
+	  pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
+		print(umap_integrated_res)
+		print(markers_heatmap)
+		dev.off()
+
+	}
+
+	if(!(norm_method_used == "SC")){
 
 	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim,
 		anchor.features = anch_features)
@@ -144,15 +214,13 @@ get_integrated_obj = function(dat, dim, anch_features){
 
 	# Run the standard workflow for visualization and clustering
 	combined <- ScaleData(combined, verbose = FALSE)
-	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
-#	combined <- RunPCA(combined, verbose = FALSE)
+	combined <- RunPCA(combined, verbose = FALSE)
 
 	# Examine and visualize PCA results a few different ways
 	print(combined[["pca"]], dims = 1:5, nfeatures = 5)
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_dimensionality_exploration", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
 	v = VizDimLoadings(combined, dims = 1:2, reduction = "pca")
 	d = DimHeatmap(combined, dims = 1:15, cells = 500, balanced = TRUE)
-
 	el = ElbowPlot(combined)
 
 	print(v)
@@ -166,7 +234,6 @@ get_integrated_obj = function(dat, dim, anch_features){
 	combined <- FindClusters(combined, resolution = 0.5)
 	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 
-	#head(Idents(combined), 5)
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
 	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
@@ -191,7 +258,8 @@ get_integrated_obj = function(dat, dim, anch_features){
 	print("finished this analysis")
 
 }
+} #end function
 
-get_integrated_obj(all_objects, 15, 2000)
+get_integrated_obj(all_objects, 20, 2000, norm_type)
 
 sessionInfo()
