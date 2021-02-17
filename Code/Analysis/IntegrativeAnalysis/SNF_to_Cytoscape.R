@@ -14,11 +14,11 @@ setwd("~/github/FLOMICS/")
 #--
 
 # Read in Cluster labels
-cluster_labels <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv") %>%
-  select(Source_node = ID, SNFClust)
+cluster_labels <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv") %>%
+  select(Source_node = ID, SNFClust = SNFClust10Feb2021)
 
 # Read in affinity matrices from SNF
-dim3_r_m_d <- read.csv(file = "SNF/WCombinedFiltered_6Jan2021.csv") %>%
+dim3_r_m_d <- read.csv(file = "SNF/WCombinedFiltered_10Feb2021.csv") %>%
   melt() %>%
   filter(value != 0.5) %>%
   setnames(old = "X", new = "Source_node") %>%
@@ -28,7 +28,7 @@ dim3_r_m_d <- read.csv(file = "SNF/WCombinedFiltered_6Jan2021.csv") %>%
   mutate(Target_node = substr(Target_node, 1, 9)) %>%
   mutate(BIOPAX_TYPE = "interaction")
 
-write.table(dim3_r_m_d, file = "SNF/WCombinedFiltered_6Jan2021_melted.txt", row.names = FALSE, sep = "\t", quote = FALSE)
+write.table(dim3_r_m_d, file = "SNF/WCombinedFiltered_10Feb2021_melted.txt", row.names = FALSE, sep = "\t", quote = FALSE)
 
 #
 
