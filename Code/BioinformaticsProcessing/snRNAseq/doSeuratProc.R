@@ -50,7 +50,7 @@ doSeuratProc <- function(exp, samp, mito_rm, nc_rm){
     object_fl <- NormalizeData(object_fl)
 
     #6. FindVariableFeatures
-    object_fl <- FindVariableFeatures(object_fl, selection.method = "vst", nfeatures = 5000) #changed nfeatures from 2000 to 5000
+    object_fl <- FindVariableFeatures(object_fl, selection.method = "vst", nfeatures = 2000) #changed nfeatures from 5000 to 2000
 
     return(object_fl)
 
