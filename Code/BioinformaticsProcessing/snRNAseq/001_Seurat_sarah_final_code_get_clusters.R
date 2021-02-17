@@ -144,8 +144,8 @@ get_integrated_obj = function(dat, dim, anch_features){
 
 	# Run the standard workflow for visualization and clustering
 	combined <- ScaleData(combined, verbose = FALSE)
-#	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
-	combined <- RunPCA(combined, verbose = FALSE)
+	combined <- RunPCA(combined, npcs = 30, verbose = FALSE)
+#	combined <- RunPCA(combined, verbose = FALSE)
 
 	# Examine and visualize PCA results a few different ways
 	print(combined[["pca"]], dims = 1:5, nfeatures = 5)
@@ -192,6 +192,6 @@ get_integrated_obj = function(dat, dim, anch_features){
 
 }
 
-get_integrated_obj(all_objects, 20, 2000)
+get_integrated_obj(all_objects, 15, 2000)
 
 sessionInfo()
