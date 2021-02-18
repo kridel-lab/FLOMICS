@@ -19,7 +19,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
 
 #output directory
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
 
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
@@ -193,7 +193,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 			dplyr::summarise(x=mean(UMAP_1), y=mean(UMAP_2))
 
 		# Plotting a UMAP plot for each of the PCs
-		pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
+		pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap_SC_norm.pdf", sep=""), width=13, height=20)
 
 		map_pcas = map(paste0("PC_", 1:dim), function(pc){
 						ggplot(pc_data,
@@ -365,7 +365,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 }
 } #end function
 
-get_integrated_obj(all_objects, 20, 2000, norm_type)
-get_integrated_obj(all_objects, 40, 2000, norm_type)
+get_integrated_obj(all_objects, dim=20, 2000, norm_type)
+get_integrated_obj(all_objects, dim=40, 2000, norm_type)
 
 sessionInfo()
