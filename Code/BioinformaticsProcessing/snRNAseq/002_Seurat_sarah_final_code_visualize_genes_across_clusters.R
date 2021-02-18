@@ -60,7 +60,7 @@ get_more_markers = function(dat, analysis_type){
 
 	# find markers for every cluster compared to all remaining cells, report only the positive ones
 	combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
-		 min.pct = 0.25, logfc.threshold = 0.25, test.use="roc")
+		 min.pct = 0.25, logfc.threshold = 0.25)
 	combined.markers = as.data.table(combined.markers)
 
 	#2. Visualize cluster markers+++++++++++++++++++++++++++++++++++++++++++++++++

@@ -9,6 +9,7 @@
 #-------------------------------------------------------------------------------
 
 options(stringsAsFactors=F)
+library(tidyverse)
 
 #make sure loading R/4.0.0 before running this script
 
@@ -139,19 +140,15 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 		# Run PCA
 		seurat_integrated <- RunPCA(object = seurat_integrated)
 
-		# Plot PCA
-		pca_plot = PCAPlot(seurat_integrated,
-        split.by = "sample")
-
 		# Run UMAP
 		seurat_integrated <- RunUMAP(seurat_integrated,
 		                             dims = 1:dim, reduction = "pca")
-		# Plot UMAP
-		umap_plot = DimPlot(seurat_integrated)
 
-		#split by sample
-		bysample = DimPlot(seurat_integrated,
-        split.by = "sample")
+		# Explore heatmap of PCs
+		pcs_plot = DimHeatmap(seurat_integrated,
+			           dims = 1:dim,
+			           cells = 500,
+			           balanced = TRUE)
 
 		# Determine the K-nearest neighbor graph
 		seurat_integrated <- FindNeighbors(object = seurat_integrated,
@@ -168,16 +165,50 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
         label = TRUE,
         label.size = 6)
 
-		saveRDS(seurat_integrated, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
+		p3 = DimPlot(seurat_integrated,
+							label = TRUE,
+							split.by = "sample")  + NoLegend()
 
-		# find markers for every cluster compared to all remaining cells, report only the positive ones
-		DefaultAssay(seurat_integrated) <- "RNA"
+		saveRDS(seurat_integrated, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
 
 		pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
 		print(umap_integrated_res)
+		print(p3)
+		print(pcs_plot)
 		print("made plots for SC norm")
 		dev.off()
 
+		#Exploration of the PCs driving the different clusters
+		columns <- c(paste0("PC_", 1:dim),
+							"seurat_clusters",
+							"UMAP_1", "UMAP_2")
+
+		# Extracting this data from the seurat object
+		pc_data <- FetchData(seurat_integrated, vars = columns)
+
+		# Adding cluster label to center of cluster on UMAP
+		umap_label <- FetchData(seurat_integrated,
+														vars = c("seurat_clusters", "UMAP_1", "UMAP_2"))  %>%
+			dplyr::group_by(seurat_clusters) %>%
+			dplyr::summarise(x=mean(UMAP_1), y=mean(UMAP_2))
+
+		# Plotting a UMAP plot for each of the PCs
+		pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
+
+		map_pcas = map(paste0("PC_", 1:dim), function(pc){
+						ggplot(pc_data,
+									 aes(UMAP_1, UMAP_2)) +
+										geom_point(aes_string(color=pc),
+															 alpha = 0.7) +
+										scale_color_gradient(guide = FALSE,
+																				 low = "grey90",
+																				 high = "blue")  +
+										geom_text(data=umap_label,
+															aes(label=seurat_clusters, x, y)) +
+										ggtitle(pc)}) %>%
+						plot_grid(plotlist = .)
+		print(map_pcas)
+		dev.off()
 	}
 
 	if(!(norm_method_used == "SC")){
@@ -185,22 +216,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	anchors <- FindIntegrationAnchors(object.list = dat, dims = 1:dim,
 		anchor.features = anch_features)
 
-	#We then pass these anchors to the IntegrateData function, which returns a Seurat object.
-	#The returned object will contain a new Assay, which holds an integrated
-	#(or 'batch-corrected') expression matrix for all cells, enabling them to be jointly analyzed.
-
 	combined <- IntegrateData(anchorset = anchors, dims = 1:dim)
-
-	#After running IntegrateData, the Seurat object will contain a new Assay with
-	#the integrated expression matrix. Note that the original (uncorrected values)
-	#are still stored in the object in the other assay, so you can switch back and forth.
-
-	#We can then use this new integrated matrix for downstream analysis and
-	#visualization. Here we scale the integrated data, run PCA, and
-	#visualize the results with UMAP. The integrated datasets cluster by cell type, instead of by technology.
-
-	# switch to integrated assay. The variable features of this assay are automatically
-	# set during IntegrateData
 
 	# specify that we will perform downstream analysis on the corrected data note that the original
 	# unmodified data still resides in the 'RNA' assay
@@ -213,16 +229,14 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	combined <- RunPCA(combined, verbose = FALSE)
 
 	# Examine and visualize PCA results a few different ways
-	print(combined[["pca"]], dims = 1:5, nfeatures = 5)
+	print(combined[["pca"]], dims = 1:20, nfeatures = 5)
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_dimensionality_exploration", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
 	v = VizDimLoadings(combined, dims = 1:2, reduction = "pca")
-	d = DimHeatmap(combined, dims = 1:15, cells = 500, balanced = TRUE)
+	d = DimHeatmap(combined, dims = 1:dim, cells = 500, balanced = TRUE)
 	el = ElbowPlot(combined)
-
 	print(v)
 	print(d)
 	print(el)
-
 	dev.off()
 
 	# t-SNE and Clustering
@@ -235,15 +249,123 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
 	p2 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=6)+
 	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
+	p3 = DimPlot(combined,
+        label = TRUE,
+        split.by = "sample")  + NoLegend()
 	print(p1 + p2)
+	print(p3)
 	dev.off()
 
 	saveRDS(combined, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
+
+	#Exploration of the PCs driving the different clusters
+	columns <- c(paste0("PC_", 1:dim),
+            "seurat_clusters",
+            "UMAP_1", "UMAP_2")
+
+	# Extracting this data from the seurat object
+	pc_data <- FetchData(combined, vars = columns)
+
+	# Adding cluster label to center of cluster on UMAP
+	umap_label <- FetchData(combined,
+	                        vars = c("seurat_clusters", "UMAP_1", "UMAP_2"))  %>%
+	  dplyr::group_by(seurat_clusters) %>%
+	  dplyr::summarise(x=mean(UMAP_1), y=mean(UMAP_2))
+
+	# Plotting a UMAP plot for each of the PCs
+	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
+
+	map_pcas = map(paste0("PC_", 1:dim), function(pc){
+	        ggplot(pc_data,
+	               aes(UMAP_1, UMAP_2)) +
+	                geom_point(aes_string(color=pc),
+	                           alpha = 0.7) +
+	                scale_color_gradient(guide = FALSE,
+	                                     low = "grey90",
+	                                     high = "blue")  +
+	                geom_text(data=umap_label,
+	                          aes(label=seurat_clusters, x, y)) +
+	                ggtitle(pc)}) %>%
+	        plot_grid(plotlist = .)
+	print(map_pcas)
+
+	# find markers for every cluster compared to all remaining cells, report only the positive ones
+	# Select the RNA counts slot to be the default assay
+	DefaultAssay(combined) <- "RNA"
+	combined.markers <- FindAllMarkers(combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+	combined.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
+	print(markers_heatmap)
+
+	#add some feature plots
+	# Normalize RNA data for visualization purposes
+	seurat_integrated <- NormalizeData(combined, verbose = FALSE)
+
+	#CD14+ monocyte markers
+	f1 = FeaturePlot(combined,
+            reduction = "umap",
+            features = c("CD14", "LYZ"),
+            sort.cell = TRUE,
+            min.cutoff = 'q10',
+            label = TRUE)
+
+	#FCGR3A+ monocyte markers
+	f2 = FeaturePlot(seurat_integrated,
+					            reduction = "umap",
+					            features = c("FCGR3A", "MS4A7"),
+					            sort.cell = TRUE,
+					            min.cutoff = 'q10',
+					            label = TRUE)
+
+	#Macrophages
+	f3 = FeaturePlot(seurat_integrated,
+											            reduction = "umap",
+											            features = c("MARCO", "ITGAM", "ADGRE1"),
+											            sort.cell = TRUE,
+											            min.cutoff = 'q10',
+											            label = TRUE)
+
+	#B cells
+	f4 = FeaturePlot(seurat_integrated,
+											            reduction = "umap",
+											            features = c("CD79A", "MS4A1"),
+											            sort.cell = TRUE,
+											            min.cutoff = 'q10',
+											            label = TRUE)
+
+  #CD4+ T cells
+	f5 = FeaturePlot(seurat_integrated,
+																  reduction = "umap",
+																	features = c("CD3D", "IL7R", "CCR7"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+  #CD8+ T cells
+	f6 = FeaturePlot(seurat_integrated,
+		                              reduction = "umap",
+																	features = c("CD3D", "CD8A"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+  #NK cells cells
+	f7 = FeaturePlot(seurat_integrated,
+																	reduction = "umap",
+																	features = c("GNLY", "NKG7"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+	dev.off()
+
 	print("finished this analysis")
 
 }
 } #end function
 
 get_integrated_obj(all_objects, 20, 2000, norm_type)
+get_integrated_obj(all_objects, 40, 2000, norm_type)
 
 sessionInfo()

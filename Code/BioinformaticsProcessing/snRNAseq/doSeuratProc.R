@@ -7,7 +7,7 @@ doSeuratProc <- function(exp, samp, mito_rm, nc_rm, norm_type){
     print(dim(exp))
     print(paste("genes in matrix =", dim(exp)[1]))
 
-    if(nc_rm == "yes"){
+    if(nc_rm == "yes"){ #remove non coding genes
       z = which(rownames(exp) %in% pc_genes)
       exp = exp[z,]
     }
@@ -35,7 +35,7 @@ doSeuratProc <- function(exp, samp, mito_rm, nc_rm, norm_type){
     ggtitle(object_fl@meta.data$sample[1])
     print(feature_plot)
 
-    #4. Filter cells that have unique feature counts over 2,500 or less than 200
+    #4. Filter cells that have unique feature counts over 5,000 or less than 200
     object_fl <- subset(object_fl, subset = nFeature_RNA > 200 & percent.mt < 5 & nFeature_RNA < 5000)
     print(object_fl)
 
