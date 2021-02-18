@@ -106,7 +106,7 @@ get_more_markers = function(dat, analysis_type){
 	#B cell genes
 	f5 = FeaturePlot(combined, features = c("EBF1", "BACH2", "LMO2", "FCER2", "CD27", "ACSM3",
   "KLHL6", "BCL2", "CD200", "MS4A1", "ARHGAP24", "IGHM", "BANK1", "PTPRG",
-	"MKI67", "TOP2A", "BCL6", "TBC1D9", "LMO2", "IL21R"),
+	"MKI67", "TOP2A", "BCL6", "TBC1D9", "LMO2", "IL21R", "CD44", "PDL2", "CD80", "NT5E"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f5)
 
