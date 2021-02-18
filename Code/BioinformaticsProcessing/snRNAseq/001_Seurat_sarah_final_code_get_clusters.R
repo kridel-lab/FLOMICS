@@ -172,16 +172,9 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 		# find markers for every cluster compared to all remaining cells, report only the positive ones
 		DefaultAssay(seurat_integrated) <- "RNA"
-		combined.markers <- FindAllMarkers(seurat_integrated, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 
 		pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_SCnorm_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""))
 		print(umap_integrated_res)
-
-		#combined.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
-		top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
-		markers_heatmap=DoHeatmap(seurat_integrated, features = top10$gene) + NoLegend()
-
-		print(markers_heatmap)
 		print("made plots for SC norm")
 		dev.off()
 
@@ -246,18 +239,6 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	dev.off()
 
 	saveRDS(combined, file = paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.rds", sep=""))
-
-	# find markers for every cluster compared to all remaining cells, report only the positive ones
-	combined.markers <- FindAllMarkers(combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-	combined.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
-
-	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
-
-	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
-	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
-	print(markers_heatmap)
-	dev.off()
-
 	print("finished this analysis")
 
 }
