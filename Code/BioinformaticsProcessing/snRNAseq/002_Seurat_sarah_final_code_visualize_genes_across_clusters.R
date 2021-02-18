@@ -37,14 +37,24 @@ lapply(packages, require, character.only = TRUE)
 #data
 #-------------------------------------------------------------------------------
 
-combined = readRDS(paste(output, "seurat_integrated_dim_20_2000_2021-02-16_samples_clusters.rds", sep=""))
+args = commandArgs(trailingOnly = TRUE) #patient ID
+input = args[1]
+print(input) #name of seurat object that should be evaluated
+analysis_type=unlist(strsplit(unlist(strsplit(input, "/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"))[2], ".rds"))
+
+#testing
+#input=paste(output, "pc_genes_only_yes_seurat_integrated_SCnorm_dim_20_2000_2021-02-17_samples_clusters.rds", sep="")
+
+combined = readRDS(input)
 
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------
 
-get_more_markers = function(dat){
+get_more_markers = function(dat, analysis_type){
+
 	combined = dat
+	DefaultAssay(combined) <- "RNA"
 
 	#1. Find cluster markers++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -53,52 +63,27 @@ get_more_markers = function(dat){
 		 min.pct = 0.25, logfc.threshold = 0.25, test.use="roc")
 	combined.markers = as.data.table(combined.markers)
 
-	#output_file = paste(unlist(strsplit(dat, ".rds")), "_markers.csv", sep="")
-
-	#write.csv(combined.markers, file=output_file,
-	#quote=F, row.names=F)
-
 	#2. Visualize cluster markers+++++++++++++++++++++++++++++++++++++++++++++++++
 
-	DefaultAssay(combined) <- "RNA"
 	combined <- NormalizeData(combined)
 
-#	pdf(paste(date, unlist(strsplit(dat, ".rds")), "_gene_markers.pdf", sep="_"), width=18, height=12)
+	pdf(paste(date, "_", analysis_type, ".pdf", sep=""),width=18, height=16)
 
-	pdf(paste(date, "dim20_no227_gene_markers.pdf", sep="_"),width=18, height=12)
 	genes=c("CD3D","CD3G","CD4","CD8A","CCR7","SELL","TCF7","IL7R","TYMS","MKI67","PRF1","CCL5")
-	#v = VlnPlot(combined, features = genes, pt.size = 0.0625)
-	#print(v)
-
 	genes2=c("GZMK","GZMB","GZMA","PRDM1","CD69","TNF","IFNG","PTPRC","CCL4","KLRG1","TIGIT","CTLA4")
-	#v2 = VlnPlot(combined, features = genes2, pt.size = 0.0625)
-	#print(v2)
-
 	genes3=c("PDCD1","HAVCR2","LAG3","TOX","TOX2","TBX21","EOMES","CD274","FOXP3","ENTPD1","CXCL13","TNFSF8")
-	#v3 = VlnPlot(combined, features = genes3, pt.size = 0.0625)
-	#print(v3)
-
 	genes4=c("IL21","PTPN13","IL6R","CXCR5","BTLA","CD200","BCL2","ICOS","TOP2A","CR2")
-	#v4 = VlnPlot(combined, features = genes4, pt.size = 0.0625)
-	#print(v4)
 
 	genesall=c("CD3D","CD3G","CD4","CD8A","CCR7","SELL","TCF7","IL7R","TYMS","MKI67","PRF1","CCL5",
 	"GZMK","GZMB","GZMA","PRDM1","CD69","TNF","IFNG","PTPRC","CCL4","KLRG1","TIGIT","CTLA4",
 	"PDCD1","HAVCR2","LAG3","TOX","TOX2","TBX21","EOMES","CD274","FOXP3","ENTPD1","CXCL13","TNFSF8",
 	"IL21","PTPN13","IL6R","CXCR5","BTLA","CD200","BCL2","ICOS","TOP2A","CR2")
 
-	v5 = VlnPlot(combined, features = c("NCAM1", "MS4A1", "PTPRC", "BCL6", "CD68", "CD163", "CXCR5",
-					    "CD69", "CD45RA", "CD45RO", "CCR7"))
-	#print(v5)
-
 	#overlay on UMAP clusters
 	f = FeaturePlot(combined, features = c("NCAM1", "MS4A1", "PTPRC", "BCL6", "CD68", "CD163", "CXCR5",
 					    "CD69", "CD45RA", "CD45RO", "CCR7", "ICOS"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f)
-
-	v6 = VlnPlot(combined, features = c("CD79A", "CCL5", "IGKC", "IGLC2", "IGLC3", "CD19"))
-	print(v6)
 
 	#overlay on UMAP clusters
 	f2 = FeaturePlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5",
@@ -112,26 +97,39 @@ get_more_markers = function(dat){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f3)
 
+	#overlay on UMAP clusters
 	f4 = FeaturePlot(combined, features = c("CD3G", "CD8A", "BANK1", "VIM", "LYZ",
 	"ST8SIA1", "ICA1", "IL7R", "TRAC", "CTLA4", "IKZF2"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f4)
 
+	#B cell genes
+	f5 = FeaturePlot(combined, features = c("EBF1", "BACH2", "LMO2", "FCER2", "CD27", "ACSM3",
+  "KLHL6", "BCL2", "CD200", "MS4A1", "ARHGAP24", "IGHM", "BANK1", "PTPRG",
+	"MKI67", "TOP2A", "BCL6", "TBC1D9", "LMO2", "IL21R"),
+	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+	print(f5)
+
+	#T cell genes
+	f6 = FeaturePlot(combined, features = c("CD3D", "CD3G", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
+		"TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
+		"PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", "ICOS",
+		"MKI67", "TCF7", "TOP2A"),
+	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+	print(f6)
+
+	#other cluster genes
+	f7 = FeaturePlot(combined, features = c("CXCL12", "SDF1", "VCAM1", "CR2", "CD21", "CD36",
+  "TFPI", "LDB2", "CD3G", "HAVCR2", "CD274", "ILR6", "CD68", "CSF1R", "IFNGR1",
+	"SPARCL1", "PECAM1", "VCAM1", "CD36", "CUX2", "SLC7A11", "CD4"),
+	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+	print(f7)
+
   combined <- ScaleData(combined, verbose = FALSE)
 	h = DoHeatmap(combined, features = genesall, assay="RNA")
 	print(h)
 
-  #cell cycle markers
-	#s.genes <- cc.genes$s.genes
-	#g2m.genes <- cc.genes$g2m.genes
-
-	#h2 = DoHeatmap(combined, features = s.genes,assay="RNA")
-	#print(h2)
-
-	#h3 = DoHeatmap(combined, features = g2m.genes,assay="RNA")
-	#print(h3)
-
-	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 20, wt = avg_diff)
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_diff)
 	h3 = DoHeatmap(combined, features = top10$gene)
 	print(h3)
 
@@ -140,4 +138,4 @@ get_more_markers = function(dat){
 
 }
 
-get_more_markers(combined)
+get_more_markers(combined, analysis_type)
