@@ -78,7 +78,7 @@ get_degs = function(dat,clus1,clus2){
 	#find markers
 	diffexp.markers <- FindMarkers(combined, ident.1 = clus1, ident.2 = clus2, min.pct = 0.25,
 		 		logfc.threshold = log(2), test.use="roc")
-	
+
 	diffexp.markers$gene=rownames(diffexp.markers)
 	diffexp.markers  = as.data.table(diffexp.markers)
 
@@ -90,4 +90,3 @@ get_degs = function(dat,clus1,clus2){
 }
 
 get_degs(clusters,clus1="5",clus2="3")
-

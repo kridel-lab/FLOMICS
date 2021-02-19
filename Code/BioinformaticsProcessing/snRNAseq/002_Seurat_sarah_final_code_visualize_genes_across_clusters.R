@@ -60,7 +60,7 @@ get_more_markers = function(dat, analysis_type){
 
 	# find markers for every cluster compared to all remaining cells, report only the positive ones
 	combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
-		 min.pct = 0.25, logfc.threshold = 0.25)
+		 min.pct = 0.3, logfc.threshold = 0.3)
 	combined.markers = as.data.table(combined.markers)
 
 	#2. Visualize cluster markers+++++++++++++++++++++++++++++++++++++++++++++++++
@@ -130,8 +130,133 @@ get_more_markers = function(dat, analysis_type){
 	print(h)
 
 	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_diff)
-	h3 = DoHeatmap(combined, features = top10$gene)
+	h3 = DoHeatmap(combined, features = top10$gene, assay="RNA")
 	print(h3)
+
+	#Exploration of the PCs driving the different clusters
+	columns <- c(paste0("PC_", 1:dim),
+            "seurat_clusters",
+            "UMAP_1", "UMAP_2")
+
+	# Extracting this data from the seurat object
+	pc_data <- FetchData(combined, vars = columns)
+
+	# Adding cluster label to center of cluster on UMAP
+	umap_label <- FetchData(combined,
+	                        vars = c("seurat_clusters", "UMAP_1", "UMAP_2"))  %>%
+	  dplyr::group_by(seurat_clusters) %>%
+	  dplyr::summarise(x=mean(UMAP_1), y=mean(UMAP_2))
+
+	# Plotting a UMAP plot for each of the PCs
+	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
+
+	map_pcas = map(paste0("PC_", 1:dim), function(pc){
+	        ggplot(pc_data,
+	               aes(UMAP_1, UMAP_2)) +
+	                geom_point(aes_string(color=pc),
+	                           alpha = 0.7) +
+	                scale_color_gradient(guide = FALSE,
+	                                     low = "grey90",
+	                                     high = "blue")  +
+	                geom_text(data=umap_label,
+	                          aes(label=seurat_clusters, x, y)) +
+	                ggtitle(pc)}) %>%
+	        plot_grid(plotlist = .)
+	print(map_pcas)
+
+	# find markers for every cluster compared to all remaining cells, report only the positive ones
+	# Select the RNA counts slot to be the default assay
+	DefaultAssay(combined) <- "RNA"
+	combined <- NormalizeData(combined)
+	combined <- ScaleData(combined)
+
+	obj.markers <- FindAllMarkers(object = combined, min.pct = 0.5, thresh.use = 0.3)
+	obj.markers %>% group_by(cluster) %>% top_n(2, avg_logFC)
+	top10 <- obj.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
+	heat=DoHeatmap(object = combined, features = top10$gene)
+	print(heat)
+	dev.off()
+
+	combined.markers <- FindAllMarkers(combined, only.pos = TRUE, min.pct = 0.5, logfc.threshold = 0.3)
+
+	#save markers in file
+	markers = as.data.table(combined.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_logFC))
+	file_name=paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_markers_all.txt", sep="")
+	write.table(markers, file_name, row.names=F, sep=";", quote=F)
+
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
+	print(markers_heatmap)
+
+	#add some feature plots
+	# Normalize RNA data for visualization purposes
+	seurat_integrated <- NormalizeData(combined, verbose = FALSE)
+
+	#CD14+ monocyte markers
+	f1 = FeaturePlot(combined,
+            reduction = "umap",
+            features = c("CD14", "LYZ"),
+            sort.cell = TRUE,
+            min.cutoff = 'q10',
+            label = TRUE)
+
+	#FCGR3A+ monocyte markers
+	f2 = FeaturePlot(combined,
+					            reduction = "umap",
+					            features = c("FCGR3A", "MS4A7"),
+					            sort.cell = TRUE,
+					            min.cutoff = 'q10',
+					            label = TRUE)
+
+	#Macrophages
+	f3 = FeaturePlot(combined,
+											            reduction = "umap",
+											            features = c("MARCO", "ITGAM", "ADGRE1"),
+											            sort.cell = TRUE,
+											            min.cutoff = 'q10',
+											            label = TRUE)
+
+	#B cells
+	f4 = FeaturePlot(combined,
+											            reduction = "umap",
+											            features = c("CD79A", "MS4A1"),
+											            sort.cell = TRUE,
+											            min.cutoff = 'q10',
+											            label = TRUE)
+
+  #CD4+ T cells
+	f5 = FeaturePlot(combined,
+																  reduction = "umap",
+																	features = c("CD3D", "IL7R", "CCR7"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+  #CD8+ T cells
+	f6 = FeaturePlot(combined,
+		                              reduction = "umap",
+																	features = c("CD3D", "CD8A"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+  #NK cells cells
+	f7 = FeaturePlot(combined,
+																	reduction = "umap",
+																	features = c("GNLY", "NKG7"),
+																	sort.cell = TRUE,
+																	min.cutoff = 'q10',
+																	label = TRUE)
+
+  print(f1)
+	print(f2)
+	print(f3)
+	print(f4)
+	print(f5)
+	print(f6)
+	print(f7)
+	dev.off()
+
 
 	dev.off()
 	print("done")
