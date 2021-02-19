@@ -358,6 +358,13 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 																	min.cutoff = 'q10',
 																	label = TRUE)
 
+  print(f1)
+	print(f2)
+	print(f3)
+	print(f4)
+	print(f5)
+	print(f6)
+	print(f7)
 	dev.off()
 
 	print("finished this analysis")
@@ -366,6 +373,5 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 } #end function
 
 get_integrated_obj(all_objects, dim=20, 2000, norm_type)
-get_integrated_obj(all_objects, dim=40, 2000, norm_type)
 
 sessionInfo()

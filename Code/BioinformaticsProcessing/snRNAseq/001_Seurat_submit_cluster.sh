@@ -13,9 +13,10 @@ module load R/4.0.0
 cd /cluster/projects/kridelgroup/FLOMICS
 
 #run once without mitochondrial genes and protein coding genes only
-nc_genes_rm=yes
-norm_method=SC
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
+#nc_genes_rm=yes
+#norm_method=SC
+
+#Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
 
 #protein coding genes only but use standard workflow
 nc_genes_rm=yes
@@ -23,11 +24,11 @@ norm_method=not_SC
 Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
 
 #run once without mitochondrial genes and all genes in matrix
-nc_genes_rm=no
-norm_method=SC
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
+#nc_genes_rm=no
+#norm_method=SC
+#Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
 
 #all genes but use standard workflow
-nc_genes_rm=no
-norm_method=not_SC
-Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
+#nc_genes_rm=no
+#norm_method=not_SC
+#Rscript /cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/001_Seurat_sarah_final_code_get_clusters.R $nc_genes_rm $norm_method
