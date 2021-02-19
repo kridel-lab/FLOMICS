@@ -19,7 +19,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
 
 #output directory
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
 
 #load libraries
 library(ellipsis)
@@ -40,10 +40,10 @@ lapply(packages, require, character.only = TRUE)
 args = commandArgs(trailingOnly = TRUE) #patient ID
 input = args[1]
 print(input) #name of seurat object that should be evaluated
-analysis_type=unlist(strsplit(unlist(strsplit(input, "/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"))[2], ".rds"))
+analysis_type=unlist(strsplit(unlist(strsplit(input, "/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"))[2], ".rds"))
 
 #testing
-#input=paste(output, "pc_genes_only_yes_seurat_integrated_SCnorm_dim_20_2000_2021-02-17_samples_clusters.rds", sep="")
+#input=paste(output, "pc_genes_only_yes_seurat_integrated_dim_20_2000_2021-02-19_samples_clusters.rds", sep="")
 
 combined = readRDS(input)
 
@@ -54,20 +54,33 @@ combined = readRDS(input)
 get_more_markers = function(dat, analysis_type){
 
 	combined = dat
-	DefaultAssay(combined) <- "RNA"
 
 	#1. Find cluster markers++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	# find markers for every cluster compared to all remaining cells, report only the positive ones
+	#using integrated seurat object
 	combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
-		 min.pct = 0.3, logfc.threshold = 0.3)
+		 min.pct = 0.5, logfc.threshold = 0.3)
 	combined.markers = as.data.table(combined.markers)
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+	h3 = DoHeatmap(combined, features = top10$gene)
+
+	#save markers in file
+	markers = as.data.table(combined.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_logFC))
+	file_name=paste(output, "pc_genes_only_yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.txt", sep="")
+	write.table(markers, file_name, row.names=F, sep=";", quote=F)
+
+	file_name=paste(output, "pc_genes_only_yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.pdf", sep="")
+	pdf(file_name, width=15, height=20)
+	print(h3)
+	dev.off()
 
 	#2. Visualize cluster markers+++++++++++++++++++++++++++++++++++++++++++++++++
 
+	DefaultAssay(combined) <- "RNA"
 	combined <- NormalizeData(combined)
 
-	pdf(paste(date, "_", analysis_type, ".pdf", sep=""),width=18, height=16)
+	pdf(paste(output, date, "_", analysis_type, ".pdf", sep=""),width=18, height=16)
 
 	genes=c("CD3D","CD3G","CD4","CD8A","CCR7","SELL","TCF7","IL7R","TYMS","MKI67","PRF1","CCL5")
 	genes2=c("GZMK","GZMB","GZMA","PRDM1","CD69","TNF","IFNG","PTPRC","CCL4","KLRG1","TIGIT","CTLA4")
@@ -125,16 +138,24 @@ get_more_markers = function(dat, analysis_type){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f7)
 
+	#scale data and make heatmap with some known genes
   combined <- ScaleData(combined, verbose = FALSE)
 	h = DoHeatmap(combined, features = genesall, assay="RNA")
 	print(h)
 
-	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_diff)
-	h3 = DoHeatmap(combined, features = top10$gene, assay="RNA")
+	#get combined markers again using normalized and scaled data
+	combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
+		 min.pct = 0.5, logfc.threshold = 0.3)
+	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+	h3 = DoHeatmap(combined, features = top10$gene)
 	print(h3)
+	dev.off()
+
+	#go back to integrated object
+	DefaultAssay(combined) <- "integrated"
 
 	#Exploration of the PCs driving the different clusters
-	columns <- c(paste0("PC_", 1:dim),
+	columns <- c(paste0("PC_", 1:20),
             "seurat_clusters",
             "UMAP_1", "UMAP_2")
 
@@ -148,8 +169,7 @@ get_more_markers = function(dat, analysis_type){
 	  dplyr::summarise(x=mean(UMAP_1), y=mean(UMAP_2))
 
 	# Plotting a UMAP plot for each of the PCs
-	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_heatmap.pdf", sep=""), width=13, height=20)
-
+	pdf(paste(output, "pc_genes_only_", "yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_PCAs.pdf", sep=""), width=15, height=15)
 	map_pcas = map(paste0("PC_", 1:dim), function(pc){
 	        ggplot(pc_data,
 	               aes(UMAP_1, UMAP_2)) +
@@ -163,100 +183,6 @@ get_more_markers = function(dat, analysis_type){
 	                ggtitle(pc)}) %>%
 	        plot_grid(plotlist = .)
 	print(map_pcas)
-
-	# find markers for every cluster compared to all remaining cells, report only the positive ones
-	# Select the RNA counts slot to be the default assay
-	DefaultAssay(combined) <- "RNA"
-	combined <- NormalizeData(combined)
-	combined <- ScaleData(combined)
-
-	obj.markers <- FindAllMarkers(object = combined, min.pct = 0.5, thresh.use = 0.3)
-	obj.markers %>% group_by(cluster) %>% top_n(2, avg_logFC)
-	top10 <- obj.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
-	heat=DoHeatmap(object = combined, features = top10$gene)
-	print(heat)
-	dev.off()
-
-	combined.markers <- FindAllMarkers(combined, only.pos = TRUE, min.pct = 0.5, logfc.threshold = 0.3)
-
-	#save markers in file
-	markers = as.data.table(combined.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_logFC))
-	file_name=paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters_markers_all.txt", sep="")
-	write.table(markers, file_name, row.names=F, sep=";", quote=F)
-
-	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
-	markers_heatmap=DoHeatmap(combined, features = top10$gene) + NoLegend()
-	print(markers_heatmap)
-
-	#add some feature plots
-	# Normalize RNA data for visualization purposes
-	seurat_integrated <- NormalizeData(combined, verbose = FALSE)
-
-	#CD14+ monocyte markers
-	f1 = FeaturePlot(combined,
-            reduction = "umap",
-            features = c("CD14", "LYZ"),
-            sort.cell = TRUE,
-            min.cutoff = 'q10',
-            label = TRUE)
-
-	#FCGR3A+ monocyte markers
-	f2 = FeaturePlot(combined,
-					            reduction = "umap",
-					            features = c("FCGR3A", "MS4A7"),
-					            sort.cell = TRUE,
-					            min.cutoff = 'q10',
-					            label = TRUE)
-
-	#Macrophages
-	f3 = FeaturePlot(combined,
-											            reduction = "umap",
-											            features = c("MARCO", "ITGAM", "ADGRE1"),
-											            sort.cell = TRUE,
-											            min.cutoff = 'q10',
-											            label = TRUE)
-
-	#B cells
-	f4 = FeaturePlot(combined,
-											            reduction = "umap",
-											            features = c("CD79A", "MS4A1"),
-											            sort.cell = TRUE,
-											            min.cutoff = 'q10',
-											            label = TRUE)
-
-  #CD4+ T cells
-	f5 = FeaturePlot(combined,
-																  reduction = "umap",
-																	features = c("CD3D", "IL7R", "CCR7"),
-																	sort.cell = TRUE,
-																	min.cutoff = 'q10',
-																	label = TRUE)
-
-  #CD8+ T cells
-	f6 = FeaturePlot(combined,
-		                              reduction = "umap",
-																	features = c("CD3D", "CD8A"),
-																	sort.cell = TRUE,
-																	min.cutoff = 'q10',
-																	label = TRUE)
-
-  #NK cells cells
-	f7 = FeaturePlot(combined,
-																	reduction = "umap",
-																	features = c("GNLY", "NKG7"),
-																	sort.cell = TRUE,
-																	min.cutoff = 'q10',
-																	label = TRUE)
-
-  print(f1)
-	print(f2)
-	print(f3)
-	print(f4)
-	print(f5)
-	print(f6)
-	print(f7)
-	dev.off()
-
 
 	dev.off()
 	print("done")
