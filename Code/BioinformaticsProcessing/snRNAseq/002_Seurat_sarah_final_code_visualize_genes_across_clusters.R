@@ -170,7 +170,7 @@ get_more_markers = function(dat, analysis_type){
 
 	# Plotting a UMAP plot for each of the PCs
 	pdf(paste(output, "pc_genes_only_", "yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_PCAs.pdf", sep=""), width=15, height=15)
-	map_pcas = map(paste0("PC_", 1:dim), function(pc){
+	map_pcas = map(paste0("PC_", 1:20), function(pc){
 	        ggplot(pc_data,
 	               aes(UMAP_1, UMAP_2)) +
 	                geom_point(aes_string(color=pc),
