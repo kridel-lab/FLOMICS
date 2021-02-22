@@ -86,7 +86,7 @@ genesall = c("KIF18B", "MIR155HG", "TOP2A", "MKI67", "ARHGAP24",
 genesall = unique(genesall)
 
 #get differentially expressed genes between different B cell clusters
-get_degs = function(dat,clus1,clus2){
+get_degs = function(dat,clus1,clus2, clus3){
 	seurat_obj = dat
 
 	#1. Find cluster markers that are differentially expressed between clusters
@@ -95,37 +95,32 @@ get_degs = function(dat,clus1,clus2){
 
 	#find markers
 	diffexp.markers <- FindMarkers(seurat_obj, ident.1 = clus1,
-		ident.2 = clus2, only.pos=TRUE, min.pct = 0.3, logfc.threshold = 0.25)
+		ident.2 = c(clus2, clus3), only.pos=TRUE, min.pct = 0.3, logfc.threshold = 0.25)
 
 	diffexp.markers$gene=rownames(diffexp.markers)
 	diffexp.markers  = as.data.table(diffexp.markers)
 	diffexp.markers$clust1 = clus1
-	diffexp.markers$clust2 = clus2
+	diffexp.markers$clust2 = paste(clus2, clus3, sep="_")
 	print(head(diffexp.markers))
 	return(diffexp.markers)
 	print("done")
 
 }
 
-c0vs1 = get_degs(combined, 0, 1)
-c0vs2 = get_degs(combined, 0, 2)
-c0vs4 = get_degs(combined, 0, 4)
-c0vs10 = get_degs(combined, 0, 10)
-c0vs13 = get_degs(combined, 0, 13)
-c0vs12 = get_degs(combined, 0, 12)
-c0vs19 = get_degs(combined, 0, 19)
-c0vs14 = get_degs(combined, 0, 14)
-c1vs2 = get_degs(combined, 1, 2)
-c1vs4 = get_degs(combined, 1, 4)
-c1vs10 = get_degs(combined, 1, 10)
-c2vs4 = get_degs(combined, 2, 4)
-c2vs10 = get_degs(combined, 2, 10)
+c0vs1 = get_degs(combined, 0, 1, 2)
+c0vs4 = get_degs(combined, 0, 4, 10)
+c0vs13 = get_degs(combined, 0, 12, 13)
+c0vs19 = get_degs(combined, 0, 14, 19)
+c1vs2 = get_degs(combined, 1, 0, 2)
+c1vs4 = get_degs(combined, 1, 4, 10)
+c2vs4 = get_degs(combined, 2, 0, 1)
+c2vs10 = get_degs(combined, 2, 4, 10)
 
-all_genes = rbind(c0vs1, c0vs2, c0vs4, c0vs10, c0vs13, c0vs12, c0vs19, c0vs14,
-c1vs2, c1vs4, c1vs10, c2vs4, c2vs10)
+all_genes = rbind(c0vs1, c0vs4, c0vs13, c0vs19,
+c1vs2, c1vs4, c2vs4, c2vs10)
 integrated_genes = rownames(combined)
 genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.6, pct.2 < 0.4, avg_logFC > 0.5, gene %in% integrated_genes)$gene)
-genes_b_plot = unique(filter(all_genes, (clust1 == 0 & clust2==1) | (clust1 == 0 & clust2==2) | (clust1 == 1 & clust2==2), avg_logFC > 0.5)$gene)
+#genes_b_plot = unique(filter(all_genes, (clust1 == 0 & clust2==1) | (clust1 == 0 & clust2==2) | (clust1 == 1 & clust2==2), avg_logFC > 0.5)$gene)
 
 #cells_t=c("B cells_0", "B cells_1", "B cells_2", "naive B or malignant B_9",
 #"proliferating B cell_11", "memory B cell_12", "Cluster 13")
@@ -138,15 +133,15 @@ combined <- NormalizeData(combined)
 #only keep B cell clusters
 combined_t <- subset(combined, idents = cells_t)
 #only keep differentially expressed genes related to different B cells
-subset.matrix <- combined_t[genes_b_plot, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
+subset.matrix <- combined_t[genes_b_plot_int, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 #scale the data
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
 #make some feature plots for the genes of interest in B cells
 pdf(paste(output, date, "_" , "B_cell_genes_featureplot.pdf", sep=""), height=10, width=10)
-FeaturePlot(combined, features = genes_b_plot, label=TRUE, cols=c("yellow", "purple"))
-DotPlot(combined_t, features = genes_b_plot) + RotatedAxis()
-DoHeatmap(subset(combined_t, downsample = 100), features = genes_b_plot, size = 3, assay="integrated")
+FeaturePlot(combined, features = genes_b_plot_int, label=TRUE, cols=c("yellow", "purple"))
+DotPlot(combined_t, features = genes_b_plot_int) + RotatedAxis()
+DoHeatmap(subset(combined_t, downsample = 100), features = genes_b_plot_int, size = 3, assay="integrated")
 dev.off()
 
 # Annotating and ordering cells by some meaningful feature(s):

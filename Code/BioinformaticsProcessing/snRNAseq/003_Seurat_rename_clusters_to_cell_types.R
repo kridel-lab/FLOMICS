@@ -46,7 +46,9 @@ date=Sys.Date()
 #data
 #-------------------------------------------------------------------------------
 
-combined = readRDS(paste(output, "seurat_integrated_dim_20_2000_2021-02-05_samples_clusters.rds", sep=""))
+file_name="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/pc_genes_only_yes_seurat_integrated_dim_20_2000_2021-02-19_samples_clusters.rds"
+
+combined = readRDS(file_name)
 
 #-------------------------------------------------------------------------------
 #analysis
