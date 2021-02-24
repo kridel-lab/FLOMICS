@@ -42,7 +42,7 @@ lapply(packages, require, character.only = TRUE)
 #1. read in processed seurat object
 #combined = readRDS("seurat_integrated_dim_10_2000_samples_clusters.rds")
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
-combined=readRDS(paste(output, "pc_genes_only_yes_seurat_integrated_dim_20_2000_2021-02-19_samples_clusters.rds", sep=""))
+combined=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds", sep=""))
 
 #-------------------------------------------------------------------------------
 #analysis
