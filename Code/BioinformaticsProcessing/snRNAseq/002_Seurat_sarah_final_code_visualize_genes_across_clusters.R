@@ -123,6 +123,12 @@ get_more_markers = function(dat, analysis_type){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f5)
 
+	#more B cell genes from https://www.nature.com/articles/s41590-018-0181-4#Sec32
+	f5b = FeaturePlot(combined, features = c("NOTCH2","JAM3", "PRDM1", "SDC1", "BCL6", "AICDA", "IRF4",
+	"MS4A1", "PAX5", "HLA-DRA", "POLH", "P2RY8", "GNA13", "SDC1"),
+	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+	print(f5b)
+
 	#T cell genes
 	f6 = FeaturePlot(combined, features = c("CD3D", "CD3G", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
 		"TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
@@ -161,6 +167,11 @@ get_more_markers = function(dat, analysis_type){
   "TFPI", "LDB2", "CD3G", "HAVCR2", "CD274", "ILR6", "CD68", "CSF1R", "IFNGR1",
 	"SPARCL1", "PECAM1", "VCAM1", "CD36", "CUX2", "SLC7A11", "CD4"), assay="integrated")
 	print(h4)
+
+	#B cell heatmap
+	h5 = DoHeatmap(combined, features = c("NOTCH2","JAM3", "PRDM1", "SDC1", "BCL6", "AICDA", "IRF4",
+	"MS4A1", "PAX5", "HLA-DRA", "POLH", "P2RY8", "GNA13", "SDC1"), assay="integrated")
+	print(h5)
 
 	dev.off()
 
