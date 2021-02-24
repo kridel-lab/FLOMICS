@@ -37,7 +37,7 @@ rownames(exprmat_CB) <- genes
 #get Seurat object and normalize it
 #SeuratObject = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
-SeuratObject=readRDS(paste(output, "pc_genes_only_yes_seurat_integrated_dim_20_2000_2021-02-19_samples_clusters.rds", sep=""))
+SeuratObject=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds", sep=""))
 
 DefaultAssay(SeuratObject) <- "RNA"
 SeuratObject <- NormalizeData(SeuratObject)
