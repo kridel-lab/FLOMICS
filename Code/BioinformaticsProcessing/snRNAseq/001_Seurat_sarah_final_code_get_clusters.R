@@ -202,7 +202,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	# t-SNE and Clustering
 	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
-	combined <- FindClusters(combined, resolution = 0.5)
+	combined <- FindClusters(combined, resolution = 0.3)
 	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
