@@ -19,16 +19,16 @@ source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 #data
 #----------------------------------------------------------------------
 
-bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/tier1_bisque_decomposed_samples.rds")
-bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/tier2_bisque_decomposed_samples.rds")
-bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Analysis-Files/Seurat/tier3_bisque_decomposed_samples.rds")
+bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier1_bisque_decomposed_samples.rds")
+bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier2_bisque_decomposed_samples.rds")
+bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier3_bisque_decomposed_samples.rds")
 
-old_labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+old_labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
 colnames(old_labels)[2] = "SAMPLE_ID"
 print(table(old_labels$SNFClust))
 
 #labels updated after mutations for n=31 plos medicine patients were reanalzyed
-labels = fread("/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
 colnames(labels)[2] = "SAMPLE_ID"
 labels$SNFClust = labels$SNFClust10Feb2021
 print(table(labels$SNFClust))
@@ -55,21 +55,31 @@ get_bisque_summ = function(dat, tier){
   patients_dat = unique(immune_cells[,c("SAMPLE_ID", "STAGE", "TYPE", "SNFClust", "InfinumClust", "tSeqClust")])
   head(immune_cells)
   immune_cells$cell_facet=""
-  z=which(immune_cells$cell_type %in% c("B cells_0", "B cells_1", "B cells_2", "naive B or malignant B_9",
-"proliferating B cell_11", "memory B cell_12", "Cluster 13"))
-  immune_cells$cell_facet[z] = "B cells"
-  z=which(immune_cells$cell_type %in% c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5",
-"naive T cells_7", "memory T cells_8", "proliferating T cell_17"))
-  immune_cells$cell_facet[z] = "T cells"
-  immune_cells$cell_facet[immune_cells$cell_facet==""] = "The others"
-  immune_cells = immune_cells[order(cell_facet, cell_type)]
-#  immune_cells$cell_type = factor(immune_cells$cell_type, levels=unique(immune_cells$cell_type))
 
-  immune_cells$cell_type = factor(immune_cells$cell_type, levels=c("B cells_0", "B cells_1",
-"B cells_2", "naive B or malignant B_9", "proliferating B cell_11", "memory B cell_12",
-"Cluster 13", "Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7", "memory T cells_8",
-"proliferating T cell_17", "Cluster 6", "macrophage or monocyte_10", "stromal cells_14",
-"endothelial cells_15", "Cluster 16", "macrophage or monocyte_18" ,"Cluster 19"))
+#  z=which(immune_cells$cell_type %in% c("B cells_0", "B cells_1", "B cells_2", "naive B or malignant B_9",
+#"proliferating B cell_11", "memory B cell_12", "Cluster 13"))
+#  immune_cells$cell_facet[z] = "B cells"
+
+  z=which(immune_cells$cell_type %in% c(0, 1, 2, 10, 13, 14))
+  immune_cells$cell_facet[z] = "B cells"
+
+#  z=which(immune_cells$cell_type %in% c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5",
+#"naive T cells_7", "memory T cells_8", "proliferating T cell_17"))
+#  immune_cells$cell_facet[z] = "T cells"
+
+  z=which(immune_cells$cell_type %in% c(5, 6, 7, 8, 9, 17))
+  immune_cells$cell_facet[z] = "T cells"
+
+  immune_cells$cell_facet[immune_cells$cell_facet==""] = "The others"
+
+  immune_cells = immune_cells[order(cell_facet, cell_type)]
+  immune_cells$cell_type = factor(immune_cells$cell_type, levels=unique(immune_cells$cell_type))
+
+#  immune_cells$cell_type = factor(immune_cells$cell_type, levels=c("B cells_0", "B cells_1",
+#"B cells_2", "naive B or malignant B_9", "proliferating B cell_11", "memory B cell_12",
+#"Cluster 13", "Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7", "memory T cells_8",
+#"proliferating T cell_17", "Cluster 6", "macrophage or monocyte_10", "stromal cells_14",
+#"endothelial cells_15", "Cluster 16", "macrophage or monocyte_18" ,"Cluster 19"))
 
   immune_cells$cell_facet = factor(immune_cells$cell_facet, levels=unique(immune_cells$cell_facet))
 
@@ -83,7 +93,7 @@ get_bisque_summ = function(dat, tier){
         dplyr::summarize(pval = wilcox.test(value ~ STAGE)$p.value))
   res_stage_analysis$fdr = p.adjust(res_stage_analysis$pval)
   res_stage_analysis$fdr=round(res_stage_analysis$fdr, digits=4)
-  stage_analysis=merge(stage_analysis, res_stage_analysis)
+  stage_analysis=merge(stage_analysis, res_stage_analysis, by="cell_type")
   z = which(duplicated(stage_analysis[,c("cell_type", "fdr")]))
   stage_analysis$fdr[z] = ""
 
@@ -93,7 +103,7 @@ get_bisque_summ = function(dat, tier){
         dplyr::summarize(pval = kruskal.test(value ~ TYPE)$p.value))
   res_type_analysis$fdr = p.adjust(res_type_analysis$pval)
   res_type_analysis$fdr=round(res_type_analysis$fdr, digits=4)
-  type_analysis=merge(type_analysis, res_type_analysis)
+  type_analysis=merge(type_analysis, res_type_analysis, by="cell_type")
   z = which(duplicated(type_analysis[,c("cell_type", "fdr")]))
   type_analysis$fdr[z] = ""
 
@@ -103,7 +113,7 @@ get_bisque_summ = function(dat, tier){
         dplyr::summarize(pval = wilcox.test(value ~ InfinumClust)$p.value))
   res_infi_analysis$fdr = p.adjust(res_infi_analysis$pval)
   res_infi_analysis$fdr=round(res_infi_analysis$fdr, digits=4)
-  infi_analysis=merge(infi_analysis, res_infi_analysis)
+  infi_analysis=merge(infi_analysis, res_infi_analysis, by="cell_type")
   z = which(duplicated(infi_analysis[,c("cell_type", "fdr")]))
   infi_analysis$fdr[z] = ""
 
@@ -113,7 +123,7 @@ get_bisque_summ = function(dat, tier){
         dplyr::summarize(pval = wilcox.test(value ~ SNFClust)$p.value))
   res_snf_analysis$fdr = p.adjust(res_snf_analysis$pval)
   res_snf_analysis$fdr=round(res_snf_analysis$fdr, digits=4)
-  snf_analysis=merge(snf_analysis, res_snf_analysis)
+  snf_analysis=merge(snf_analysis, res_snf_analysis, by="cell_type")
   z = which(duplicated(snf_analysis[,c("cell_type", "fdr")]))
   snf_analysis$fdr[z] = ""
 
@@ -123,7 +133,7 @@ get_bisque_summ = function(dat, tier){
         dplyr::summarize(pval = wilcox.test(value ~ tSeqClust)$p.value))
   res_tseq_analysis$fdr = p.adjust(res_tseq_analysis$pval)
   res_tseq_analysis$fdr=round(res_tseq_analysis$fdr, digits=4)
-  tseq_analysis=merge(tseq_analysis, res_tseq_analysis)
+  tseq_analysis=merge(tseq_analysis, res_tseq_analysis, by="cell_type")
   z = which(duplicated(tseq_analysis[,c("cell_type", "fdr")]))
   tseq_analysis$fdr[z] = ""
 

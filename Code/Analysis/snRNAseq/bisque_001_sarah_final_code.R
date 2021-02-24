@@ -39,7 +39,9 @@ exp = as.matrix(exp)
 #scRNA-seq data (with counts also in matrix format) as follows:
 
 #can automatically convert from seurat object
-sc.eset = readRDS("Analysis-Files/Seurat/seurat_objects/sc_eset_for_bisque_rmFL277dim20_prelim.rds")
+#sc.eset = readRDS("Analysis-Files/Seurat/seurat_objects/sc_eset_for_bisque_rmFL277dim20_prelim.rds")
+output="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Feb192020/"
+sc.eset=readRDS(paste(output, "sc_eset_for_bisque.rds", sep=""))
 
 get_bisque_res = function(tier){
 
