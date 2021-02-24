@@ -67,10 +67,10 @@ get_more_markers = function(dat, analysis_type){
 
 	#save markers in file
 	markers = as.data.table(combined.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_logFC))
-	file_name=paste(output, "pc_genes_only_yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.txt", sep="")
+	file_name=paste(output, "pc_genes_only_no", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.txt", sep="")
 	write.table(markers, file_name, row.names=F, sep=";", quote=F)
 
-	file_name=paste(output, "pc_genes_only_yes", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.pdf", sep="")
+	file_name=paste(output, "pc_genes_only_no", "_", "seurat_integrated_dim_", "20" , "_", "2000", "_", date, "_samples_clusters_markers_all_integrated_object.pdf", sep="")
 	pdf(file_name, width=15, height=20)
 	print(h3)
 	dev.off()
@@ -80,7 +80,7 @@ get_more_markers = function(dat, analysis_type){
 	DefaultAssay(combined) <- "RNA"
 	combined <- NormalizeData(combined)
 
-	pdf(paste(output, date, "_", analysis_type, ".pdf", sep=""),width=18, height=16)
+	pdf(paste(output, date, "_", analysis_type, ".pdf", sep=""),width=18, height=20)
 
 	genes=c("CD3D","CD3G","CD4","CD8A","CCR7","SELL","TCF7","IL7R","TYMS","MKI67","PRF1","CCL5")
 	genes2=c("GZMK","GZMB","GZMA","PRDM1","CD69","TNF","IFNG","PTPRC","CCL4","KLRG1","TIGIT","CTLA4")
@@ -131,12 +131,18 @@ get_more_markers = function(dat, analysis_type){
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
 	print(f6)
 
+	#more T cell genes based on plot from https://www.nature.com/articles/s41556-020-0532-x#Fig2
+	f7 = FeaturePlot(combined, features = c("IL7R", "CD4", "PLAC8", "KLF2","GZMK", "CCL5",
+	"GZMA", "NKG7", "CCL4", "CD8A", "PDCD1", "TOX", "TOX2", "CD200", "CXCR5", "ICOS",
+	"IL2RA", "FOXP3"),cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
+	print(f7)
+
 	#other cluster genes
-	f7 = FeaturePlot(combined, features = c("CXCL12", "SDF1", "VCAM1", "CR2", "CD21", "CD36",
+	f8 = FeaturePlot(combined, features = c("CXCL12", "SDF1", "VCAM1", "CR2", "CD21", "CD36",
   "TFPI", "LDB2", "CD3G", "HAVCR2", "CD274", "ILR6", "CD68", "CSF1R", "IFNGR1",
 	"SPARCL1", "PECAM1", "VCAM1", "CD36", "CUX2", "SLC7A11", "CD4"),
 	cols=c("antiquewhite", "cadetblue3", "chartreuse3", "red"))
-	print(f7)
+	print(f8)
 
 	#scale data and make heatmap with some known genes
   combined <- ScaleData(combined, verbose = FALSE)
@@ -147,8 +153,15 @@ get_more_markers = function(dat, analysis_type){
 	combined.markers <- FindAllMarkers(combined, only.pos = TRUE,
 		 min.pct = 0.5, logfc.threshold = 0.3)
 	top10 <- combined.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
-	h3 = DoHeatmap(combined, features = top10$gene)
+	h3 = DoHeatmap(combined, features = top10$gene, assay="integrated")
 	print(h3)
+
+	#T cell heatmap
+	h4 = DoHeatmap(combined, features = c("CXCL12", "SDF1", "VCAM1", "CR2", "CD21", "CD36",
+  "TFPI", "LDB2", "CD3G", "HAVCR2", "CD274", "ILR6", "CD68", "CSF1R", "IFNGR1",
+	"SPARCL1", "PECAM1", "VCAM1", "CD36", "CUX2", "SLC7A11", "CD4"), assay="integrated")
+	print(h4)
+
 	dev.off()
 
 	#go back to integrated object
