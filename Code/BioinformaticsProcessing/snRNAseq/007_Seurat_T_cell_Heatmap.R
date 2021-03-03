@@ -26,7 +26,7 @@ source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSe
 date=Sys.Date()
 
 #output directory
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/"
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
 
 #load libraries
 library(ellipsis)
@@ -41,7 +41,8 @@ packages <- c("readr", "data.table", "plyr",
 lapply(packages, require, character.only = TRUE)
 
 #r=readRDS("combined_processed_seurat_object_rmFL277dim20.rds")
-r=readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
+#r=readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
+r=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds", sep=""))
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -65,8 +66,18 @@ genesall = c("CD3D", "CD3G", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "
 	"PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", "ICOS",
 	"MKI67", "TCF7", "TOP2A")
 
-cells_t=c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7",
-"memory T cells_8", "proliferating T cell_17")
+cells_t=c(4, 5, 6, 8, 10, 16)
+
+###
+# T cells
+###
+#*P4 - CTLA4 - Treg
+#P5
+#P6
+#P8
+#P10
+#*P16 - proliferating T cells
+
 
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
@@ -76,11 +87,14 @@ combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 
 # Annotating and ordering cells by some meaningful feature(s):
-pdf(paste(date, "_" , "rmFL277dim20_Tcells_only_markers_dittoheatmap.pdf", sep=""))
+pdf(paste(output, date, "_" , "T_cell_genes_dittoheatmap.pdf", sep=""), height=10, width=10)
 dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"),scaled.to.max = TRUE)
 dev.off()
 
-h = DoHeatmap(combined_t, features = genesall, assay="RNA", size=2)
-pdf(paste(date, "_" , "rmFL277dim20_Tcells_only_markers.pdf", sep=""))
-print(h)
+h1 = DoHeatmap(combined_t, features = genesall, assay="RNA", size=2)
+h2 = DoHeatmap(combined_t, features = genesall, assay="integrated", size=2)
+
+pdf(paste(output, date, "_" , "T_cell_genes_heatmap_seurat.pdf", sep=""), height=10, width=10)
+print(h1)
+print(h2)
 dev.off()

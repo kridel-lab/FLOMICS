@@ -41,7 +41,7 @@ packages <- c("readr", "data.table", "plyr",
 lapply(packages, require, character.only = TRUE)
 
 #r=readRDS("combined_processed_seurat_object_rmFL277dim20.rds")
-r=readRDS(paste(output, "pc_genes_only_yes_seurat_integrated_dim_20_2000_2021-02-19_samples_clusters.rds", sep=""))
+r=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds", sep=""))
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -107,49 +107,61 @@ get_degs = function(dat,clus1,clus2, clus3){
 
 }
 
-c0vs1 = get_degs(combined, 0, 1, 2)
-c0vs4 = get_degs(combined, 0, 4, 10)
-c0vs13 = get_degs(combined, 0, 12, 13)
-c0vs19 = get_degs(combined, 0, 14, 19)
-c1vs2 = get_degs(combined, 1, 0, 2)
-c1vs4 = get_degs(combined, 1, 4, 10)
-c2vs4 = get_degs(combined, 2, 0, 1)
-c2vs10 = get_degs(combined, 2, 4, 10)
+###
+# B cells
+###
+#P0
+#*P1
+#*P2
+#*P7
+#*P9
+#P12 - proliferating B cells
+#P13
 
-all_genes = rbind(c0vs1, c0vs4, c0vs13, c0vs19,
-c1vs2, c1vs4, c2vs4, c2vs10)
+c0vs1 = get_degs(combined, 0, 1, 2)
+c0vs9 = get_degs(combined, 0, 9, 7)
+c0vs13 = get_degs(combined, 0, 9, 13)
+
+c1vs2 = get_degs(combined, 1, 0, 2)
+c1vs9 = get_degs(combined, 1, 9, 7)
+
+c2vs1 = get_degs(combined, 2, 0, 1)
+c2vs9 = get_degs(combined, 2, 9, 7)
+
+all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9)
 integrated_genes = rownames(combined)
-genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.6, pct.2 < 0.4, avg_logFC > 0.5, gene %in% integrated_genes)$gene)
+genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_logFC > 0.5, gene %in% integrated_genes)$gene)
 #genes_b_plot = unique(filter(all_genes, (clust1 == 0 & clust2==1) | (clust1 == 0 & clust2==2) | (clust1 == 1 & clust2==2), avg_logFC > 0.5)$gene)
 
 #cells_t=c("B cells_0", "B cells_1", "B cells_2", "naive B or malignant B_9",
 #"proliferating B cell_11", "memory B cell_12", "Cluster 13")
 
-cells_t = c(0, 1, 2, 4, 10, 13, 12, 19, 14)
+cells_b = c(0, 1, 2, 7, 9, 12, 13)
 
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
 
 #only keep B cell clusters
-combined_t <- subset(combined, idents = cells_t)
+combined_b <- subset(combined, idents = cells_b)
 #only keep differentially expressed genes related to different B cells
-subset.matrix <- combined_t[genes_b_plot_int, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
+subset.matrix <- combined_b[genes_b_plot_int, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 #scale the data
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
 #make some feature plots for the genes of interest in B cells
 pdf(paste(output, date, "_" , "B_cell_genes_featureplot.pdf", sep=""), height=10, width=10)
 FeaturePlot(combined, features = genes_b_plot_int, label=TRUE, cols=c("yellow", "purple"))
-DotPlot(combined_t, features = genes_b_plot_int) + RotatedAxis()
-DoHeatmap(subset(combined_t, downsample = 100), features = genes_b_plot_int, size = 3, assay="integrated")
+DotPlot(combined_b, features = genes_b_plot_int) + RotatedAxis()
+DoHeatmap(subset(combined_b, downsample = 100), features = genes_b_plot_int, size = 3, assay="integrated")
 dev.off()
 
 # Annotating and ordering cells by some meaningful feature(s):
-pdf(paste(output, date, "_" , "rmFL277dim20_Bcells_only_markers_dittoheatmap_AUC0.75.pdf", sep=""), height=12, width=15)
+pdf(paste(output, date, "_" , "B_cell_genes_ditto_heatmap_scaled.pdf", sep=""), height=10, width=15)
 dittoHeatmap(combined_scaled, heatmap.colors.max.scaled=colorRamps::blue2yellow(25), scaled.to.max=TRUE, annot.by = c("seurat_clusters"), assay="integrated")
+dittoHeatmap(combined_scaled, heatmap.colors.max.scaled=colorRamps::blue2yellow(25), scaled.to.max=TRUE, annot.by = c("seurat_clusters"), assay="RNA")
 dev.off()
 
-h = DoHeatmap(combined_t, features = genes_b_plot, assay="RNA", size=2)
-pdf(paste(date, "_" , "rmFL277dim20_Bcells_only_markers_AUC0.75.pdf", sep=""), height=20)
+h = DoHeatmap(combined_b, features = genes_b_plot_int, assay="integrated", size=2)
+pdf(paste(output, date, "_" , "B_cell_genes_ditto_heatmap_seurat.pdf", sep=""), height=6)
 print(h)
 dev.off()

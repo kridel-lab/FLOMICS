@@ -5,22 +5,23 @@
 #load functions and libraries
 #----------------------------------------------------------------------
 
-#----------------------------------------------------------------------
-#load functions and libraries
-#----------------------------------------------------------------------
-
 options(stringsAsFactors = F)
 #avoid scientific notation
 options(scipen=999)
 #load libraries
-packages <- c("dplyr", "readr", "ggplot2", "vcfR", "tidyr",
-"mclust", "data.table", "plyr",
+packages <- c("dplyr", "readr", "ggplot2", "tidyr",
+"data.table", "plyr",
 "ggrepel", "stringr", "maftools", "ggpubr", "readxl", "skimr",
  "edgeR", "annotables", "EnvStats", "maftools", "gridExtra")
 lapply(packages, require, character.only = TRUE)
+library(BSgenome.Hsapiens.UCSC.hg19, quietly = TRUE)
+library(NMF)
+library(pheatmap)
 
 #date
 date=Sys.Date()
+
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS")
 
 #directory with FLOMICS related matrices
 #setwd("FLOMICS") should equal to this /Users/kisaev/UHN/kridel-lab - Documents/FLOMICS/
@@ -29,60 +30,126 @@ date=Sys.Date()
 #data filtering
 #----------------------------------------------------------------------
 
-# Gene panel
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#load data
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#1. Gene panel
 gene.panel <- read.csv("DNAseq/Final_target_files/coding_gene_panel_PLOSMED_FLOMICS.csv", header = TRUE)
 genes.common <- gene.panel %>%
   filter(PLOS_MED_PANEL == "YES" & FLOMICS_PANEL == "YES") %>%
   .$Gene.Name %>% as.character() # n = 57
 
-muts <- fread("RNAseq/variant_calls/2020-06-23_opossum_variant_FL_rna-seq_filtered.txt")
-qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
+#2. All FLOMICS samples included
+all.samples.DNAseq.FLOMICS <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
+  filter(CAPSEQ_DATA == TRUE & CAPSEQ_DATA_YEAR == "2019" & CAPSEQ_INCLUDE == "YES") %>%
+  .$SAMPLE_ID %>% as.character() # n=131 (n=123 T1, n=8 T2)
 
-muts = as.data.table(filter(muts, Tumor_Sample_Barcode %in% qc$rna_seq_file_sample_ID))
-length(unique(muts$SAMPLE_ID)) #128
+#3. All PLOSMED samples included
+all.samples.DNAseq.PLOSMED <- read.csv("metadata/sample_annotations_rcd6Nov2019.csv", header = T) %>%
+  filter(CAPSEQ_DATA == TRUE & CAPSEQ_DATA_YEAR == "2015" & CAPSEQ_INCLUDE == "YES") %>%
+  .$SAMPLE_ID %>% as.character() # n=31 (only T1)
 
-#filter out mutation types we dont want
-muts <- as.data.table(filter(muts, !(Variant_Classification %in% c("UTR3 .",
-"downstream .", "UTR5 .", "upstream .", "exonic unknown"))))
-
-# Coverage FLOMICS DNAseq
+#4. Coverage FLOMICS DNAseq
 coverage.samples <- read.csv("DNAseq/Targeted_Seq_Coverage/08-07-2020/2020-08-07_sample_based_coverage_summary.csv")
 
-#mutations obtained via dna sequencing for 131 samples (some overlap)
-#some patients have very low coverage
-# Read in mutation calls for FLOMICS
+#5. Read in mutation calls for FLOMICS and filter
 mut.FLOMICS <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
   mutate(Cohort = "FLOMICS") %>%
   filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
   filter(Var_Freq > 0.1)
 dim(mut.FLOMICS)
-length(unique(mut.FLOMICS$Tumor_Sample_Barcode))
+
+#6. Hotspot mutations curated by RK
+hotspots <- read.table("DNAseq/hotspot_mutations.txt", sep = "\t", header = T) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>% .$mutation_id
+
+#7. rescued FL mutations
+mut.FLOMICS.rescued <- fread("DNAseq/Mutation_calls_KI/08-13-2020/with_indels/2020-08-13_Mutect2_filtered_mutations_FL_wRNASeq_mut_info.txt") %>%
+  mutate(Cohort = "FLOMICS") %>%
+  filter(Var_Freq <= 0.1 & Var_Freq > 0.05) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>%
+  filter(cosmic68 != "." | mutation_id %in% hotspots) %>%
+  select(-mutation_id)
+dim(mut.FLOMICS.rescued)
+
+#8. combined FL mutations
+mut.FLOMICS <- mut.FLOMICS %>% rbind(mut.FLOMICS.rescued)
+dim(mut.FLOMICS)
+length(unique(mut.FLOMICS$Tumor_Sample_Barcode)) # n = 818 rows & 131 unique patients
+
+#9. read in mutation calls for PLOS MED and filter
+mut.PLOSMED <- fread("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_unfiltered_Feb2021.txt") %>%
+  mutate(Cohort = "PLOSMED") %>%
+  filter(avsnp142 == "." | (avsnp142 != "." & cosmic68 != ".")) %>%
+  filter(Var_Freq > 0.1)
+dim(mut.PLOSMED)
+
+#10. rescued PLOS mutations
+mut.PLOSMED.rescued <- fread("DNAseq/Mutation_calls_KI/PLOS_MED/clean_up_PLOS_mutations_mutect2_unfiltered_Feb2021.txt") %>%
+  mutate(Cohort = "PLOSMED") %>%
+  filter(Var_Freq <= 0.1 & Var_Freq > 0.05) %>%
+  mutate(mutation_id = paste(Chromosome, Start_Position, sep = "_")) %>%
+  filter(cosmic68 != "." | mutation_id %in% hotspots) %>%
+  select(-mutation_id)
+dim(mut.PLOSMED.rescued)
+
+#11. combined PLOS mutations
+mut.PLOSMED <- mut.PLOSMED %>% rbind(mut.PLOSMED.rescued)
+dim(mut.PLOSMED)
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Analyze FLOMICS data in more detail
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Identify poor coverage samples and filter them out
 poor.coverage.samples <- coverage.samples %>%
-filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples
+  filter(mean_cov < 50) %>% .$External_identifier %>% as.character() #18 samples (16=T1 and 2=T2)
 length(poor.coverage.samples)
 
-# Read in mutation calls for PLOSMED
-mut.PLOSMED <- read.csv("DNAseq/BC_Cancer_capseq_data/BC_Cancer_capseq_data.csv", header = T) %>%
-  mutate(Cohort = "PLOSMED") %>%
-  select(SAMPLE_ID, Hugo_Symbol, Cohort, Chromosome, Start_Position, Reference_Allele,
-  Tumor_Seq_Allele2=Variant_Allele, End_Position, Variant_Classification=Mutation_Type)
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#combine mutations FLOMICs and PLOS MED
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Merge FLOMICS and PLOSMED
-mut.merged <- mut.FLOMICS %>%
-  select(SAMPLE_ID = Tumor_Sample_Barcode, Hugo_Symbol, Cohort, Chromosome,
-  Start_Position, Reference_Allele, Tumor_Seq_Allele2,
-  End_Position, Variant_Classification) %>%
+mut.FLOMICS = mut.FLOMICS %>% mutate(SAMPLE_ID = Tumor_Sample_Barcode)
+
+#get common columns
+cols = which(colnames(mut.FLOMICS) %in% colnames(mut.PLOSMED))
+mut.FLOMICS = as.data.frame(mut.FLOMICS[,..cols])
+
+cols = which(colnames(mut.PLOSMED) %in% colnames(mut.FLOMICS))
+mut.PLOSMED = as.data.frame(mut.PLOSMED[,..cols])
+
+mut.PLOSMED <- mut.PLOSMED[names(mut.FLOMICS)]
+
+mut.merged <- as.data.table(mut.FLOMICS %>%
   rbind(mut.PLOSMED) %>%
-  mutate(mut_id = paste(.$Chromosome, .$Start_Position, sep="_")) %>%
-  filter(Hugo_Symbol %in% genes.common) #55 unique genes
+  filter(Hugo_Symbol %in% genes.common)) # n = 954
+
+# Percentage of mutations per gene in merged cohort (max 1 mutation per gene per sample counted)
+mut.merged = mut.merged %>%
+  mutate(TIME_POINT = substr(SAMPLE_ID, 11, 12)) %>%
+  filter(TIME_POINT != "T2") %>%
+  filter(!SAMPLE_ID %in% poor.coverage.samples) #816
 
 #clinical data
 clin = fread("metadata/clinical_data_rcd11Aug2020.csv")
 colnames(clin)[1] = "Tumor_Sample_Barcode"
 colnames(clin)[19] = "Overall_Survival_Status"
 colnames(clin)[23] = "days_to_last_followup"
+
+#SNF labels
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
+colnames(labels)[2] = "Tumor_Sample_Barcode"
+labels$Tumor_Sample_Barcode = as.character(labels$Tumor_Sample_Barcode)
+labels$status = sapply(labels$Tumor_Sample_Barcode, function(x){unlist(strsplit(x, "_"))[4]})
+labels$Tumor_Sample_Barcode = sapply(labels$Tumor_Sample_Barcode, function(x){paste(unlist(strsplit(x, "_"))[1:3], collapse="_")})
+labels$SNFClust = labels$SNFClust10Feb2021
+labels = as.data.table(filter(labels, status == "T1"))
+labels = labels[,c("Tumor_Sample_Barcode", "SNFClust")]
+labels$SNFClust[is.na(labels$SNFClust)] = "na"
+print(table(labels$SNFClust))
 
 #-----------
 #ANALYSIS
@@ -115,80 +182,107 @@ mut.merged$Variant_Classification[mut.merged$Variant_Classification == "exonic s
 mut.merged[,ref_alt_diff := nchar(Reference_Allele) - nchar(Tumor_Seq_Allele2)]
 mut.merged[, Variant_Type := ifelse(ref_alt_diff == 0 , yes = "SNP", no = ifelse(ref_alt_diff < 0 , yes = "INS", no = "DEL"))]
 
-colnames(mut.merged)[1] = "Tumor_Sample_Barcode"
+colnames(mut.merged)[which(colnames(mut.merged) == "SAMPLE_ID")] = "Tumor_Sample_Barcode"
 
 #seperate into T1 and T2 samples
 mut.merged$status = sapply(mut.merged$Tumor_Sample_Barcode, function(x){unlist(strsplit(x, "_"))[4]})
 mut.merged$Tumor_Sample_Barcode = sapply(mut.merged$Tumor_Sample_Barcode, function(x){paste(unlist(strsplit(x, "_"))[1:3], collapse="_")})
-t1 = filter(mut.merged, status=="T1")
-t2 = filter(mut.merged, status=="T2")
+mut.merged = as.data.table(filter(mut.merged, status=="T1"))
+mut.merged = merge(mut.merged, labels, by="Tumor_Sample_Barcode")
+mut.merged$Chromosome = paste("chr", mut.merged$Chromosome, sep="")
+
+snf1 = filter(mut.merged, SNFClust=="1")
+snf2 = filter(mut.merged, SNFClust=="2")
+
 clin$PRIM_TX = NULL
+clin=merge(clin, labels, by="Tumor_Sample_Barcode")
 write.table(mut.merged, file="Analysis-Files/maftools/maftools_mutations_test.txt", quote=F, row.names=F, sep="\t")
-write.table(t1, file="Analysis-Files/maftools/maftools_mutations_T1_only.txt", quote=F, row.names=F, sep="\t")
-write.table(t2, file="Analysis-Files/maftools/maftools_mutations_T2_only.txt", quote=F, row.names=F, sep="\t")
+write.table(snf1, file="Analysis-Files/maftools/maftools_mutations_snf1_only.txt", quote=F, row.names=F, sep="\t")
+write.table(snf2, file="Analysis-Files/maftools/maftools_mutations_snf2_only.txt", quote=F, row.names=F, sep="\t")
 write.table(clin, file="Analysis-Files/maftools/maftools_clinical_file.txt", quote=F, row.names=F, sep="\t")
 
-#T1 FL
-t1 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_T1_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt")
-#T2 FL
-t2 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_T2_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt")
+#snf1 FL
+snf1 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_snf1_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt") #56 unique patients
+#snf2 FL
+snf2 = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_snf2_only.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt") #45 unqiue patients
+#all samples
+all = read.maf(maf = "Analysis-Files/maftools/maftools_mutations_test.txt", clinicalData="Analysis-Files/maftools/maftools_clinical_file.txt") #125 unique patients
 
-pdf("Analysis-Files/maftools/maftools_prelim_plots.pdf")
+get_maf_plots = function(maf_ob, type_analysis){
 
-#global overview of mutations - t1 only
-plotmafSummary(maf = t1, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
-#in depth summary of top 30 genes -t1 only
-oncoplot(maf = t1, fontSize=0.5, clinicalFeatures ='TYPE', sortByAnnotation = TRUE, top=30)
-#somatic interactions - t1 only
-ints_res = somaticInteractions(maf = t1, top = 55, pvalue = c(0.05, 0.01), fontSize=0.5)
-ints_res$fdr = p.adjust(ints_res$pValue, method="fdr")
-write.table(ints_res, file="Analysis-Files/maftools/somatic_interactions_results_T1_only.txt", sep=";", quote=F, row.names=F)
+  pdf(paste("Analysis-Files/maftools/", type_analysis, "_", date, "_maftools_prelim_plots.pdf", sep=""))
+  #global overview of mutations
+  plotmafSummary(maf = maf_ob, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
+  #in depth summary of top 30 genes
+  oncoplot(maf = maf_ob, fontSize=0.5, clinicalFeatures ='TYPE', sortByAnnotation = TRUE, top=30)
+  #onco plot using SNF labels
+  oncoplot(maf = maf_ob, fontSize=0.5, clinicalFeatures ='SNFClust', sortByAnnotation = TRUE, top=30)
 
-#types of mutation in depth - T1 only
-fl.titv = titv(maf = t1, plot = FALSE, useSyn = TRUE)
-#plot titv summary
-plotTiTv(res = fl.titv)
+  #somatic interactions
+  ints_res = somaticInteractions(maf = maf_ob, top = 25, pvalue = c(0.05, 0.01), fontSize=0.5)
+  #types of mutation in depth - snf1 only
+  fl.titv = titv(maf = maf_ob, plot = FALSE, useSyn = TRUE)
+  #plot titv summary
+  plotTiTv(res = fl.titv)
 
-#Using top 55 mutated genes to identify a set of genes (of size 2) to predict poor prognostic groups
-prog_geneset = survGroup(maf = t1, top = 55, geneSetSize = 2, #to test all gene pairs
-  time = "days_to_last_followup", Status = "Overall_Survival_Status", verbose = FALSE)
-print(prog_geneset)
-#multiple testing correction
-prog_geneset$fdr = p.adjust(prog_geneset$P_value, method="fdr")
-write.csv(prog_geneset, file="Analysis-Files/maftools/prognostic_partners_results_T1_only.csv", quote=F, row.names=F)
+  dgi = drugInteractions(maf = maf_ob, fontSize = 0.5)
+  #OncogenicPathways(maf = maf_ob)
 
-mafSurvGroup(maf = t1, geneSet = c("CREBBP", "STAT6"),
-time = "days_to_last_followup", Status = "Overall_Survival_Status")
+  #Using top 55 mutated genes to identify a set of genes (of size 2) to predict poor prognostic groups
+  prog_geneset = survGroup(maf = maf_ob, geneSetSize = 2, #to test all gene pairs
+    time = "days_to_last_followup", Status = "Overall_Survival_Status", verbose = TRUE)
+  print(prog_geneset)
+  #multiple testing correction
+  prog_geneset$fdr = p.adjust(prog_geneset$P_value, method="fdr")
 
-mafSurvGroup(maf = t1, geneSet = c("FOXO1", "SOCS1"),
-time = "days_to_last_followup", Status = "Overall_Survival_Status")
+  gene1=unlist(strsplit(as.character(prog_geneset[1,1]), "_"))[1]
+  gene2=unlist(strsplit(as.character(prog_geneset[1,1]), "_"))[2]
 
-mafSurvGroup(maf = t1, geneSet = c("CREBBP", "FOXO1"),
-time = "days_to_last_followup", Status = "Overall_Survival_Status")
+  mafSurvGroup(maf = maf_ob, geneSet = c(gene1, gene2),
+  time = "days_to_last_followup", Status = "Overall_Survival_Status")
 
-mafSurvGroup(maf = t1, geneSet = c("TNFRSF14", "B2M"),
-time = "days_to_last_followup", Status = "Overall_Survival_Status")
+  dev.off()
 
+}
+
+get_maf_plots(all, "all_patients")
+get_maf_plots(snf1, "snf1")
+get_maf_plots(snf2, "snf2")
+
+pdf(paste("Analysis-Files/maftools/", date, "_SNF1_vs2_maftools_prelim_plots.pdf", sep=""))
 #compare the two cohorts
-pt.vs.rt <- mafCompare(m1 = t1, m2 = t2, m1Name = 'T1 FL', m2Name = 'T2 FL', minMut = 2)
+pt.vs.rt <- mafCompare(m1 = snf1, m2 = snf2, m1Name = 'SNF1 FL', m2Name = 'SNF2 FL', minMut = 2)
 print(pt.vs.rt)
 forestPlot(mafCompareRes = pt.vs.rt, pVal = 0.1, color = c('royalblue', 'maroon'), geneFontSize = 0.8)
-
-#genes = c("CREBBP")
-#coOncoplot(m1 = t1, m2 = t2,
-#  m1Name = 'T1', m2Name = 'T2', genes=c("TP53", "EZH2"), removeNonMutated = TRUE)
-coBarplot(m1 = t1, m2 = t2, m1Name = "T1 FL", m2Name = "T2 FL")
-
-fab.ce = clinicalEnrichment(maf = t1, clinicalFeature = 'TYPE')
-fab.ce$groupwise_comparision[p_value < 0.05]
-plotEnrichmentResults(enrich_res = fab.ce, pVal = 0.05)
-dgi = drugInteractions(maf = t1, fontSize = 0.5)
-
-dnmt3a.dgi = drugInteractions(genes = "CREBBP", drugs = TRUE)
-dnmt3a.dgi[,.(Gene, interaction_types, drug_name, drug_claim_name)]
-
-OncogenicPathways(maf = t1)
-
-PlotOncogenicPathways(maf = t1, pathways = "NOTCH")
-
+#coBarplot(m1 = snf1, m2 = snf2, m1Name = "SNF1 FL", m2Name = "SNF2 FL")
 dev.off()
+
+#mutation signature analysis
+
+get_mut_signatures = function(maf_file, type_analysis, n_sigs){
+  
+  pdf(paste("Analysis-Files/maftools/", type_analysis, "_", date, "_maftools_mutation_signature_analysis.pdf", sep=""), width=10)
+  
+  snf=maf_file
+  
+  snf.tnm = trinucleotideMatrix(maf = snf, ref_genome = "BSgenome.Hsapiens.UCSC.hg19")
+  
+  snf.sig = extractSignatures(mat = snf.tnm, n = n_sigs, pConstant = 1e-9)
+  
+  #Compate against original 30 signatures 
+  snf.og30.cosm = compareSignatures(nmfRes = snf.sig, sig_db = "legacy")
+  #Compate against updated version3 60 signatures 
+  snf.v3.cosm = compareSignatures(nmfRes = snf.sig, sig_db = "SBS")
+  pheatmap::pheatmap(mat = snf.og30.cosm$cosine_similarities, 
+                     cluster_rows = FALSE, main = "cosine similarity against validated signatures (old)")
+  pheatmap::pheatmap(mat = snf.v3.cosm$cosine_similarities, 
+                     cluster_rows = FALSE, main = "cosine similarity against validated signatures (new)")
+  maftools::plotSignatures(nmfRes = snf.sig, title_size = 1.2, sig_db = "SBS")
+  dev.off()
+}
+
+get_mut_signatures(all, "all_patients", 2)
+get_mut_signatures(snf1, "snf1", 2)
+get_mut_signatures(snf2, "snf2", 2)
+
+
