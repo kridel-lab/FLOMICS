@@ -158,7 +158,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 		seurat_integrated <- FindClusters(object = seurat_integrated, resolution = c(0.4, 0.5, 0.6, 0.8, 1.0, 1.4))
 
 		# Assign identity of clusters
-		Idents(object = seurat_integrated) <- "integrated_snn_res.0.4"
+		Idents(object = seurat_integrated) <- "integrated_snn_res.0.5"
 		# Plot the UMAP
 		umap_integrated_res = DimPlot(seurat_integrated,
         reduction = "umap",

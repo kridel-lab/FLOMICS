@@ -128,7 +128,10 @@ c1vs9 = get_degs(combined, 1, 9, 7)
 c2vs1 = get_degs(combined, 2, 0, 1)
 c2vs9 = get_degs(combined, 2, 9, 7)
 
-all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9)
+c9vs1 = get_degs(combined, 9, 0, 1)
+c9vs2 = get_degs(combined, 9, 1, 2)
+
+all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9, c9vs1, c9vs2)
 integrated_genes = rownames(combined)
 genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_logFC > 0.5, gene %in% integrated_genes)$gene)
 #genes_b_plot = unique(filter(all_genes, (clust1 == 0 & clust2==1) | (clust1 == 0 & clust2==2) | (clust1 == 1 & clust2==2), avg_logFC > 0.5)$gene)
@@ -150,15 +153,16 @@ combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
 #make some feature plots for the genes of interest in B cells
 pdf(paste(output, date, "_" , "B_cell_genes_featureplot.pdf", sep=""), height=10, width=10)
-FeaturePlot(combined, features = genes_b_plot_int, label=TRUE, cols=c("yellow", "purple"))
 DotPlot(combined_b, features = genes_b_plot_int) + RotatedAxis()
+dittoHeatmap(combined_b, genes = genes_b_plot_int, scaled.to.max=TRUE, assay="integrated")
 DoHeatmap(subset(combined_b, downsample = 100), features = genes_b_plot_int, size = 3, assay="integrated")
 dev.off()
 
 # Annotating and ordering cells by some meaningful feature(s):
-pdf(paste(output, date, "_" , "B_cell_genes_ditto_heatmap_scaled.pdf", sep=""), height=10, width=15)
-dittoHeatmap(combined_scaled, heatmap.colors.max.scaled=colorRamps::blue2yellow(25), scaled.to.max=TRUE, annot.by = c("seurat_clusters"), assay="integrated")
-dittoHeatmap(combined_scaled, heatmap.colors.max.scaled=colorRamps::blue2yellow(25), scaled.to.max=TRUE, annot.by = c("seurat_clusters"), assay="RNA")
+pdf(paste(output, date, "_" , "B_cell_genes_ditto_heatmap_scaled.pdf", sep=""), height=20, width=20)
+FeaturePlot(combined, features = genes_b_plot_int, cols=c("yellow", "purple"))
+dittoHeatmap(combined_scaled, scaled.to.max=TRUE, assay="integrated")
+dittoHeatmap(combined_scaled, scaled.to.max=TRUE, assay="RNA")
 dev.off()
 
 h = DoHeatmap(combined_b, features = genes_b_plot_int, assay="integrated", size=2)

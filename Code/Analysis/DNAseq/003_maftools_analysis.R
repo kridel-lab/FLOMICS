@@ -260,22 +260,22 @@ dev.off()
 #mutation signature analysis
 
 get_mut_signatures = function(maf_file, type_analysis, n_sigs){
-  
+
   pdf(paste("Analysis-Files/maftools/", type_analysis, "_", date, "_maftools_mutation_signature_analysis.pdf", sep=""), width=10)
-  
+
   snf=maf_file
-  
+
   snf.tnm = trinucleotideMatrix(maf = snf, ref_genome = "BSgenome.Hsapiens.UCSC.hg19")
-  
+
   snf.sig = extractSignatures(mat = snf.tnm, n = n_sigs, pConstant = 1e-9)
-  
-  #Compate against original 30 signatures 
+
+  #Compate against original 30 signatures
   snf.og30.cosm = compareSignatures(nmfRes = snf.sig, sig_db = "legacy")
-  #Compate against updated version3 60 signatures 
+  #Compate against updated version3 60 signatures
   snf.v3.cosm = compareSignatures(nmfRes = snf.sig, sig_db = "SBS")
-  pheatmap::pheatmap(mat = snf.og30.cosm$cosine_similarities, 
+  pheatmap::pheatmap(mat = snf.og30.cosm$cosine_similarities,
                      cluster_rows = FALSE, main = "cosine similarity against validated signatures (old)")
-  pheatmap::pheatmap(mat = snf.v3.cosm$cosine_similarities, 
+  pheatmap::pheatmap(mat = snf.v3.cosm$cosine_similarities,
                      cluster_rows = FALSE, main = "cosine similarity against validated signatures (new)")
   maftools::plotSignatures(nmfRes = snf.sig, title_size = 1.2, sig_db = "SBS")
   dev.off()
@@ -284,5 +284,3 @@ get_mut_signatures = function(maf_file, type_analysis, n_sigs){
 get_mut_signatures(all, "all_patients", 2)
 get_mut_signatures(snf1, "snf1", 2)
 get_mut_signatures(snf2, "snf2", 2)
-
-
