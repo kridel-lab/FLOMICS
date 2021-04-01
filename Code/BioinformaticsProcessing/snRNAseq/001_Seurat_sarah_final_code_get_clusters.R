@@ -222,7 +222,8 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	file_name = paste(output, "clustree_plot.pdf", sep="")
 	pdf(file_name, width=15, height=15)
-	clustree(combined_test, node_colour = "sc3_stability")
+	c = clustree(combined_test, node_colour = "sc3_stability")
+	print(c)
 	dev.off()
 
 	combined <- FindClusters(combined, resolution = 0.5)
