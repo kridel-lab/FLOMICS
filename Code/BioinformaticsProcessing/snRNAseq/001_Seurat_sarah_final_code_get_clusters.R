@@ -20,6 +20,7 @@ packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 	"patchwork")
 lapply(packages, require, character.only = TRUE)
 library(annotables)
+library(clustree)
 
 #load functions to analyze seurat
 source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
@@ -118,8 +119,8 @@ dev.off()
 #3. Set up anchors++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #dat = all_objects
-#dim = 10
-#anch_features = 3000
+#dim = 20
+#anch_features = 2000
 
 get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
@@ -196,6 +197,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	# Run the standard workflow for visualization and clustering
 	combined <- ScaleData(combined, verbose = FALSE)
 	combined <- RunPCA(combined, verbose = FALSE)
+	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 
 	# Examine and visualize PCA results a few different ways
 	print(combined[["pca"]], dims = 1:20, nfeatures = 5)
@@ -210,8 +212,21 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	# t-SNE and Clustering
 	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
-	combined <- FindClusters(combined, resolution = 0.5)
-	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
+
+	combined_test <- FindClusters(
+	  object = combined,
+	  reduction.type = "pca",
+	  resolution = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1),
+	  dims.use = 1:dim,
+	  save.SNN = TRUE
+	)
+
+	file_name = paste(output, "clustree_plot.pdf", sep="")
+	pdf(file_name, width=15, height=15)
+	clustree(combined_test)
+	dev.off()
+
+	combined <- FindClusters(combined, resolution = 0.4)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
