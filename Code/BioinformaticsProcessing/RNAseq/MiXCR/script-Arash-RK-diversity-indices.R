@@ -27,7 +27,7 @@ library(ggplot2)
 immunelistfx <- function(datapath, chain){
 # File pattern is CLONES_TRB*.txt. Ensure you output each chain seperately.
   # file_list<- list.files(datapath, pattern = paste0("CLONES_", chain))
-  file_list<- list.files(datapath, pattern = "TRB")
+  file_list<- list.files(datapath, pattern = chain)
   readlist = list()
   i <- 1
   for(f in file_list){
