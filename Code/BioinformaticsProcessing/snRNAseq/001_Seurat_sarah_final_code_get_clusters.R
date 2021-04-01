@@ -48,7 +48,6 @@ print(input) #whether only protein coding genes should be included or not
 norm_type = args[2]
 print(norm_type) #normalization type
 
-#genes = as.data.table(grch38)
 genes = as.data.table(grch37)
 pc_genes = unique(filter(genes, biotype == "protein_coding")$symbol)
 
@@ -223,10 +222,10 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	file_name = paste(output, "clustree_plot.pdf", sep="")
 	pdf(file_name, width=15, height=15)
-	clustree(combined_test)
+	clustree(combined_test, node_colour = "sc3_stability")
 	dev.off()
 
-	combined <- FindClusters(combined, resolution = 0.4)
+	combined <- FindClusters(combined, resolution = 0.5)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+

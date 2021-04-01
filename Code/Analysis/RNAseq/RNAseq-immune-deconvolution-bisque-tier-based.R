@@ -60,14 +60,14 @@ get_bisque_summ = function(dat, tier){
 #"proliferating B cell_11", "memory B cell_12", "Cluster 13"))
 #  immune_cells$cell_facet[z] = "B cells"
 
-  z=which(immune_cells$cell_type %in% c(0, 1, 2, 7, 9, 12, 13))
+  z=which(immune_cells$cell_type %in% c(0, 1, 2, 12, 11, 16))
   immune_cells$cell_facet[z] = "B cells"
 
 #  z=which(immune_cells$cell_type %in% c("Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5",
 #"naive T cells_7", "memory T cells_8", "proliferating T cell_17"))
 #  immune_cells$cell_facet[z] = "T cells"
 
-  z=which(immune_cells$cell_type %in% c(4, 5, 6, 8, 10, 16))
+  z=which(immune_cells$cell_type %in% c(4, 5, 6, 7, 8, 17))
   immune_cells$cell_facet[z] = "T cells"
 
   immune_cells$cell_facet[immune_cells$cell_facet==""] = "The others"
