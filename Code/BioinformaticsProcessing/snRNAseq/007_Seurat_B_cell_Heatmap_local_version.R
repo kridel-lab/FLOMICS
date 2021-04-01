@@ -99,37 +99,46 @@ get_degs = function(dat,clus1,clus2, clus3){
 ###
 # B cells
 ###
-#P0
-#*P1
-#*P2
-#*P7
-#*P9
+
+#P0 - dark zone GC like
+#P1 - dark zone GC like
+#P2 - dark zone GC like
+#P7
+#P9 - light zone GC like
 #P12 - proliferating B cells
-#P13
+#P13 - naive B cells
 
-c0vs1 = get_degs(combined, 0, 1, 2)
-c0vs9 = get_degs(combined, 0, 9, 7)
-c0vs13 = get_degs(combined, 0, 9, 13)
+#####################################
+#RUN once
+#####################################
 
-c1vs2 = get_degs(combined, 1, 0, 2)
-c1vs9 = get_degs(combined, 1, 9, 7)
+#c0vs1 = get_degs(combined, 0, 1, 2)
+#c0vs9 = get_degs(combined, 0, 9, 7)
+#c0vs13 = get_degs(combined, 0, 9, 13)
 
-c2vs1 = get_degs(combined, 2, 0, 1)
-c2vs9 = get_degs(combined, 2, 9, 7)
+#c1vs2 = get_degs(combined, 1, 0, 2)
+#c1vs9 = get_degs(combined, 1, 9, 7)
 
-c9vs1 = get_degs(combined, 9, 0, 1)
-c9vs2 = get_degs(combined, 9, 1, 2)
+#c2vs1 = get_degs(combined, 2, 0, 1)
+#c2vs9 = get_degs(combined, 2, 9, 7)
 
-c13c1 = get_degs(combined, 13, 0, 1)
-c13c2 = get_degs(combined, 13, 1, 2)
-c13c9 = get_degs(combined, 13, 1, 9)
+#c9vs1 = get_degs(combined, 9, 0, 1)
+#c9vs2 = get_degs(combined, 9, 1, 2)
 
-c7c1 = get_degs(combined, 7, 0, 1)
-c7c2 = get_degs(combined, 7, 1, 2)
-c7c9 = get_degs(combined, 7, 1, 9)
+#c13c1 = get_degs(combined, 13, 0, 1)
+#c13c2 = get_degs(combined, 13, 1, 2)
+#c13c9 = get_degs(combined, 13, 1, 9)
 
-all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9, c9vs1, c9vs2,
-                  c13c1, c13c2, c13c9, c7c1, c7c2,  c7c9)
+#c7c1 = get_degs(combined, 7, 0, 1)
+#c7c2 = get_degs(combined, 7, 1, 2)
+#c7c9 = get_degs(combined, 7, 1, 9)
+
+#all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9, c9vs1, c9vs2,
+#                  c13c1, c13c2, c13c9, c7c1, c7c2,  c7c9)
+
+#saveRDS(all_genes, file="B_cell_clusters_diff_exp_genes.rds")
+
+all_genes = readRDS("B_cell_clusters_diff_exp_genes.rds")
 integrated_genes = rownames(combined)
 genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_log2FC > 0.5, gene %in% integrated_genes)$gene)
 
@@ -144,24 +153,6 @@ combined_b <- subset(combined, idents = cells_b)
 subset.matrix <- combined_b[genes_b_plot_int, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 #scale the data
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
-
-gsva_result <- analyse_sc_clusters(combined_b, verbose = TRUE, use_interactors=F)
-pathway_expression <- pathways(gsva_result)
-pathway_expression$X12.Seurat = NULL
-
-# find the maximum differently expressed pathway
-max_difference <- do.call(rbind, apply(pathway_expression, 1, function(row) {
-  values <- as.numeric(row[2:length(row)])
-  return(data.frame(name = row[1], min = min(values), max = max(values)))
-}))
-
-max_difference$diff <- max_difference$max - max_difference$min
-
-# sort based on the difference
-max_difference <- max_difference[order(max_difference$diff, decreasing = T), ]
-
-head(max_difference)
-plot_gsva_pathway(gsva_result, pathway_id = rownames(max_difference)[1])
 
 #naive B cell markers
 pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)

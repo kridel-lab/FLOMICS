@@ -4,41 +4,48 @@
 #September 30th 2020
 #-------------------------------------------------------------------------------
 
+#make sure loading R/4.0.0 before running this script
+
 #-------------------------------------------------------------------------------
 #load functions and libraries
 #-------------------------------------------------------------------------------
 
 options(stringsAsFactors=F)
 library(tidyverse)
-
-#make sure loading R/4.0.0 before running this script
-
-setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
-
-#load functions to analyze seurat
-source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
-
-#output directory
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
-
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "tidyr", "data.table", "plyr",
 	"stringr",
   "Seurat",
   "cowplot",
 	"patchwork")
-
 lapply(packages, require, character.only = TRUE)
-
 library(annotables)
 
+#load functions to analyze seurat
+source("/cluster/home/kisaev/FLOMICS/Code/BioinformaticsProcessing/snRNAseq/doSeuratProc.R")
+
+#-------------------------------------------------------------------------------
+#set up environment
+#-------------------------------------------------------------------------------
+
+setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
+
+#output directory
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/April2021/"
+
+#snRNA data
+input_data="/cluster/projects/kridelgroup/210330_Robert_Kridel"
+
+#date
 date=Sys.Date()
 
+#input arguements
 args = commandArgs(trailingOnly = TRUE) #patient ID
 input = args[1]
 print(input) #whether only protein coding genes should be included or not
+
 norm_type = args[2]
-print(norm_type)
+print(norm_type) #normalization type
 
 #genes = as.data.table(grch38)
 genes = as.data.table(grch37)
@@ -68,10 +75,11 @@ pc_genes = unique(filter(genes, biotype == "protein_coding")$symbol)
 #LY_FL_076_T1: snRNAseq/200420_A00827_0152_AHT2YJDMXX_Kridel_Robert/Kridel_Robert__LY_FL_076_T1
 #LY_FL_227_T1.: snRNAseq/200317_A00827_0147_BH75CGDSXY_Kridel_Robert/Kridel_Robert__LY_FL_227_T1
 
-data_dir_FL062 <- "snRNAseq/191218_A00827_0099_AHMW73DMXX_Robert_Kridel/Robert_Kridel__LY_FL_062_T1/filtered_feature_bc_matrix"
-data_dir_FL064 <- "snRNAseq/200420_A00827_0152_AHT2YJDMXX_Kridel_Robert/Kridel_Robert__LY_FL_064_T1/filtered_feature_bc_matrix"
-data_dir_FL076 <- "snRNAseq/200420_A00827_0152_AHT2YJDMXX_Kridel_Robert/Kridel_Robert__LY_FL_076_T1/filtered_feature_bc_matrix"
-#data_dir_FL227 <- "snRNAseq/200317_A00827_0147_BH75CGDSXY_Kridel_Robert/Kridel_Robert__LY_FL_227_T1/filtered_feature_bc_matrix"
+#These input files have now been aligned to hg19
+data_dir_FL062 <- paste(input_data, "/", "Kridel_Robert__LY_FL_062_T1/outs/filtered_feature_bc_matrix", sep="")
+data_dir_FL064 <- paste(input_data, "/", "Kridel_Robert__LY_FL_064_T1/outs/filtered_feature_bc_matrix", sep="")
+data_dir_FL076 <- paste(input_data, "/", "Kridel_Robert__LY_FL_076_T1/outs/filtered_feature_bc_matrix", sep="")
+#data_dir_FL227 <- paste(input_data, "/", "Kridel_Robert__LY_FL_062_T1/outs/filtered_feature_bc_matrix", sep="")
 
 list.files(data_dir_FL062)
 list.files(data_dir_FL064)
@@ -202,7 +210,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	# t-SNE and Clustering
 	combined <- FindNeighbors(combined, reduction = "pca", dims = 1:dim)
-	combined <- FindClusters(combined, resolution = 0.3)
+	combined <- FindClusters(combined, resolution = 0.5)
 	combined <- RunUMAP(combined, reduction = "pca", dims = 1:dim)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
