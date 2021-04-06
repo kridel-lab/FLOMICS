@@ -59,10 +59,10 @@ combined = r
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------
-genesall = c("CD3D", "CD3G", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
+genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
              "TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
-             "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", "ICOS",
-             "MKI67", "TCF7", "TOP2A", "IL2RA")
+             "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
+             "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
 
 cells_t=c(18, 4, 5, 7, 8, 9)
 
@@ -72,15 +72,22 @@ cells_t=c(18, 4, 5, 7, 8, 9)
 
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
-combined <- ScaleData(combined, verbose = TRUE)
+
+#combined <- ScaleData(combined, verbose = TRUE)
 
 combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 
-dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"),scaled.to.max = TRUE)
+dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE)
 
-h1 = DoHeatmap(combined_t, features = genesall, assay="RNA", size=2)
-h2 = DoHeatmap(combined_t, features = genesall, assay="integrated", size=2)
+FeaturePlot(subset.matrix, features = c("GZMK", "CCL5"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+FeaturePlot(subset.matrix, features = c("IL7R", "PLAC8"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+FeaturePlot(subset.matrix, features = c("PDCD1", "TOX"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+FeaturePlot(subset.matrix, features = c("IL2RA", "FOXP3"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+FeaturePlot(subset.matrix, features = c("TOP2A", "MKI67"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
 
-print(h1)
-print(h2)
+
+
+
+
+

@@ -9,22 +9,29 @@ library(ggpubr)
 
 set.seed(1234)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Feb232021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #DATA
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #seurat object from our single cell data
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
 
 #confirm UMAP plot
 DimPlot(r, label = TRUE)
+dev.off()
 
 #define B cells
-cells_b = c(0, 1, 2, 7, 9, 12, 13)
+cells_b = c(12, 2, 0, 13, 6, 16, 1, 10)
 DefaultAssay(r) <- "RNA"
 r <- NormalizeData(r)
+
+mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021"
+subDir=paste("Pseudotime_analysis", date, sep="_")
+
+dir.create(file.path(mainDir, subDir))
+setwd(file.path(mainDir, subDir))
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #FUNCTIONS
@@ -84,10 +91,13 @@ get_gene_vs_pseudotime = function(gene){
 r.cds <- as.cell_data_set(r)
 #create partitions for pseudotime analysis
 r.cds <- cluster_cells(cds = r.cds, reduction_method = "UMAP")
-#check partitions created
-plot_cells(r.cds, color_cells_by = "partition")
 #learn graph
 r.cds <- learn_graph(r.cds, use_partition = TRUE)
+#check partitions created
+
+pdf("Estimated_partitions_by_Monocle_for_pseudotime.pdf")
+plot_cells(r.cds, color_cells_by = "partition")
+dev.off()
 
 pdf("Bcells_pseudotime_estimation_all_possible_cells_as_roots.pdf", width=10, height=8)
 all_res = as.data.table(ldply(llply(cells_b, get_pseudotime_estimates)))

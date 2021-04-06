@@ -39,8 +39,8 @@ rownames(exprmat_CB) <- genes
 #get Seurat object and normalize it
 #SeuratObject=readRDS("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/combined_processed_seurat_object_rmFL277dim20.rds")
 #SeuratObject = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
-output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/Feb2020/"
-SeuratObject=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds", sep=""))
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/April2021/"
+SeuratObject=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds", sep=""))
 
 DefaultAssay(SeuratObject) <- "RNA"
 SeuratObject <- NormalizeData(SeuratObject)
@@ -56,7 +56,8 @@ pred_CBheme_singleR
 SeuratObject$SingleR.label <- pred_CBheme_singleR$labels
 pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes.pdf", sep=""))
 DimPlot(SeuratObject, group.by = 'SingleR.label', label = FALSE) + #+ NoLegend()
-theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
+theme(axis.line = element_line(colour = 'black', size = 1),
+text = element_text(size = 20), axis.text = element_text(size = 20))
 dev.off()
 
 # Add individual SingleR scores to Seurat metadata

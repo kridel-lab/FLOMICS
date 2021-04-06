@@ -23,8 +23,9 @@ library(enrichplot)
 organism = "org.Hs.eg.db"
 library(organism, character.only = TRUE)
 library(ReactomeGSA)
+library("xlsx")
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Feb232021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
 
 date=Sys.Date()
 
@@ -40,7 +41,7 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -53,6 +54,8 @@ r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clu
 #-------------------------------------------------------------------------------
 
 combined = r
+DimPlot(combined)
+dev.off()
 
 #-------------------------------------------------------------------------------
 #analysis
@@ -100,49 +103,61 @@ get_degs = function(dat,clus1,clus2, clus3){
 # B cells
 ###
 
-#P0 - dark zone GC like
-#P1 - dark zone GC like
-#P2 - dark zone GC like
-#P7
-#P9 - light zone GC like
-#P12 - proliferating B cells
-#P13 - naive B cells
+#P0 - 
+#P1 - 
+#P2 - 
+#P6 - 
+#P10 - 
+#P12 - proliferating 
+#P13 - 
+#P16 - 
 
 #####################################
 #RUN once
 #####################################
 
 #c0vs1 = get_degs(combined, 0, 1, 2)
-#c0vs9 = get_degs(combined, 0, 9, 7)
-#c0vs13 = get_degs(combined, 0, 9, 13)
+#c0vs10 = get_degs(combined, 0, 1, 10)
+#c0vs13 = get_degs(combined, 0, 6, 13)
+#c0vs6 = get_degs(combined, 0, 6, 10)
 
 #c1vs2 = get_degs(combined, 1, 0, 2)
-#c1vs9 = get_degs(combined, 1, 9, 7)
+#c1vs6 = get_degs(combined, 1, 0, 6)
 
 #c2vs1 = get_degs(combined, 2, 0, 1)
-#c2vs9 = get_degs(combined, 2, 9, 7)
+#c2vs6 = get_degs(combined, 2, 0, 6)
 
-#c9vs1 = get_degs(combined, 9, 0, 1)
-#c9vs2 = get_degs(combined, 9, 1, 2)
+#c10vs1 = get_degs(combined, 10, 0, 1)
+#c10vs2 = get_degs(combined, 10, 1, 2)
 
 #c13c1 = get_degs(combined, 13, 0, 1)
 #c13c2 = get_degs(combined, 13, 1, 2)
-#c13c9 = get_degs(combined, 13, 1, 9)
+#c13c10 = get_degs(combined, 13, 1, 10)
 
-#c7c1 = get_degs(combined, 7, 0, 1)
-#c7c2 = get_degs(combined, 7, 1, 2)
-#c7c9 = get_degs(combined, 7, 1, 9)
+#c6c1 = get_degs(combined, 6, 0, 1)
+#c6c2 = get_degs(combined, 6, 1, 2)
+#c6c10 = get_degs(combined, 6, 1, 10)
 
-#all_genes = rbind(c0vs1, c0vs9, c0vs13, c1vs2, c1vs9, c2vs1, c2vs9, c9vs1, c9vs2,
-#                  c13c1, c13c2, c13c9, c7c1, c7c2,  c7c9)
+#c16c1 = get_degs(combined, 16, 0, 1)
+#c16c2 = get_degs(combined, 16, 1, 2)
+#c16c10 = get_degs(combined, 16, 1, 10)
+
+#all_genes = rbind(c0vs1, c0vs10, c0vs13, c0vs6, 
+ #                 c1vs2, c1vs6, c2vs1, c2vs6, c10vs1, c10vs2, 
+  #                c13c1, c13c2, c13c10, c6c1, c6c2, c6c10 , c16c1, c16c2, c16c10)
 
 #saveRDS(all_genes, file="B_cell_clusters_diff_exp_genes.rds")
 
 all_genes = readRDS("B_cell_clusters_diff_exp_genes.rds")
+
+all_genes = filter(all_genes, p_val_adj < 0.05)
+write.xlsx(all_genes, file, file = "Bcell_marker_genes_across_clusters.xlsx", 
+           col.names = TRUE, row.names = TRUE, append = FALSE)
+
 integrated_genes = rownames(combined)
 genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_log2FC > 0.5, gene %in% integrated_genes)$gene)
 
-cells_b = c(0, 1, 2, 7, 9, 12, 13)
+cells_b = c(0, 1, 2, 6, 10, 12, 13, 16)
 
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
@@ -155,11 +170,11 @@ subset.matrix <- combined_b[genes_b_plot_int, ] # Pull the raw expression matrix
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
 #naive B cell markers
-pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)
-cells_wexp = WhichCells(object = combined_b, expression = IGHD > 1 & IGHM >1)
-FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
-FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
-dev.off()
+#pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)
+#cells_wexp = WhichCells(object = combined_b, expression = IGHD > 1 & IGHM >1)
+#FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+#FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
+#dev.off()
 
 pdf("naive_Bcell_marker_diff_exp_analysis.pdf", width=10, height=6)
 cells_wexp = WhichCells(object = combined_b, expression = CCSER1 > 1 & KHDRBS2 >1)
@@ -167,38 +182,26 @@ FeaturePlot(combined_b, features = c("CCSER1", "KHDRBS2"), blend = TRUE, order=T
 FeaturePlot(combined_b, features = c("CCSER1", "KHDRBS2"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
 dev.off()
 
-pdf("markers_of_follicular_B_cells.pdf", width=10, height=6)
-cells_wexp = WhichCells(object = combined_b, expression = PAX5 > 3 & 'HLA-DRA' >3)
-FeaturePlot(combined_b, features = c("PAX5", "HLA-DRA"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6)
-FeaturePlot(combined_b, features = c("PAX5", "HLA-DRA"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6, cells=cells_wexp)
+pdf("BCL2_BCL6.pdf", width=8, height=6)
+FeaturePlot(combined_b, features = c("BCL2", "BCL6"), order=TRUE, label=TRUE, 
+            blend.threshold=0.7, cols=c("grey", "thistle1", "steelblue", "red"))
 dev.off()
 
-pdf("HLA_genes_B_cells.pdf", width=10, height=6)
-#cells_wexp = WhichCells(object = combined_b, expression = "HLA-A" > 1 & "HLA-B" >1)
-FeaturePlot(combined_b, features = c("HLA-B", "HLA-A"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6)
-#FeaturePlot(combined_b, features = c("HLA-B", "HLA-A"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6, cells=cells_wexp)
+pdf("cluster6.pdf", width=8, height=6)
+FeaturePlot(combined_b, features = c("ABCB4", "ACAP1", "ADAM19", "B2M"), order=TRUE, label=TRUE, 
+            blend.threshold=0.7, cols=c("grey", "thistle1", "steelblue", "red"))
 dev.off()
 
-FeaturePlot(combined_b, features = c("CD80"), order=TRUE, label=TRUE, blend.threshold=0.1, cols=c("grey", "thistle1", "steelblue", "red"))
+FeaturePlot(combined_b, features = c("CD83", "CXCR4"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6)
+ggsave("LZ_DZ_CD83_CXCR4.pdf")
 
-FeaturePlot(combined_b, features = c2vs1$gene[1:12], cols=c("grey", "thistle1", "steelblue", "red"),
+FeaturePlot(combined_b, features = c0vs10$gene[1:12], cols=c("grey", "thistle1", "steelblue", "red"),
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
-ggsave("Cluster2_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
-
-FeaturePlot(combined_b, features = c9vs2$gene[1:12], cols=c("grey", "thistle1", "steelblue", "red"),
-            order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
-ggsave("Cluster9_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
-
-FeaturePlot(combined_b, features = genes_check, cols=c("grey", "thistle1", "steelblue", "red"),
-            order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
-ggsave("Bcell_genes_featureplots.pdf", width=12, height=15)
-
-DotPlot(combined_b, features = genes_check, idents = cells_b) + RotatedAxis()
-ggsave("Bcell_genes_dotplot.pdf")
+ggsave("Cluster0_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
 
 DZ_genes=c("AICDA", "CXCR4", "GCSAM", "CD27", "SEMA4B", "MKI67", "EZH2", "CCNB1", "BACH2", "AURKA", "RAD51", "POLH")
-DotPlot(combined_b, features = DZ_genes, idents = cells_b) + RotatedAxis()
-ggsave("Bcell_DZ_dotplot.pdf")
+DotPlot(combined_b, features = DZ_genes, idents = cells_b, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()
+ggsave("Bcell_DZ_dotplot.pdf", width=7, height=5)
 
 FeaturePlot(combined_b, features = DZ_genes, cols=c("grey", "thistle1", "steelblue", "red"),
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
@@ -210,27 +213,18 @@ FeaturePlot(combined_b, features = LZ_genes, cols=c("grey", "thistle1", "steelbl
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
 ggsave("Bcell_LZ_genes_featureplots.pdf", width=12, height=15)
 
-DotPlot(combined_b, features = LZ_genes, idents = cells_b) + RotatedAxis()
-ggsave("Bcell_LZ_dotplot.pdf")
-
-FeaturePlot(combined_b, features = "LRMP", cols=c("grey", "thistle1", "steelblue", "red"),
-            order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
+DotPlot(combined_b, features = LZ_genes, idents = cells_b, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()
+ggsave("Bcell_LZ_dotplot.pdf", width=7, height=5)
 
 #make some feature plots for the genes of interest in B cells
-pdf(paste(date, "_" , "B_cell_genes_featureplot.pdf", sep=""), height=10, width=10)
-DotPlot(combined_b, features = genes_b_plot_int) + RotatedAxis()
-dittoHeatmap(combined_b, genes = genes_b_plot_int, scaled.to.max=TRUE, assay="integrated")
-DoHeatmap(subset(combined_b, downsample = 100), features = genes_b_plot_int, size = 3, assay="integrated")
+pdf(paste(date, "_" , "B_cell_genes_dotplot.pdf", sep=""), height=7, width=15)
+DotPlot(combined_b, features = genes_b_plot_int, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()+
+  theme(axis.text.x = element_text(angle = 90))
 dev.off()
 
-# Annotating and ordering cells by some meaningful feature(s):
-pdf(paste(date, "_" , "B_cell_genes_ditto_heatmap_scaled.pdf", sep=""), height=20, width=20)
-FeaturePlot(combined, features = genes_b_plot_int, cols=c("yellow", "purple"))
-dittoHeatmap(combined_scaled, scaled.to.max=TRUE, assay="integrated")
-dittoHeatmap(combined_scaled, scaled.to.max=TRUE, assay="RNA")
+pdf(paste(date, "_" , "B_cell_genes_heatmap.pdf", sep=""), height=8, width=8)
+DoHeatmap(combined_b, features = genes_b_plot_int, size = 3, assay="integrated")
 dev.off()
 
-h = DoHeatmap(combined_b, features = genes_b_plot_int, assay="integrated", size=2)
-pdf(paste(date, "_" , "B_cell_genes_ditto_heatmap_seurat.pdf", sep=""), height=6)
-print(h)
-dev.off()
+
+

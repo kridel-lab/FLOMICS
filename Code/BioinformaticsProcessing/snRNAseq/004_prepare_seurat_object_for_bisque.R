@@ -87,4 +87,5 @@ sc.eset <- Biobase::ExpressionSet(assayData=sc.data,
                                     phenoData=sc.pdata)
 
 #save final object ready for BISQUE, right now the sample names are 1,2,3,4
-saveRDS(sc.eset, "sc_eset_for_bisque.rds")
+file_name = paste(output, "sc_eset_for_bisque.rds", sep="")
+saveRDS(sc.eset, file_name)

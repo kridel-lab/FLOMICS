@@ -47,6 +47,9 @@ analysis_type=unlist(strsplit(unlist(strsplit(input, "/cluster/projects/kridelgr
 
 combined = readRDS(input)
 
+output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/April2021/"
+combined=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds", sep=""))
+
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------

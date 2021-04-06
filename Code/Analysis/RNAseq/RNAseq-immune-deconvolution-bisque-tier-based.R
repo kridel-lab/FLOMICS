@@ -19,9 +19,9 @@ source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 #data
 #----------------------------------------------------------------------
 
-bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier1_bisque_decomposed_samples.rds")
-bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier2_bisque_decomposed_samples.rds")
-bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/tier3_bisque_decomposed_samples.rds")
+bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier1_bisque_decomposed_samples.rds")
+bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier2_bisque_decomposed_samples.rds")
+bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier3_bisque_decomposed_samples.rds")
 
 old_labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
 colnames(old_labels)[2] = "SAMPLE_ID"

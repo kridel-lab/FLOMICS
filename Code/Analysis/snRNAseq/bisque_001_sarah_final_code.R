@@ -61,7 +61,7 @@ get_bisque_res = function(tier){
 
     res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset, sc.eset, markers=NULL, use.overlap=TRUE)
     ref.based.estimates <- res$bulk.props
-    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/", "tier1", "_bisque_decomposed_samples.rds", sep=""))
+    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/Bisque/", "tier1", "_bisque_decomposed_samples.rds", sep=""))
   }
 
   if(tier=="tier2"){
@@ -77,7 +77,7 @@ get_bisque_res = function(tier){
 
     res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset, sc.eset, markers=NULL, use.overlap=TRUE)
     ref.based.estimates <- res$bulk.props
-    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/", "tier2", "_bisque_decomposed_samples.rds", sep=""))
+    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/Bisque/", "tier2", "_bisque_decomposed_samples.rds", sep=""))
   }
 
   if(tier=="tier3"){
@@ -93,7 +93,7 @@ get_bisque_res = function(tier){
 
     res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset, sc.eset, markers=NULL, use.overlap=TRUE)
     ref.based.estimates <- res$bulk.props
-    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/", "tier3", "_bisque_decomposed_samples.rds", sep=""))
+    saveRDS(ref.based.estimates, file=paste("Analysis-Files/Seurat/Bisque/", "tier3", "_bisque_decomposed_samples.rds", sep=""))
   }
 
   print("done")
@@ -114,4 +114,4 @@ bulk.eset <- Biobase::ExpressionSet(assayData = exp)
 
 res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset, sc.eset, markers=NULL, use.overlap=TRUE)
 ref.based.estimates <- res$bulk.props
-saveRDS(ref.based.estimates, file="Analysis-Files/Seurat/bisque_decomposed_samples.rds")
+saveRDS(ref.based.estimates, file="Analysis-Files/Seurat/Bisque/bisque_decomposed_samples.rds")

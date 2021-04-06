@@ -33,13 +33,13 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Feb232021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
 
 date=Sys.Date()
 
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-02-23_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
 
-mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat"
+mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021"
 subDir=paste("B_cells_pathways", date, sep="_")
 
 dir.create(file.path(mainDir, subDir))
@@ -50,13 +50,15 @@ setwd(file.path(mainDir, subDir))
 #-------------------------------------------------------------------------------
 
 #visualize differences between B cell clusters
+DimPlot(r)
+dev.off()
 
 #-------------------------------------------------------------------------------
 #data
 #-------------------------------------------------------------------------------
 
 combined = r
-cells_b = c(0, 1, 2, 7, 9, 12, 13)
+cells_b = c(12, 2, 0, 13, 6, 16, 1, 10)
 
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
@@ -129,20 +131,20 @@ enrichr_analysis = function(dat, clust1, clust2, db){
 
 #1. get GSVA pathways comparing different clusters
 
-pdf("GSVA_analysis_cluster1_vs_cluster2.pdf", width=10)
-gsva_analysis(gsva_result, "X1", "X2") #X1 = seurat cluster 1
+pdf("GSVA_analysis_cluster0_vs_cluster10.pdf", width=10)
+gsva_analysis(gsva_result, "X0", "X10") #X1 = seurat cluster 1
 dev.off()
 
-pdf("GSVA_analysis_cluster1_vs_cluster9.pdf", width=10)
-gsva_analysis(gsva_result, "X1", "X9")
+pdf("GSVA_analysis_cluster0_vs_cluster6.pdf", width=10)
+gsva_analysis(gsva_result, "X0", "X6")
 dev.off()
 
-pdf("GSVA_analysis_cluster2_vs_cluster9.pdf", width=10)
-gsva_analysis(gsva_result, "X2", "X9")
+pdf("GSVA_analysis_cluster0_vs_cluster6.pdf", width=10)
+gsva_analysis(gsva_result, "X0", "X6")
 dev.off()
 
-pdf("GSVA_analysis_cluster7_vs_cluster13.pdf", width=10)
-gsva_analysis(gsva_result, "X7", "X13")
+pdf("GSVA_analysis_cluster6_vs_cluster13.pdf", width=10)
+gsva_analysis(gsva_result, "X6", "X13")
 dev.off()
 
 #2. Analyze pathways using EnrichR comparing different clusters
@@ -159,6 +161,14 @@ get_db_enrichr_plots = function(db_type, clust1, clust2){
 	enrichr_analysis(combined_b, clust1, clust2, db_type)
 }
 
-pdf("EnrichR_analysis_cluster1_vs_cluster2.pdf", width=12, height=8)
-llply(paths_db, get_db_enrichr_plots, 1, 2)
+pdf("EnrichR_analysis_cluster0_vs_cluster10.pdf", width=12, height=8)
+llply(paths_db, get_db_enrichr_plots, 0, 10)
+dev.off()
+
+pdf("EnrichR_analysis_cluster0_vs_cluster6.pdf", width=12, height=8)
+llply(paths_db, get_db_enrichr_plots, 0, 6)
+dev.off()
+
+pdf("EnrichR_analysis_cluster6_vs_cluster10.pdf", width=12, height=8)
+llply(paths_db, get_db_enrichr_plots, 6, 10)
 dev.off()
