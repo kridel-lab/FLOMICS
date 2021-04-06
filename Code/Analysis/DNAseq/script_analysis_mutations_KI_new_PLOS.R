@@ -304,6 +304,18 @@ ggsave(paste0("Analysis-Files/",  date, " Mutation_percentage_FLOMICS_PLOSMED_me
 
 # higher nb of mutations in C1 vs C2
 
+# Calculate mean nb of genes mutated in C1 and C2
+n.C1 <- cluster.annotation %>% filter(SNFClust == "1") %>% nrow()
+n.C2 <- cluster.annotation %>% filter(SNFClust == "2") %>% nrow()
+
+mut.merged %>%
+  distinct(SAMPLE_ID, Hugo_Symbol, Cohort) %>%
+  right_join(cluster.annotation) %>%
+  filter(!is.na(SNFClust)) %>%
+  group_by(SNFClust) %>%
+  summarize(count = n()) %>%
+  mutate(mean.nb.genes.mut = ifelse(SNFClust == "1", count/n.C1, count/n.C2))
+
 # Mutation matrix
 no.mut.cases <- setdiff(sample.annotation$SAMPLE_ID, unique(mut.merged$SAMPLE_ID))
 # n = 0
