@@ -24,6 +24,17 @@ TRB <- read.csv("Analysis-Files/Mixcr/Arash_script_output/divstats_TRB.csv") %>%
   select(-tmp) %>%
   filter(TIME_POINT %in% c(NA, "T1"))
 
+IGH <- read.csv("Analysis-Files/Mixcr/Arash_script_output/divstats_IGH.csv") %>%
+  mutate(clonotype = "IGH") %>%
+  mutate(X = gsub("\\..*", "", X)) %>%
+  rename(SAMPLE_ID = X) %>%
+  mutate(tmp = nchar(SAMPLE_ID)) %>%
+  mutate(SAMPLE_ID = ifelse(tmp == 9, paste0(SAMPLE_ID, "_T1"), SAMPLE_ID)) %>%
+  mutate(tmp = nchar(SAMPLE_ID)) %>%
+  mutate(TIME_POINT = ifelse(tmp == 12, substr(SAMPLE_ID, 11, 12), NA)) %>%
+  select(-tmp) %>%
+  filter(TIME_POINT %in% c(NA, "T1"))
+
 clin <- read.csv("metadata/clinical_data_rcd11Aug2020.csv") %>%
   mutate(LY_FL_ID = paste0(LY_FL_ID, "_T1")) %>%
   mutate(POD24 = ifelse(CODE_TTP == 1 & TTP < 2, "YES", "NO")) %>%
@@ -44,6 +55,11 @@ TRB <- TRB %>%
   left_join(SNF.clust, by = c("SAMPLE_ID" = "ID")) %>%
   filter(Sample_Coverage > 0.75)
 
+IGH <- IGH %>%
+  left_join(sample.annotation[, c("SAMPLE_ID", "TYPE", "STAGE")]) %>%
+  left_join(SNF.clust, by = c("SAMPLE_ID" = "ID")) %>%
+  filter(Sample_Coverage > 0.75)
+
 ##
 # Plot Shannon diversity
 ##
@@ -52,6 +68,10 @@ p <- TRA %>% filter(TYPE %in% c("DLBCL", "FL")) %>%
 p + stat_compare_means(method = "wilcox.test")
 
 p <- TRB %>% filter(TYPE %in% c("DLBCL", "FL")) %>%
+  ggboxplot(x = "TYPE", y = "observed_Shannon", color = "TYPE", add = "jitter")
+p + stat_compare_means(method = "wilcox.test")
+
+p <- IGH %>% filter(TYPE %in% c("DLBCL", "FL")) %>%
   ggboxplot(x = "TYPE", y = "observed_Shannon", color = "TYPE", add = "jitter")
 p + stat_compare_means(method = "wilcox.test")
 
