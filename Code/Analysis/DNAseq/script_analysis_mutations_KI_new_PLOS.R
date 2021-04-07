@@ -338,6 +338,15 @@ mut.merged.df.T1.T2 <- mut.merged %>%
 # mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
 # mut.merged.df.T1.T2 <- mut.merged.df.T1.T2[,order(colnames(mut.merged.df.T1.T2))]
 
+#add 4 genes that were removed from matrix because no mutations
+#in them that passed filters
+genes_missing = genes.common[which(!(genes.common %in% mut.merged.df.T1.T2$Hugo_Symbol))]
+genes_missing_df = mut.merged.df.T1.T2[1:4,]
+genes_missing_df$Hugo_Symbol = genes_missing
+genes_missing_df[,2:ncol(genes_missing_df)] = 0
+
+mut.merged.df.T1.T2 = rbind(mut.merged.df.T1.T2, genes_missing_df)
+
 mut.merged.df.T1.T2.poor.cov.excl <- mut.merged.df.T1.T2[, c("Hugo_Symbol", setdiff(sample.annotation$SAMPLE_ID, poor.coverage.samples))]
 
 T1.samples <- sample.annotation %>% filter(TIME_POINT == "T1") %>% .$SAMPLE_ID %>% as.character() # n = 154
