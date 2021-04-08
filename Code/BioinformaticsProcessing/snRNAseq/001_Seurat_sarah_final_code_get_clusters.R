@@ -35,7 +35,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/DATA")
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/April2021/"
 
 #snRNA data
-input_data="/cluster/projects/kridelgroup/210330_Robert_Kridel"
+input_data="/cluster/projects/kridelgroup/210330_Robert_Kridel_GRCh37.67"
 
 #date
 date=Sys.Date()
