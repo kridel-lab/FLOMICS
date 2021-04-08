@@ -6,7 +6,7 @@ library(survminer)
 setwd("~/github/FLOMICS/")
 
 clusters <- read.csv("Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
-survival <- read.csv("metadata/clinical_data_upd5Apr2021.csv")[,c(1:27)] %>% mutate(TTP = as.numeric(TTP))
+survival <- read.csv("metadata/clinical_data_upd7Apr2021.csv")[,c(1:27)] %>% mutate(TTP = as.numeric(TTP))
 
 survival.df <- clusters %>%
   filter(!is.na(SNFClust10Feb2021)) %>%
