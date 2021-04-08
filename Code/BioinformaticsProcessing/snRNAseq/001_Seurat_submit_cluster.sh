@@ -7,6 +7,7 @@
 #SBATCH -t 5-00:00 # Runtime in D-HH:MM
 #SBATCH -J seurat_run
 
+module purge
 module load R/4.0.0
 
 #pwd
