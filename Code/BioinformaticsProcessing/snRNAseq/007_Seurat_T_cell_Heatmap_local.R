@@ -24,7 +24,7 @@ organism = "org.Hs.eg.db"
 library(organism, character.only = TRUE)
 library(ReactomeGSA)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021")
 
 date=Sys.Date()
 
@@ -40,7 +40,7 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -64,7 +64,7 @@ genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "P
              "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
              "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
 
-cells_t=c(18, 4, 5, 7, 8, 9)
+cells_t=c(10, 16, 5, 6, 7, 8)
 
 ###
 # T cells

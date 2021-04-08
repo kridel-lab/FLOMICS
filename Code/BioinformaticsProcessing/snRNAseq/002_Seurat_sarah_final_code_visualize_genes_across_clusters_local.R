@@ -18,7 +18,7 @@ organism = "org.Hs.eg.db"
 library(organism, character.only = TRUE)
 library(ReactomeGSA)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021")
 
 date=Sys.Date()
 
@@ -34,7 +34,7 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
 
 #-------------------------------------------------------------------------------
 #analysis
@@ -91,6 +91,10 @@ f = FeaturePlot(combined, features = c("NCAM1", "MS4A1", "PTPRC", "BCL6", "CD68"
 cols=c("grey", "thistle1", "steelblue", "red"))
 print(f)
 
+igh = FeaturePlot(combined, features = c("IGHM", "IGHD", "IGKC", "IGLC2", "IGLC3", "BCL2", "CD19"),order=TRUE, label=TRUE,
+                 cols=c("grey", "thistle1", "steelblue", "red"))
+print(igh)
+
 #overlay on UMAP clusters
 f2 = FeaturePlot(combined, features = c("CD79A", "CR2", "CD3D", "CCL5",
 "ICOS", "IGKC", "IGLC2", "IGLC3", "BCL2", "CD19"),order=TRUE, label=TRUE,
@@ -145,4 +149,13 @@ print(f8)
 
 dev.off()
 
+pdf("IGHM_IGHD.pdf", width=15, height=6)
+FeaturePlot(combined, features = c("IGHM", "IGHD"), order=TRUE, label=TRUE, 
+            blend.threshold=0.6, blend=TRUE)
+dev.off()
+
+pdf("BCL2_BCL6.pdf", width=15, height=6)
+FeaturePlot(combined, features = c("BCL2", "BCL6"), order=TRUE, label=TRUE, 
+            blend.threshold=0.7, blend=TRUE)
+dev.off()
 

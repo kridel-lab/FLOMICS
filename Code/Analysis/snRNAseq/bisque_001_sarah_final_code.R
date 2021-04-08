@@ -40,7 +40,7 @@ exp = as.matrix(exp)
 
 #can automatically convert from seurat object
 #sc.eset = readRDS("Analysis-Files/Seurat/seurat_objects/sc_eset_for_bisque_rmFL277dim20_prelim.rds")
-output="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021/"
+output="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021/"
 sc.eset=readRDS(paste(output, "sc_eset_for_bisque.rds", sep=""))
 
 get_bisque_res = function(tier){

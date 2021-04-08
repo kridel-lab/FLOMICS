@@ -226,7 +226,7 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 	print(c)
 	dev.off()
 
-	combined <- FindClusters(combined, resolution = 0.5)
+	combined <- FindClusters(combined, resolution = 0.6)
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
