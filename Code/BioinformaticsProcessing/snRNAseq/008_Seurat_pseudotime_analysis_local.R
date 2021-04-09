@@ -6,28 +6,30 @@ library(Matrix)
 library(ggplot2)
 library(patchwork)
 library(ggpubr)
+library(data.table)
+library(plyr)
+library(cowplot)
+library(dplyr)
 
 set.seed(1234)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021")
+
+date = Sys.Date()
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #DATA
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #seurat object from our single cell data
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
-
-#confirm UMAP plot
-DimPlot(r, label = TRUE)
-dev.off()
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
 
 #define B cells
-cells_b = c(12, 2, 0, 13, 6, 16, 1, 10)
+cells_b = c(0, 1, 2, 4, 11)
 DefaultAssay(r) <- "RNA"
 r <- NormalizeData(r)
 
-mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021"
+mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021"
 subDir=paste("Pseudotime_analysis", date, sep="_")
 
 dir.create(file.path(mainDir, subDir))
@@ -79,8 +81,37 @@ get_pseudotime_estimates = function(root_cells){
   return(med_pseuds)
 }
 
-get_gene_vs_pseudotime = function(gene){
-
+get_gene_vs_pseudotime = function(gene, root_cells){
+  
+  #test
+  #gene="BCL2"
+  
+  cell_start = root_cells
+  r.cds <- order_cells(r.cds, root_pr_nodes=get_earliest_principal_node(r.cds, cell_start))
+  
+  # plot trajectories colored by pseudotime
+  p = plot_cells(cds = r.cds,
+                 color_cells_by = "pseudotime",
+                 show_trajectory_graph = TRUE, label_branch_points=FALSE,  graph_label_size=3) + ggtitle(paste(cell_start, "as root"))
+  
+  #add final pseudotime to main seurat object
+  r <- AddMetaData(
+    object = r,
+    metadata = r.cds@principal_graph_aux@listData$UMAP$pseudotime,
+    col.name = "Pseudotime"
+  )
+  
+  #gene expression 
+  rna_exp = as.numeric(r$RNA[which(rownames(r$RNA) == gene)])
+  
+  #get pseudotime for each cluster when this one is set as root and gene expression for gene of interest
+  med_pseuds = as.data.table(r[[c("seurat_clusters", "Pseudotime")]])
+  med_pseuds$gene_exp = rna_exp
+  med_pseuds$seurat_clusters = as.character(med_pseuds$seurat_clusters)
+  med_pseuds = filter(med_pseuds, seurat_clusters %in% cells_b, !(Pseudotime == "Inf")) 
+  plot = ggscatter(med_pseuds, x="Pseudotime", y="gene_exp", color="seurat_clusters")+geom_smooth(span = 0.3)+
+    ggtitle(paste(gene, "vs Pseudotime"))+ylab("Gene Expression")
+  print(plot)
 }
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,3 +137,32 @@ dev.off()
 #summary
 ggline(all_res, "root", "median", color="seurat_clusters") + ylab("Median Pseudotime") +xlab("Cluster set as root") + theme_bw()
 ggsave("Median_pseudotimes_vs_cell_type_diff_roots.pdf")
+
+#get pseudotime vs gene expression values
+pdf("Bcells_pseudotime_root_is_11_vs_gene_expression.pdf", width=8, height=6)
+get_gene_vs_pseudotime("BACH2", 11)
+get_gene_vs_pseudotime("CXCR4", 11)
+get_gene_vs_pseudotime("CD83", 11)
+get_gene_vs_pseudotime("LMO2", 11)
+get_gene_vs_pseudotime("PAX5", 11)
+get_gene_vs_pseudotime("HLA-DRA", 11)
+get_gene_vs_pseudotime("BCL6", 11)
+get_gene_vs_pseudotime("BIRC3", 11)
+get_gene_vs_pseudotime("GS1-410F4.2", 11)
+get_gene_vs_pseudotime("VAV3", 11)
+get_gene_vs_pseudotime("ADRBK2", 11)
+dev.off()
+
+pdf("Bcells_pseudotime_root_is_4_vs_gene_expression.pdf", width=8, height=6)
+get_gene_vs_pseudotime("BACH2", 4)
+get_gene_vs_pseudotime("CXCR4", 4)
+get_gene_vs_pseudotime("CD83", 4)
+get_gene_vs_pseudotime("LMO2", 4)
+get_gene_vs_pseudotime("PAX5", 4)
+get_gene_vs_pseudotime("HLA-DRA", 4)
+get_gene_vs_pseudotime("BCL6", 4)
+get_gene_vs_pseudotime("BIRC3", 4)
+get_gene_vs_pseudotime("GS1-410F4.2", 4)
+get_gene_vs_pseudotime("VAV3", 4)
+get_gene_vs_pseudotime("ADRBK2", 4)
+dev.off()

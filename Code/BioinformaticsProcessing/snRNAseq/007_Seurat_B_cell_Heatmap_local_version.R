@@ -24,8 +24,9 @@ organism = "org.Hs.eg.db"
 library(organism, character.only = TRUE)
 library(ReactomeGSA)
 library("xlsx")
+library(tidyr)
 
-setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April2021")
+setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021")
 
 date=Sys.Date()
 
@@ -41,7 +42,7 @@ packages <- c("readr", "data.table", "plyr",
 
 lapply(packages, require, character.only = TRUE)
 
-r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds")
+r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -71,13 +72,18 @@ genes_check = c("NOTCH2", "JAM3", "PRDM1", "IRF4", "MS4A1", "PAX5",
                 "HLA-DRA", "BCL6", "POLH", "P2RY8", "GNA13", "AICDA",
                 "LMO2")
 
+normalized_combined = combined
+DefaultAssay(normalized_combined) <- "RNA"
+normalized_combined <- NormalizeData(normalized_combined)
+
+
 #get differentially expressed genes between different B cell clusters
-get_degs = function(dat,clus1,clus2, clus3){
-	seurat_obj = dat
+get_degs = function(clus1,clus2, clus3){
+	
+  print(paste(clus1, clus2, clus3))
+  seurat_obj = normalized_combined
 
 	#1. Find cluster markers that are differentially expressed between clusters
-	DefaultAssay(seurat_obj) <- "RNA"
-	seurat_obj <- NormalizeData(seurat_obj)
 
 	#find markers
 	diffexp.markers <- FindMarkers(seurat_obj, ident.1 = clus1,
@@ -87,14 +93,16 @@ get_degs = function(dat,clus1,clus2, clus3){
 	diffexp.markers  = as.data.table(diffexp.markers)
 	diffexp.markers$clust1 = clus1
 	diffexp.markers$clust2 = paste(clus2, clus3, sep="_")
+#	diffexp.markers = filter(diffexp.markers, p_val_adj < 0.05)
 	diffexp.markers = diffexp.markers[order(-avg_log2FC)]
-
+	
 	genes = filter(diffexp.markers, p_val_adj < 0.05)$gene
-	gs = as.data.table(gprofiler2::gost(genes, exclude_iea=TRUE, ordered_query=TRUE))
+	gs = as.data.table(gprofiler2::gost(genes, exclude_iea=TRUE, ordered_query=TRUE, 
+	                                 user_threshold = 0.01, sources=c("REAC")))
 
-	print(gs$result.term_name)
-
-	return(diffexp.markers)
+	print(head(gs$result.term_name))
+  print(head(diffexp.markers))
+	return(as.data.table(diffexp.markers))
 	print("done")
 
 }
@@ -106,45 +114,26 @@ get_degs = function(dat,clus1,clus2, clus3){
 #P0 - 
 #P1 - 
 #P2 - 
-#P6 - 
-#P10 - 
-#P12 - proliferating 
-#P13 - 
-#P16 - 
+#P4 - 
+#P11 -  
+#P12 - proliferating
 
 #####################################
 #RUN once
 #####################################
 
-#c0vs1 = get_degs(combined, 0, 1, 2)
-#c0vs10 = get_degs(combined, 0, 1, 10)
-#c0vs13 = get_degs(combined, 0, 6, 13)
-#c0vs6 = get_degs(combined, 0, 6, 10)
 
-#c1vs2 = get_degs(combined, 1, 0, 2)
-#c1vs6 = get_degs(combined, 1, 0, 6)
+cells_b = c(0, 1, 2, 4, 11, 12)
 
-#c2vs1 = get_degs(combined, 2, 0, 1)
-#c2vs6 = get_degs(combined, 2, 0, 6)
+#all possible comparisons 
+comps = as.data.table(crossing(var1 = cells_b, var2 = cells_b, var3 = cells_b)) %>% 
+    filter(!(var1 == var2), !(var1==var3), !(var2==var3), !(var1 == 12))
+comps
 
-#c10vs1 = get_degs(combined, 10, 0, 1)
-#c10vs2 = get_degs(combined, 10, 1, 2)
-
-#c13c1 = get_degs(combined, 13, 0, 1)
-#c13c2 = get_degs(combined, 13, 1, 2)
-#c13c10 = get_degs(combined, 13, 1, 10)
-
-#c6c1 = get_degs(combined, 6, 0, 1)
-#c6c2 = get_degs(combined, 6, 1, 2)
-#c6c10 = get_degs(combined, 6, 1, 10)
-
-#c16c1 = get_degs(combined, 16, 0, 1)
-#c16c2 = get_degs(combined, 16, 1, 2)
-#c16c10 = get_degs(combined, 16, 1, 10)
-
-#all_genes = rbind(c0vs1, c0vs10, c0vs13, c0vs6, 
- #                 c1vs2, c1vs6, c2vs1, c2vs6, c10vs1, c10vs2, 
-  #                c13c1, c13c2, c13c10, c6c1, c6c2, c6c10 , c16c1, c16c2, c16c10)
+#all_genes = mapply(get_degs, comps$var1, comps$var2, comps$var3, SIMPLIFY=FALSE)
+#all_genes_combined <- do.call("rbind", all_genes)
+#tail(all_genes_combined)
+#all_genes = as.data.table(ldply(all_genes))
 
 #saveRDS(all_genes, file="B_cell_clusters_diff_exp_genes.rds")
 
@@ -157,8 +146,6 @@ write.xlsx(all_genes, file, file = "Bcell_marker_genes_across_clusters.xlsx",
 integrated_genes = rownames(combined)
 genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_log2FC > 0.5, gene %in% integrated_genes)$gene)
 
-cells_b = c(0, 1, 2, 6, 10, 12, 13, 16)
-
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
 
@@ -170,16 +157,10 @@ subset.matrix <- combined_b[genes_b_plot_int, ] # Pull the raw expression matrix
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
 #naive B cell markers
-#pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)
-#cells_wexp = WhichCells(object = combined_b, expression = IGHD > 1 & IGHM >1)
-#FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
-#FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
-#dev.off()
-
-pdf("naive_Bcell_marker_diff_exp_analysis.pdf", width=10, height=6)
-cells_wexp = WhichCells(object = combined_b, expression = CCSER1 > 1 & KHDRBS2 >1)
-FeaturePlot(combined_b, features = c("CCSER1", "KHDRBS2"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
-FeaturePlot(combined_b, features = c("CCSER1", "KHDRBS2"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
+pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)
+cells_wexp = WhichCells(object = combined_b, expression = IGHD > 1 & IGHM >1)
+FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
+FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
 dev.off()
 
 pdf("BCL2_BCL6.pdf", width=8, height=6)
@@ -187,17 +168,16 @@ FeaturePlot(combined_b, features = c("BCL2", "BCL6"), order=TRUE, label=TRUE,
             blend.threshold=0.7, cols=c("grey", "thistle1", "steelblue", "red"))
 dev.off()
 
-pdf("cluster6.pdf", width=8, height=6)
-FeaturePlot(combined_b, features = c("ABCB4", "ACAP1", "ADAM19", "B2M"), order=TRUE, label=TRUE, 
-            blend.threshold=0.7, cols=c("grey", "thistle1", "steelblue", "red"))
-dev.off()
-
 FeaturePlot(combined_b, features = c("CD83", "CXCR4"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6)
 ggsave("LZ_DZ_CD83_CXCR4.pdf")
 
-FeaturePlot(combined_b, features = c0vs10$gene[1:12], cols=c("grey", "thistle1", "steelblue", "red"),
+FeaturePlot(combined_b, features = filter(all_genes, clust1==1)[1:12]$gene, cols=c("grey", "thistle1", "steelblue", "red"),
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
-ggsave("Cluster0_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
+ggsave("Cluster1_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
+
+FeaturePlot(combined_b, features = filter(all_genes, clust1==2)[1:12]$gene, cols=c("grey", "thistle1", "steelblue", "red"),
+            order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
+ggsave("Cluster2_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
 
 DZ_genes=c("AICDA", "CXCR4", "GCSAM", "CD27", "SEMA4B", "MKI67", "EZH2", "CCNB1", "BACH2", "AURKA", "RAD51", "POLH")
 DotPlot(combined_b, features = DZ_genes, idents = cells_b, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()

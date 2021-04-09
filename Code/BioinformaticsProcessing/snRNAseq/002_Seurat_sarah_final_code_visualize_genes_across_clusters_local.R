@@ -41,6 +41,9 @@ r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clu
 #-------------------------------------------------------------------------------
 
 combined = r
+
+DimPlot(combined)
+
 DefaultAssay(combined) <- "RNA"
 combined <- NormalizeData(combined)
 

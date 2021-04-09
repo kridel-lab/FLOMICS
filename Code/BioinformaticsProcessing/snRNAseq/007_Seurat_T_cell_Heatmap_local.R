@@ -64,7 +64,7 @@ genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "P
              "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
              "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
 
-cells_t=c(10, 16, 5, 6, 7, 8)
+cells_t=c(5, 6, 7, 8, 9, 15)
 
 ###
 # T cells
@@ -78,6 +78,8 @@ combined <- NormalizeData(combined)
 combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 
+pdf("T-cell_clusters_features.pdf", width=12, height=8)
+
 dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE)
 
 FeaturePlot(subset.matrix, features = c("GZMK", "CCL5"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
@@ -86,7 +88,7 @@ FeaturePlot(subset.matrix, features = c("PDCD1", "TOX"), blend = TRUE, order=TRU
 FeaturePlot(subset.matrix, features = c("IL2RA", "FOXP3"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
 FeaturePlot(subset.matrix, features = c("TOP2A", "MKI67"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
 
-
+dev.off()
 
 
 
