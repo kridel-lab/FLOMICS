@@ -42,6 +42,12 @@ lapply(packages, require, character.only = TRUE)
 
 r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
 
+mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021"
+subDir=paste("Figures_for_manuscript", date, sep="_")
+
+dir.create(file.path(mainDir, subDir))
+setwd(file.path(mainDir, subDir))
+
 #-------------------------------------------------------------------------------
 #purpose
 #-------------------------------------------------------------------------------
@@ -64,6 +70,8 @@ genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "P
              "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
              "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
 
+#FeaturePlot(subset.matrix, features = c("CD8A"), order=TRUE, label=TRUE)
+
 cells_t=c(5, 6, 7, 8, 9, 15)
 
 ###
@@ -77,6 +85,10 @@ combined <- NormalizeData(combined)
 
 combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
+
+pdf("Figure6D.pdf", width=7, height=4)
+dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE)
+dev.off()
 
 pdf("T-cell_clusters_features.pdf", width=12, height=8)
 

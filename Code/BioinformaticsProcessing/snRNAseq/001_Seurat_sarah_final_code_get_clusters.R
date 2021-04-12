@@ -230,9 +230,11 @@ get_integrated_obj = function(dat, dim, anch_features, norm_method_used){
 
 	pdf(paste(output, "pc_genes_only_", input, "_", "seurat_integrated_dim_", dim , "_", anch_features, "_", date, "_samples_clusters.pdf", sep=""), width=13, height=6)
 	p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
-	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
+	theme(axis.line = element_line(colour = 'black', size = 1),
+	text = element_text(size = 20), axis.text = element_text(size = 20))
 	p2 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=6)+
-	theme(axis.line = element_line(colour = 'black', size = 1), text = element_text(size = 20), axis.text = element_text(size = 20))
+	theme(axis.line = element_line(colour = 'black', size = 1),
+	text = element_text(size = 20), axis.text = element_text(size = 20))
 	p3 = DimPlot(combined,
         label = TRUE,
         split.by = "sample")  + NoLegend()

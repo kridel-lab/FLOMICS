@@ -2,6 +2,8 @@
 ### Andy Zeng
 ### Jan 13, 2021
 
+#RUN in R/4.0.0
+
 library(data.table)
 library(tidyverse)
 library(Seurat)
@@ -37,13 +39,14 @@ exprmat_CB <- exprmat_CB %>%
 rownames(exprmat_CB) <- genes
 
 #get Seurat object and normalize it
-#SeuratObject=readRDS("/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/combined_processed_seurat_object_rmFL277dim20.rds")
-#SeuratObject = readRDS("/cluster/projects/kridelgroup/FLOMICS/DATA/2021-02-05_combined_processed_snRNAseq_FL_seurat_object.rds")
 output="/cluster/projects/kridelgroup/FLOMICS/ANALYSIS/snRNAseq/seurat/April2021/"
-SeuratObject=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-01_samples_clusters.rds", sep=""))
+SeuratObject=readRDS(paste(output, "pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds", sep=""))
 
 DefaultAssay(SeuratObject) <- "RNA"
 SeuratObject <- NormalizeData(SeuratObject)
+
+cells_b = c(0, 1, 2, 4, 11, 12)
+SeuratObject <- subset(SeuratObject, idents = cells_b)
 
 # Run scores at single cell level. Using the raw count matrix
 # I use both raw counts and normalized counts and see which results make sense,
@@ -54,8 +57,10 @@ pred_CBheme_singleR
 
 # Add SingleR Labels to Seurat object
 SeuratObject$SingleR.label <- pred_CBheme_singleR$labels
-pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes.pdf", sep=""))
-DimPlot(SeuratObject, group.by = 'SingleR.label', label = FALSE) + #+ NoLegend()
+#pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes.pdf", sep=""))
+
+pdf("Figure6C_umap.pdf", width=5, height=5)
+DimPlot(SeuratObject, group.by = 'SingleR.label', label = FALSE, cols=c("darkgoldenrod1", "cyan4")) + #+ NoLegend()
 theme(axis.line = element_line(colour = 'black', size = 1),
 text = element_text(size = 20), axis.text = element_text(size = 20))
 dev.off()
@@ -85,6 +90,10 @@ cell_types$seurat_cluster = as.numeric(cell_types$seurat_cluster)
 cell_types = cell_types[order(seurat_cluster)]
 cell_types$seurat_cluster = factor(cell_types$seurat_cluster, levels=unique(cell_types$seurat_cluster))
 
-pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes_barplot.pdf", sep=""))
-ggbarplot(cell_types, x="seurat_cluster", y="seurat_explained_by_singleR", fill="singleR_label", palette=mypal)
+#pdf(paste(date, "_", "SingleR_normalized_seurat_clusters_labels_from_LZ_DZ_genes_barplot.pdf", sep=""))
+pdf("Figure6C_barplot.pdf", width=5, height=5)
+ggbarplot(cell_types, x="seurat_cluster", y="seurat_explained_by_singleR",
+fill="singleR_label", palette=c("darkgoldenrod1", "cyan4"))+
+theme(axis.line = element_line(colour = 'black', size = 1),
+       text = element_text(size = 20), axis.text = element_text(size = 20))
 dev.off()
