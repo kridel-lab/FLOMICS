@@ -25,6 +25,7 @@ library(organism, character.only = TRUE)
 library(ReactomeGSA)
 library("xlsx")
 library(tidyr)
+library(dittoSeq)
 
 setwd("~/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021")
 
@@ -43,6 +44,7 @@ packages <- c("readr", "data.table", "plyr",
 lapply(packages, require, character.only = TRUE)
 
 r=readRDS("pc_genes_only_no_seurat_integrated_dim_20_2000_2021-04-08_samples_clusters.rds")
+cols = c(dittoColors(), dittoColors(1)[seq_len(7)])
 
 #-------------------------------------------------------------------------------
 #purpose
@@ -61,6 +63,7 @@ dev.off()
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------
+
 b_genes = c("CD79A", "BCL2", "CD19", "PTPRG", "BANK1",
 "EBF1", "BACH2", "LMO2", "FCER2", "CD27", "ACSM3",
 "BACH2", "KLHL6", "EBF1", "FCER2", "LMO2",
@@ -75,7 +78,6 @@ genes_check = c("NOTCH2", "JAM3", "PRDM1", "IRF4", "MS4A1", "PAX5",
 normalized_combined = combined
 DefaultAssay(normalized_combined) <- "RNA"
 normalized_combined <- NormalizeData(normalized_combined)
-
 
 #get differentially expressed genes between different B cell clusters
 get_degs = function(clus1,clus2, clus3){
@@ -140,14 +142,14 @@ comps
 all_genes = readRDS("B_cell_clusters_diff_exp_genes.rds")
 
 all_genes = filter(all_genes, p_val_adj < 0.05)
-write.xlsx(all_genes, file, file = "Bcell_marker_genes_across_clusters.xlsx", 
-           col.names = TRUE, row.names = TRUE, append = FALSE)
+#write.xlsx(all_genes, file, file = "Bcell_marker_genes_across_clusters.xlsx", 
+ #          col.names = TRUE, row.names = TRUE, append = FALSE)
 
 integrated_genes = rownames(combined)
-genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.5, pct.2 < 0.5, avg_log2FC > 0.5, gene %in% integrated_genes)$gene)
+genes_b_plot_int = unique(filter(all_genes, pct.1 > 0.6, pct.2 < 0.5, avg_log2FC > 0.6, gene %in% integrated_genes)$gene)
 
-DefaultAssay(combined) <- "RNA"
-combined <- NormalizeData(combined)
+DefaultAssay(combined) <- "integrated"
+#combined <- NormalizeData(combined)
 
 #only keep B cell clusters
 combined_b <- subset(combined, idents = cells_b)
@@ -156,11 +158,22 @@ subset.matrix <- combined_b[genes_b_plot_int, ] # Pull the raw expression matrix
 #scale the data
 combined_scaled <- ScaleData(subset.matrix, verbose = TRUE)
 
+pdf("Figure6_Bheatmap.pdf", width=6, height=3)
+dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE, complex=FALSE, fontsize = 5)
+dev.off()
+
+DefaultAssay(combined_b) <- "RNA"
+
 #naive B cell markers
 pdf("IGHD_IGHM_coexpression_Bcells.pdf", width=10, height=6)
 cells_wexp = WhichCells(object = combined_b, expression = IGHD > 1 & IGHM >1)
 FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1)
 FeaturePlot(combined_b, features = c("IGHD", "IGHM"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.1, cells=cells_wexp)
+dev.off()
+
+#IGHM and IGHD violin plot expression summary
+pdf("IGHD_IGHM_violin_Bcells.pdf", width=4, height=3)
+VlnPlot(combined_b, features = c("IGHD", "IGHM", "BCL2"), cols=cols[as.numeric(cells_b)+1], same.y.lims=TRUE, pt.size = -1)
 dev.off()
 
 pdf("BCL2_BCL6.pdf", width=8, height=6)
@@ -169,7 +182,7 @@ FeaturePlot(combined_b, features = c("BCL2", "BCL6"), order=TRUE, label=TRUE,
 dev.off()
 
 FeaturePlot(combined_b, features = c("CD83", "CXCR4"), blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.6)
-ggsave("LZ_DZ_CD83_CXCR4.pdf")
+ggsave("LZ_DZ_CD83_CXCR4.pdf", width=8, height=4)
 
 FeaturePlot(combined_b, features = filter(all_genes, clust1==1)[1:12]$gene, cols=c("grey", "thistle1", "steelblue", "red"),
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
@@ -178,6 +191,8 @@ ggsave("Cluster1_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=
 FeaturePlot(combined_b, features = filter(all_genes, clust1==2)[1:12]$gene, cols=c("grey", "thistle1", "steelblue", "red"),
             order=TRUE, min.cutoff='q15', label=TRUE, ncol=3)
 ggsave("Cluster2_top12_enriched_Bcell_genes_featureplots.pdf", width=12, height=15)
+
+dev.off()
 
 DZ_genes=c("AICDA", "CXCR4", "GCSAM", "CD27", "SEMA4B", "MKI67", "EZH2", "CCNB1", "BACH2", "AURKA", "RAD51", "POLH")
 DotPlot(combined_b, features = DZ_genes, idents = cells_b, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()
@@ -196,7 +211,13 @@ ggsave("Bcell_LZ_genes_featureplots.pdf", width=12, height=15)
 DotPlot(combined_b, features = LZ_genes, idents = cells_b, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()
 ggsave("Bcell_LZ_dotplot.pdf", width=7, height=5)
 
-#make some feature plots for the genes of interest in B cells
+#make some feature plots for the genes of interest in B cells just clusters 1 versus 2 
+c12 = unique(filter(all_genes, clust1 %in% c(1,2), p_val_adj < 0.05, clust2 %in% c("0_2", "0_1"), pct.1 > 0.6, pct.2 < 0.5, avg_log2FC > 0.3)$gene)
+pdf(paste(date, "_" , "B_cell_genes_dotplot_cluster1_2.pdf", sep=""), height=4, width=6)
+DotPlot(combined_b, features = c12, idents=c(1,2) , cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()+
+  theme(axis.text.x = element_text(angle = 90), text = element_text(size = 7), axis.text = element_text(size = 7))
+dev.off()
+
 pdf(paste(date, "_" , "B_cell_genes_dotplot.pdf", sep=""), height=7, width=15)
 DotPlot(combined_b, features = genes_b_plot_int, cols=c("green", "red"), cluster.idents=TRUE) + RotatedAxis()+
   theme(axis.text.x = element_text(angle = 90))

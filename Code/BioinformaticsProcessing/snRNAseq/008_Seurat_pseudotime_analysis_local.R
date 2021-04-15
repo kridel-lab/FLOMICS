@@ -10,6 +10,7 @@ library(data.table)
 library(plyr)
 library(cowplot)
 library(dplyr)
+library(dittoSeq)
 
 set.seed(1234)
 
@@ -34,6 +35,8 @@ subDir=paste("Pseudotime_analysis", date, sep="_")
 
 dir.create(file.path(mainDir, subDir))
 setwd(file.path(mainDir, subDir))
+
+cols = c(dittoColors(), dittoColors(1)[seq_len(7)])
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #FUNCTIONS
@@ -81,6 +84,54 @@ get_pseudotime_estimates = function(root_cells){
   return(med_pseuds)
 }
 
+get_pseudotime_umap_figure = function(root_cells){
+  
+  cell_start = root_cells
+  r.cds <- order_cells(r.cds, root_pr_nodes=get_earliest_principal_node(r.cds, cell_start))
+  
+  #add final pseudotime to main seurat object
+  r <- AddMetaData(
+    object = r,
+    metadata = r.cds@principal_graph_aux@listData$UMAP$pseudotime,
+    col.name = "Pseudotime"
+  )
+  
+  f = FeaturePlot(r, "Pseudotime", pt.size = 0.1, label = TRUE) + scale_color_viridis_c(option="plasma")+
+    theme(axis.line = element_line(colour = 'black', size = 1),
+          text = element_text(size = 20), axis.text = element_text(size = 20))
+  
+  print(f)
+  
+}
+
+get_pseudotime_vs_cluster = function(root_cells){
+  
+  cell_start = root_cells
+  r.cds <- order_cells(r.cds, root_pr_nodes=get_earliest_principal_node(r.cds, cell_start))
+  
+  #add final pseudotime to main seurat object
+  r <- AddMetaData(
+    object = r,
+    metadata = r.cds@principal_graph_aux@listData$UMAP$pseudotime,
+    col.name = "Pseudotime"
+  )
+  
+  #get pseudotime for each cluster when this one is set as root and gene expression for gene of interest
+  med_pseuds = as.data.table(r[[c("seurat_clusters", "Pseudotime")]])
+  med_pseuds$seurat_clusters = as.character(med_pseuds$seurat_clusters)
+  med_pseuds = filter(med_pseuds, seurat_clusters %in% cells_b, !(Pseudotime == "Inf")) 
+  medians = as.data.table(med_pseuds %>% dplyr::group_by(seurat_clusters) %>% dplyr::summarize(median = median(Pseudotime)))
+  medians = medians[order(median)]
+  
+  f = ggboxplot(med_pseuds, x="seurat_clusters", y="Pseudotime", order=medians$seurat_clusters, fill="seurat_clusters",
+                palette = cols[as.numeric(medians$seurat_clusters)+1], legend="none")+
+    theme(axis.line = element_line(colour = 'black', size = 1),
+          text = element_text(size = 20), axis.text = element_text(size = 20)) + xlab("Cell Population")
+  
+  print(f)
+  
+}
+
 get_gene_vs_pseudotime = function(gene, root_cells){
   
   #test
@@ -125,6 +176,7 @@ r.cds <- cluster_cells(cds = r.cds, reduction_method = "UMAP")
 #learn graph
 r.cds <- learn_graph(r.cds, use_partition = TRUE)
 #check partitions created
+dev.off()
 
 pdf("Estimated_partitions_by_Monocle_for_pseudotime.pdf")
 plot_cells(r.cds, color_cells_by = "partition")
@@ -165,4 +217,20 @@ get_gene_vs_pseudotime("BIRC3", 4)
 get_gene_vs_pseudotime("GS1-410F4.2", 4)
 get_gene_vs_pseudotime("VAV3", 4)
 get_gene_vs_pseudotime("ADRBK2", 4)
+dev.off()
+
+#save plots for manuscript figure 6
+mainDir="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/April82021"
+subDir=paste("Figures_for_manuscript", date, sep="_")
+dir.create(file.path(mainDir, subDir))
+setwd(file.path(mainDir, subDir))
+
+#UMAP with pseudotime on it
+pdf("Figure6_pseudotime_umap.pdf", width=5, height=5)
+get_pseudotime_umap_figure(11) #11 set as root
+dev.off()
+
+#Clusters versus pseudotime
+pdf("Figure6_pseudotime_boxplots_vs_clusters.pdf", width=5, height=5)
+get_pseudotime_vs_cluster(11)
 dev.off()

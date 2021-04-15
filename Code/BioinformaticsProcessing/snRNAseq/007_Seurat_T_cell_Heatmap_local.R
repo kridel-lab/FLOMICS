@@ -65,10 +65,13 @@ combined = r
 #-------------------------------------------------------------------------------
 #analysis
 #-------------------------------------------------------------------------------
-genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
-             "TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
-             "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
-             "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
+#genesall = c("CD3D", "CD3G", "IL7R", "CD4", "CD8A", "TCF7", "PTPRC", "TIGIT", "PDCD1", "TOX",
+ #            "TOX2", "TNFSF8", "PTPN13", "ILR3", "BTLA", "CD200", "ICOS", "IL21", "CCL5", "GZMK", "GZMA",
+  #           "PRDM1", "KLRG1", "TIGIT", "HAVCR2", "EOMES", "CTLA4", "TOX2", "FOXP3", "IL6R", 
+   #          "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
+
+genesall = c("IL7R", "CD4", "PLAC8", "KLF2", "GZMK", "CCL5", "GZMA", "NKG7", "CCL4", "CD8A", 
+             "PDCD1", "TOX", "TOX2", "CD200", "CXCR5", "ICOS", "IL2RA", "FOXP3", "TOP2A", "MKI67")
 
 #FeaturePlot(subset.matrix, features = c("CD8A"), order=TRUE, label=TRUE)
 
@@ -86,8 +89,8 @@ combined <- NormalizeData(combined)
 combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 
-pdf("Figure6D.pdf", width=7, height=4)
-dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE)
+pdf("Figure6D.pdf", width=6, height=3)
+dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE, complex=FALSE)
 dev.off()
 
 pdf("T-cell_clusters_features.pdf", width=12, height=8)

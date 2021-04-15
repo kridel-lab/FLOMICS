@@ -1,72 +1,62 @@
 #----------------------------------------------------------------------
 #Karin Isaev
-#Use RNA-seq TPM matrix from Kallisto
-#Plot gene expression versus cell type fraction
+#Use RNA-seq count matrix (first normalize to TPM)
+#Run through immune deconvolution tools to estimate fraction of immune
+#cells present in each sample
 #----------------------------------------------------------------------
 
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #load functions and libraries
-#----------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-options(stringsAsFactors = F)
-options(scipen=999) #avoid scientific notation
+#in terminal go to UHN FLOMICS folder or set this as working directory in
+#Rstudio
+#/Users/kisaev/UHN/kridel-lab - Documents/FLOMICS for example
 
-#load libraries
-packages <- c("dplyr", "readr", "ggplot2", "tidyr",
-"data.table", "plyr",
-"ggrepel", "stringr", "maftools", "ggpubr", "readxl", "skimr",
- "edgeR", "annotables", "EnvStats", "gridExtra")
-lapply(packages, require, character.only = TRUE)
-
-#date
-date=Sys.Date()
-
-#args = commandArgs(trailingOnly = TRUE) #patient ID
-#index = args[1]
-#print(index) #this should be gene name provided as input
-#gene_name=index
-
-#getwd() --> FLOMICS teams folder
-#cd /Users/kisaev/UHN/kridel-lab - Documents/FLOMICS
+source("/Users/kisaev/github/FLOMICS/Code/Analysis/load_scripts_data_KI.R")
 
 #----------------------------------------------------------------------
-#data filtering
+#data
 #----------------------------------------------------------------------
 
-#gene annotations
-#UCSC gene classes - only protein coding genes
-genes_class = as.data.table(grch37)
-genes_class = as.data.table(filter(genes_class, biotype == "protein_coding"))
-genes_class = as.data.table(filter(genes_class, !(is.na(entrez))))
-genes_class = unique(genes_class[,c("ensgene", "symbol")])
-#keep only one ens id per gene name
-z = which(duplicated(genes_class$symbol))
-genes_class = genes_class[-z,]
+bisque_T1 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier1_bisque_decomposed_samples.rds")
+bisque_T2 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier2_bisque_decomposed_samples.rds")
+bisque_T3 = readRDS("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Analysis-Files/Seurat/Bisque/tier3_bisque_decomposed_samples.rds")
 
-#load in results from kallisto
-tpm = fread("RNAseq/counts/2020-09-01_kallisto_gene_based_counts.txt", data.table=F)
-colnames(tpm)[1] = "ensgene"
-tpm = merge(tpm, genes_class, by = "ensgene")
-tpm = as.data.frame(tpm)
-rownames(tpm) = tpm$symbol
-tpm$symbol = NULL
-tpm$ensgene = NULL
+old_labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_18Nov2020.csv")
+colnames(old_labels)[2] = "SAMPLE_ID"
+print(table(old_labels$SNFClust))
 
-# All FLOMICS samples included - load sample information
-all.samples.DNAseq.FLOMICS <- fread("metadata/sample_annotations_rcd6Nov2019.csv")
+#labels updated after mutations for n=31 plos medicine patients were reanalzyed
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
+colnames(labels)[2] = "SAMPLE_ID"
+labels$SNFClust = labels$SNFClust10Feb2021
+print(table(labels$SNFClust))
 
-#sample info with rna-seq qc
-rnaseq_qc = fread("metadata/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamAdded.csv")
+#all RNA-seq info
+rnaseq_qc = merge(rnaseq_qc, labels, by="SAMPLE_ID")
 
-#results from CIBERSORT abs
-full_cells=fread("Analysis-Files/Immune-Deconvolution/2020-09-16_full_cell_types_results.txt")
-some_cells=fread("Analysis-Files/Immune-Deconvolution/2020-09-16_subset_cell_types_results.txt")
+#mutation data
+muts = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv")
 
-#mutation calls
-muts = fread("DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv")
+dat = bisque_T3
+z = which(str_detect(colnames(dat), "FL"))
+dat = dat[,z]
 
-#results from bisque
-bisque = readRDS("Analysis-Files/Seurat/bisque_decomposed_samples.rds")
+immune_cells = as.data.frame(dat)
+immune_cells$cell_type = rownames(immune_cells)
+
+#add tag based on whether sample is limited advanced and FL vs DLBCL
+immune_cells = as.data.table(immune_cells)
+immune_cells = melt((immune_cells))
+colnames(immune_cells)[2] = "rna_seq_file_sample_ID"
+immune_cells = merge(immune_cells, rnaseq_qc, by = "rna_seq_file_sample_ID")
+immune_cells$InfinumClust = factor(immune_cells$InfinumClust)
+immune_cells$SNFClust = factor(immune_cells$SNFClust)
+immune_cells$tSeqClust = factor(immune_cells$tSeqClust)
+patients_dat = unique(immune_cells[,c("SAMPLE_ID", "STAGE", "TYPE", "SNFClust", "InfinumClust", "tSeqClust")])
+head(immune_cells)
+immune_cells$cell_facet=""
 
 #----------------------------------------------------------------------
 #analysis
@@ -82,29 +72,21 @@ get_mutation_immune_correlation = function(gene, im_data){
   gene_dat = gene_dat[-1,]
   colnames(gene_dat)[1] = "gene_mut"
 
-  temp_dat = im_data
-  z = which(str_detect(colnames(im_data), "T2"))
-  im_data = im_data[,-z]
-  z = which(str_detect(colnames(im_data), "RLN"))
-  im_data = im_data[,-z]
+  temp_dat = immune_cells
 
-  z = which(!(str_detect(colnames(im_data), "T1")))
-  colnames(im_data)[z] = paste(colnames(im_data)[z], "_T1", sep="")
+  z = which(!(str_detect(temp_dat$rna_seq_file_sample_ID, "T1")))
+  temp_dat$rna_seq_file_sample_ID[z] = paste(temp_dat$rna_seq_file_sample_ID[z], "_T1", sep="")
 
-  im_data = melt(im_data)
-  colnames(im_data)[2] = "rna_seq_file_sample_ID"
-
-  im_data = merge(im_data, gene_dat, by = "rna_seq_file_sample_ID")
-  colnames(im_data)[2] = "cell_type"
   #create dataset for plotting
-  plot = im_data %>%
-    select(rna_seq_file_sample_ID, cell_type, value, gene_mut) %>%
+  plot = temp_dat %>%
+    select(rna_seq_file_sample_ID, SNFClust10Feb2021, cell_type, value) %>%
       melt(measure = "value")
 
-  #plot$STAGE = factor(plot$STAGE, levels=c("LIMITED", "ADVANCED"))
+  #add gene mutation info
+  plot = merge(plot, gene_dat)
   plot$gene_mut = factor(plot$gene_mut, levels=c("0", "1"))
 
-  #binary gene expression vs continuous cell fraction
+  #binary mutation status vs continuous cell fraction
   g2=ggboxplot(plot, x = "gene_mut", y = "value",
   fill = "gene_mut", palette = c("#00AFBB", "#E7B800")) +
   ylab("Cell type fraction") +
@@ -112,10 +94,9 @@ get_mutation_immune_correlation = function(gene, im_data){
   g2=ggpar(g2, font.tickslab = c(5, "plain", "black"))
   g2=facet(g2, facet.by="cell_type", ,
          panel.labs.font = list(color = "black", size=6))+
-         stat_compare_means(aes(group = gene_mut), label = "p.signif")
+         stat_compare_means(aes(group = gene_mut), label = "p.signif")+ylim(c(0,1))
   print(g2)
 
-  #if(!( 0 %in% c(table(plot$gene_mut, plot$STAGE)))){
   if((!(table(plot$gene_mut)[1] == 0))& (!(table(plot$gene_mut)[2] == 0))){
   res <- as.data.table(plot %>% group_by(cell_type) %>%
          do(w = wilcox.test(value~gene_mut, data=., paired=FALSE)) %>%
@@ -128,7 +109,6 @@ get_mutation_immune_correlation = function(gene, im_data){
   res$gene = gene
   head(res)
   return(res)
-#}
 }
 }
 
@@ -145,5 +125,5 @@ all_res = all_res[order(Wilcox_Pval)]
 all_res$fdr = p.adjust(all_res$Wilcox_Pval, method="fdr")
 
 all_results = all_res
-file_name = paste("Analysis-Files/Immune-Deconvolution/", "all_methods_", "full_immune_cells_vs_mutations", ".txt", sep="")
-write.table(all_results, file_name, quote=F, row.names=F, sep="\t")
+file_name = paste("Analysis-Files/Immune-Deconvolution/", "all_methods_", "full_immune_cells_vs_mutations", ".csv", sep="")
+write.csv(all_results, file_name, quote=F, row.names=F)

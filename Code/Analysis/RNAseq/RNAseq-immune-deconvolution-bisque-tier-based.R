@@ -139,7 +139,7 @@ get_bisque_summ = function(dat, tier){
 
   #plotting - automate for all the groups
 
-  pdf(paste("Analysis-Files/Immune-Deconvolution/", date, "_", tier, "_BISQUE_results.pdf", sep=""), width=9,height=6)
+  pdf(paste("Analysis-Files/Seurat/April82021/Bisque/", date, "_", tier, "_BISQUE_results.pdf", sep=""), width=8,height=5)
 
   #STAGE
   g1 = ggboxplot(stage_analysis, x="cell_type", y="value", fill="STAGE",group="STAGE", outlier.shape=20) +
@@ -171,13 +171,16 @@ get_bisque_summ = function(dat, tier){
 
   #SNF "1" = "#4363D8", "2" = "#F58231"
   snf_analysis$SNFClust = factor(snf_analysis$SNFClust, levels=c(1,2))
-  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", fill="SNFClust",palette = c("#4363D8", "#F58231"), outlier.shape=20) +
-  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
- names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
+  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", fill="SNFClust",
+  palette = c("#4363D8", "#F58231"), outlier.shape=20, legend="bottom") +
+  theme_classic() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))#+
+#  ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
+ #names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
   g4 = facet(g4, facet.by="cell_facet", scales = "free")+
      geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
-  g4 = ggpar(g4, legend="bottom")
+  g4 = ggpar(g4, legend="bottom")+
+  theme(axis.line = element_line(colour = 'black', size = 1),
+        text = element_text(size = 15), axis.text = element_text(size = 15), legend.position="bottom")
 
   #tSeqClust
   g5 = ggboxplot(tseq_analysis, x="cell_type", y="value", fill="tSeqClust",palette = "jco", outlier.shape=20) +
