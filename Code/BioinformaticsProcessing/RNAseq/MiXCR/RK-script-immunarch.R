@@ -52,7 +52,8 @@ qc <- read.csv("RNAseq/qc/FL_TGL_STAR_logQC_2020-06-18_summary_KI_ClusterContamA
 tr_imm = immdata
 x = ''
 for(i in 1:length(tr_imm$data)){
-  tr_imm$data[[i]] <- tr_imm$data[[i]][grepl("TRA|TRB|TRG|TRD",tr_imm$data[[i]]$V.name),]
+  # tr_imm$data[[i]] <- tr_imm$data[[i]][grepl("TRA|TRB|TRG|TRD",tr_imm$data[[i]]$V.name),]
+  tr_imm$data[[i]] <- tr_imm$data[[i]][grepl("TRB",tr_imm$data[[i]]$V.name),]
   x[i] = nrow(tr_imm$data[[i]]) > 0
   z = names(tr_imm$data[as.logical(x)])
   dat = tr_imm$data[as.logical(x)]
@@ -106,7 +107,7 @@ clones.nb.sample_qc %>%
   ggscatter(x = "nb_uniquely_mapped_reads", y = "nb_clones", add = "reg.line", conf.int = TRUE,                                
             add.params = list(color = "blue", fill = "lightgray")) +
   stat_cor(method = "spearman")
-# R = 0.56, i.e. correlation between nb_uniquely_mapped_reads and nb_unique_clonotypes
+# R = 0.53, i.e. correlation between nb_uniquely_mapped_reads and nb_unique_clonotypes
 
 # -> normalize nb_clones by nb_uniquely_mapped_reads
 
@@ -157,7 +158,7 @@ exp_vol_qc %>%
   ggscatter(x = "nb_uniquely_mapped_reads", y = "nb_unique_clonotypes", add = "reg.line", conf.int = TRUE,                                
             add.params = list(color = "blue", fill = "lightgray")) +
   stat_cor(method = "spearman")
-# R = 0.59, i.e. correlation between nb_uniquely_mapped_reads and nb_unique_clonotypes
+# R = 0.55, i.e. correlation between nb_uniquely_mapped_reads and nb_unique_clonotypes
 
 # -> normalize nb_unique_clonotypes by nb_uniquely_mapped_reads
 
