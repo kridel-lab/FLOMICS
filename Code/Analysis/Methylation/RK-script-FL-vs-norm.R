@@ -50,7 +50,8 @@ colnames(UHN_RGset) <- ClinicalFile$SAMPLE_ID[match(colnames(UHN_RGset), Clinica
 Combined_RGset <- combineArrays(UHN_RGset, Blueprint_RGset, outType = "IlluminaHumanMethylation450k")
 
 # Normalize
-Combined_mSet_Sw <- preprocessNoob(Combined_RGset)
+# Combined_mSet_Sw <- preprocessNoob(Combined_RGset)
+Combined_mSet_Sw <- preprocessSWAN(Combined_RGset)
 
 # Order Combined_M_valueMatrix_sub based on pData file
 Combined_mSet_Sw <- Combined_mSet_Sw[,pData$SAMPLE_ID]
@@ -470,6 +471,7 @@ hypometh_FL_intersect_GRanges <- AnnotationFile %>%
 hypometh_FL_intersect_GRanges <- makeGRangesFromDataFrame(hypometh_FL_intersect_GRanges)
 
 pt <- overlapPermTest(A = H3K27me3_GRanges, B = hypermeth_FL_intersect_GRanges, ntimes = 100)
+numOverlaps(A = H3K27me3_GRanges, B = hypermeth_FL_intersect_GRanges, count.once = TRUE)
 lz <- localZScore(pt = pt, A = H3K27me3_GRanges, B = hypermeth_FL_intersect_GRanges)
 pdf(paste0("img/",  date, " RK-overlapPermTest-H3K27me3-hypermethFL_1.pdf"), width = 6, height = 4)
 plot(pt)
@@ -477,6 +479,10 @@ dev.off()
 pdf(paste0("img/",  date, " RK-overlapPermTest-H3K27me3-hypermethFL_2.pdf"), width = 6, height = 4)
 plot(lz)
 dev.off()
+
+# library(VennDiagram) 
+# venn.diagram(list(B = 1:10375, A = 8920:30699), fill = c("lightblue", "green"), 
+#              alpha = c(0.5, 0.5), lwd =0, "venn_diagram.tiff")
 
 pt <- overlapPermTest(A = H3K27me3_GRanges, B = hypometh_FL_intersect_GRanges, ntimes = 100)
 lz <- localZScore(pt = pt, A = H3K27me3_GRanges, B = hypometh_FL_intersect_GRanges)
@@ -486,6 +492,9 @@ dev.off()
 pdf(paste0("img/",  date, " RK-overlapPermTest-H3K27me3-hypomethFL_2.pdf"), width = 6, height = 4)
 plot(lz)
 dev.off()
+
+library("venneuler")
+plot(venneuler(c(A = 30699, B = 10375, "A&B" = 1456)))
 
 #---
 # Differentially methylated regions 

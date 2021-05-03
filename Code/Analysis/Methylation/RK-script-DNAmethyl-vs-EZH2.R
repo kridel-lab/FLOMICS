@@ -27,7 +27,7 @@ row.names(beta.values) <- beta.values$V1
 beta.values$V1 <- NULL
 
 # Read in mutation data
-mutations <- read.csv("DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.csv") %>%
+mutations <- read.csv("DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv") %>% 
   filter(Hugo_Symbol == "EZH2")
 row.names(mutations) <- mutations$Hugo_Symbol
 mutations <- mutations[,2:ncol(mutations)]
@@ -77,9 +77,25 @@ myAnnotation <- cpg.annotate(object = as.matrix(M.values), datatype = "array", w
 DMRs <- dmrcate(myAnnotation, lambda = 1000, C = 2)
 DMRs_ranges <- extractRanges(DMRs, genome = "hg19")
 DMRs_results <- data.frame(DMRs_ranges)
-# similar findings, only 1 hit (DNAJA4) with weak evidence
+# similar findings, only 1 hit (C14orf132) with weak evidence
 
 # Determine mean methylation in EZH2 mut vs wt
+
+mean.methylation <- colMeans(beta.values)
+mean.methylation <- cbind(SAMPLE_ID = names(mean.methylation), mean.methylation) %>%
+  data.frame() %>%
+  left_join(mutations) %>%
+  mutate(mean.methylation = as.numeric(mean.methylation))
+
+mean.methylation %>%
+  group_by(EZH2) %>%
+  summarize(mean = mean(mean.methylation))
+
+mean.methylation  %>%
+  ggboxplot(x = "EZH2", y = "mean.methylation", width = 0.8) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means()
+
 melted.beta.values <- beta.values %>%
   mutate(probe = row.names(.)) %>%
   melt()
@@ -89,6 +105,14 @@ melted.beta.values %>%
                 ifelse(variable %in% EZH2.wt.cases, "WT", NA))) %>%
   group_by(EZH2) %>%
   summarize(mean = mean(value))
+
+melted.beta.values %>%
+  mutate(EZH2 = ifelse(variable %in% EZH2.mut.cases, "MUT",
+                       ifelse(variable %in% EZH2.wt.cases, "WT", NA))) %>%
+  group_by(EZH2) %>%
+  ggboxplot(x = "EZH2", y = "value", width = 0.8) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  stat_compare_means()
 
 melted.beta.values %>%
   left_join(AnnotationFile[,c("V1", "Regulatory_Feature_Group")], by = c("probe" = "V1")) %>%
