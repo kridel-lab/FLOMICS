@@ -13,7 +13,7 @@ setwd("/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq")
 #load libraries
 packages <- c("dplyr", "readr", "ggplot2", "vcfR", "tidyr", "mclust", "data.table",
 "plyr",
-"ggrepel", "stringr", "maftools")
+"ggrepel", "stringr")
 lapply(packages, require, character.only = TRUE)
 
 #----------------------------------------------------------------------
