@@ -16,6 +16,13 @@ survival.df <- clusters %>%
   mutate(FLIPI_BINARY = factor(FLIPI_BINARY, levels = c("LOW_INTERMEDIATE", "HIGH"))) %>%
   mutate(TYPE = factor(TYPE, levels = c("LIMITED", "ADVANCED")))
 
+# exclude <- c("LY_FL_046_T1", "LY_FL_316_T1", "LY_FL_018_T1", "LY_FL_248_T1", "LY_FL_181_T1", "LY_FL_318_T1", "LY_FL_119_T1",
+#              "LY_FL_276_T1", "LY_FL_273_T1", "LY_FL_136_T1", "LY_FL_445_T1", "LY_FL_196_T1", "LY_FL_179_T1", "LY_FL_167_T1")
+# exclude <- substr(exclude, 1, 9)
+# 
+# survival.df <- survival.df %>%
+#   filter(!ID %in% exclude)
+
 # median follow-up of living patients
 survival.df %>%
   filter(CODE_OS == "0") %>%

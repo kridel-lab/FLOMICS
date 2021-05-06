@@ -359,3 +359,8 @@ write.csv(mut.merged.df.T1.T2, file = "DNAseq/Mutation_and_BA_matrices/mut.merge
 write.csv(mut.merged.df.T1.T2.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.T2.poor.cov.excl.csv", row.names = FALSE)
 write.csv(mut.merged.df.T1, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.csv", row.names = FALSE)
 write.csv(mut.merged.df.T1.poor.cov.excl, file = "DNAseq/Mutation_and_BA_matrices/mut.merged.df.T1.poor.cov.excl.csv", row.names = FALSE)
+
+# Create file for mutation mapper with FLOMICS calls (can be uploaded here: https://www.cbioportal.org/mutation_mapper):
+mut.FLOMICS.mutation.mapper <- mut.FLOMICS %>%
+  select(Sample_ID = Tumor_Sample_Barcode, Chromosome, Start_Position, End_Position, Reference_Allele = Reference_Allele, Variant_Allele = Tumor_Seq_Allele2)
+write.table(mut.FLOMICS.mutation.mapper, file = "DNAseq/Mutation_and_BA_matrices/mut.FLOMICS.mutation.mapper.txt", sep = "\t", row.names = FALSE, quote = FALSE)
