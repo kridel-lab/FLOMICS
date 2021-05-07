@@ -92,13 +92,28 @@ final.BA.results <- final.BA.results %>%
 
 nrow(final.BA.results) # n = 183
 
+# Correct these results with FISH data from Adam Smith
+final.BA.results.corr <- final.BA.results %>%
+  mutate(BCL2_BA_consensus = ifelse(SAMPLE_ID %in% c("LY_FL_050_T1", "LY_FL_219_T1"), "1", BCL2_BA_consensus)) %>% # false negatives by MANTA
+  mutate(BCL2_BA_consensus = ifelse(SAMPLE_ID == "LY_FL_119_T1", "0", BCL2_BA_consensus)) %>% # there is a translocation to chr14 based on Manta but not into IGH locus
+  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID == "LY_FL_076_T1", "1", BCL6_BA_consensus)) %>% 
+  # another discrepancy is LY_FL_449_T2 where MANTA predicts BA and FISH does not show this, but looks like real translocation when inspecting MANTA prediction -> keep prediction of rearrangement
+  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% c("LY_FL_134_T1", "LY_FL_442_T2", "LY_FL_449_T2"), "0", BCL6_BA_consensus)) # look like false predictions in MANTA as translocation to some repetitive sequence or to same chromosome
+  
 final.BA.results.T1 <- final.BA.results %>% filter(TIME_POINT == "T1") # n = 173
+final.BA.results.corr.T1 <- final.BA.results.corr %>% filter(TIME_POINT == "T1") # n = 173
 
 table(final.BA.results.T1$BCL2_BA_consensus)
+table(final.BA.results.corr.T1$BCL2_BA_consensus)
 table(final.BA.results.T1$BCL6_BA_consensus)
+table(final.BA.results.corr.T1$BCL6_BA_consensus)
 
 table(final.BA.results.T1$STAGE, final.BA.results.T1$BCL2_BA_consensus)
+table(final.BA.results.corr.T1$STAGE, final.BA.results.corr.T1$BCL2_BA_consensus)
 table(final.BA.results.T1$STAGE, final.BA.results.T1$BCL6_BA_consensus)
+table(final.BA.results.corr.T1$STAGE, final.BA.results.corr.T1$BCL6_BA_consensus)
 
-write.csv(final.BA.results, file = "BA.results.csv", row.names = FALSE)
-write.csv(final.BA.results.T1, file = "BA.results.T1.csv", row.names = FALSE)
+write.csv(final.BA.results, file = "DNAseq/Mutation_and_BA_matrices/BA.results.csv", row.names = FALSE)
+write.csv(final.BA.results.corr, file = "DNAseq/Mutation_and_BA_matrices/BA.results.corr.csv", row.names = FALSE)
+write.csv(final.BA.results.T1, file = "DNAseq/Mutation_and_BA_matrices/BA.results.T1.csv", row.names = FALSE)
+write.csv(final.BA.results.corr.T1, file = "DNAseq/Mutation_and_BA_matrices/BA.results.corr.T1.csv", row.names = FALSE)
