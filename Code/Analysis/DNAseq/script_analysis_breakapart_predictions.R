@@ -57,6 +57,13 @@ BCL6.BA.predictions <- predictions %>%
 
 # only 3 BC cases out of 31 had BCL6 translocations:
 # FL1190 = 	LY_FL_235_T1, FL2008 = 	LY_FL_237_T1, FL2121 = LY_FL_247_T1
+# FL3016 = 	LY_FL_253_T1: NA for BCL6
+
+BC.cases.BCL6.BA.YES <- c("LY_FL_235_T1", "LY_FL_237_T1", "LY_FL_247_T1")
+BC.cases.BCL6.BA.NO <- sample.annotation %>%
+  filter(INSTITUTION == "BCCA" & TYPE == "FL") %>%
+  filter(!SAMPLE_ID %in% BC.cases.BCL6.BA.YES) %>%
+  .$SAMPLE_ID
 
 final.BA.results <- sample.annotation %>%
   filter(TYPE == "FL") %>%
@@ -65,7 +72,9 @@ final.BA.results <- sample.annotation %>%
   left_join(BCL6.BA.predictions, by = c("SAMPLE_ID" = "External_identifier")) %>%
   mutate(BCL2_BA_consensus = ifelse(is.na(BCL2_BA_consensus) & !is.na(TRANSLOC_14_18), TRANSLOC_14_18, BCL2_BA_consensus)) %>%
   mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% sample.annotation.FLOMICS.131$SAMPLE_ID & is.na(BCL6_BA_MANTA), 0, BCL6_BA_MANTA)) %>%
-  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% c("LY_FL_235_T1", "LY_FL_237_T1", "LY_FL_247_T1"), 1, BCL6_BA_consensus)) %>%
+  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% BC.cases.BCL6.BA.YES, 1, BCL6_BA_consensus)) %>%
+  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID %in% BC.cases.BCL6.BA.NO, 0, BCL6_BA_consensus)) %>%
+  mutate(BCL6_BA_consensus = ifelse(SAMPLE_ID == "LY_FL_253_T1", NA, BCL6_BA_consensus)) %>%
   mutate(FLOMICS.131 = ifelse(SAMPLE_ID %in% sample.annotation.FLOMICS.131$SAMPLE_ID, "YES", "NO")) %>%
   select(SAMPLE_ID, TIME_POINT, FLOMICS.131, STAGE, BCL2_BA_consensus, BCL6_BA_consensus)
 
