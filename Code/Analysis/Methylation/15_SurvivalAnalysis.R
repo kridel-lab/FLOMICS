@@ -1,4 +1,4 @@
-# Updated 10 June 2019
+# Updated 10 May 2021
 # Function: Survival analysis
 # Author: Anjali Silva
 
@@ -20,12 +20,13 @@
 # 15_SurvivalAnalysis_survival_TTP_advanced
 # 15_SurvivalAnalysis_survival_TTP_limited
 
-SurvivalAnalysis <- function(BetaMatrix, 
-                             ClinicalFile,
-                             SurvivalFile, 
-                             ClusterLabels = "NA", 
-                             FigureGenerate = "No", 
-                             PNGorPDF = "png") {
+SurvivalAnalysis15 <- function(BetaMatrix, 
+                               ClinicalFile,
+                               SurvivalFile, 
+                               ClusterLabels = "NA", 
+                               FigureGenerate = "No", 
+                               PNGorPDF = "png",
+                               ImageName = date()) {
   
   # Loading needed packages
   library(ggplot2)
@@ -57,7 +58,7 @@ SurvivalAnalysis <- function(BetaMatrix,
   # Ordering Clinical File by the same order as patients in Beta Matrix
   matchedIDs <- match(colnames(BetaMatrix[, which(substr(colnames(BetaMatrix), 4, 5) == "FL")]), 
                       ClinicalFile$SAMPLE_ID)
-  if (sum(is.na(matchedIDs) ) > 0) {
+  if (sum(is.na(matchedIDs)) > 0) {
     ClinicalFile_OrderedbyBetaMatrixPatients <- ClinicalFile[matchedIDs[- which(is.na(matchedIDs) == TRUE)], ]
     Cluster <- ClusterLabels[- which(is.na(matchedIDs) == TRUE)]
   } else {
@@ -77,6 +78,10 @@ SurvivalAnalysis <- function(BetaMatrix,
   CodeOS <- SurvivalFile_OrderedbyBetaMatrixPatients$CODE_OS
   TTP <- as.vector(SurvivalFile_OrderedbyBetaMatrixPatients$TTP)
   CodeTTP <- SurvivalFile_OrderedbyBetaMatrixPatients$CODE_TTP
+  TTT <- as.vector(SurvivalFile_OrderedbyBetaMatrixPatients$TTT)
+  CodeTRANSF <- SurvivalFile_OrderedbyBetaMatrixPatients$CODE_TRANSF # in place of CODE_TTT
+  CodeDDS <- as.vector(SurvivalFile_OrderedbyBetaMatrixPatients$CODE_DSS) # disease specific survival 
+  CodePFS <- as.vector(SurvivalFile_OrderedbyBetaMatrixPatients$CODE_PFS)
   Stage <- ClinicalFile_OrderedbyBetaMatrixPatients$STAGE
   ANNARBORstage <- SurvivalFile_OrderedbyBetaMatrixPatients$ANN_ARBOR_STAGE
   FLIPI <- SurvivalFile_OrderedbyBetaMatrixPatients$FLIPI_BINARY
@@ -111,32 +116,32 @@ SurvivalAnalysis <- function(BetaMatrix,
   # }
   
   # if an entry is empty in TTP, eliminate that from all categories
-  TTPemptyentry <- which(is.na(TTP) == TRUE)
-  if (length(TTPemptyentry) >= 1) {
-    CodeOS <- CodeOS[- TTPemptyentry]
-    OS <- OS[-TTPemptyentry]
-    TTP <- TTP[- TTPemptyentry]
-    CodeTTP <- CodeTTP[- TTPemptyentry]
-    Cluster <- Cluster[- TTPemptyentry]
-    SurvivalFile_OrderedbyBetaMatrixPatients <- SurvivalFile_OrderedbyBetaMatrixPatients[- TTPemptyentry, ]
-    Stage <- Stage[- TTPemptyentry]
-    ANNARBORstage <- ANNARBORstage[- TTPemptyentry]
-    FLIPI <- FLIPI[- TTPemptyentry]
-  }
+  # TTPemptyentry <- which(is.na(TTP) == TRUE)
+  # if (length(TTPemptyentry) >= 1) {
+  #   CodeOS <- CodeOS[- TTPemptyentry]
+  #   OS <- OS[-TTPemptyentry]
+  #   TTP <- TTP[- TTPemptyentry]
+  #   CodeTTP <- CodeTTP[- TTPemptyentry]
+  #   Cluster <- Cluster[- TTPemptyentry]
+  #   SurvivalFile_OrderedbyBetaMatrixPatients <- SurvivalFile_OrderedbyBetaMatrixPatients[- TTPemptyentry, ]
+  #   Stage <- Stage[- TTPemptyentry]
+  #   ANNARBORstage <- ANNARBORstage[- TTPemptyentry]
+  #   FLIPI <- FLIPI[- TTPemptyentry]
+  # }
   
   # if an entry is empty in CodeTTP, eliminate that from all categories
-  CodeTTPemptyentry <- which(is.na(CodeTTP) == TRUE)
-  if (length(CodeTTPemptyentry) >= 1) {
-    CodeOS <- CodeOS[- CodeTTPemptyentry]
-    OS <- OS[- CodeTTPemptyentry]
-    TTP <- TTP[- CodeTTPemptyentry]
-    CodeTTP <- CodeTTP[- CodeTTPemptyentry]
-    Cluster <- Cluster[- CodeTTPemptyentry]    
-    SurvivalFile_OrderedbyBetaMatrixPatients <- SurvivalFile_OrderedbyBetaMatrixPatients[- CodeTTPemptyentry, ]
-    Stage <- Stage[- CodeTTPemptyentry]
-    ANNARBORstage <- ANNARBORstage[- CodeTTPemptyentry]
-    FLIPI <- FLIPI[- CodeTTPemptyentry]
-  }
+  # CodeTTPemptyentry <- which(is.na(CodeTTP) == TRUE)
+  # if (length(CodeTTPemptyentry) >= 1) {
+  #   CodeOS <- CodeOS[- CodeTTPemptyentry]
+  #   OS <- OS[- CodeTTPemptyentry]
+  #   TTP <- TTP[- CodeTTPemptyentry]
+  #   CodeTTP <- CodeTTP[- CodeTTPemptyentry]
+  #   Cluster <- Cluster[- CodeTTPemptyentry]    
+  #   SurvivalFile_OrderedbyBetaMatrixPatients <- SurvivalFile_OrderedbyBetaMatrixPatients[- CodeTTPemptyentry, ]
+  #  Stage <- Stage[- CodeTTPemptyentry]
+  #  ANNARBORstage <- ANNARBORstage[- CodeTTPemptyentry]
+  #   FLIPI <- FLIPI[- CodeTTPemptyentry]
+  # }
   
   # if an entry is empty in Stage, eliminate that from all categories
   # Stageemptyentry <- which(is.na(Stage) == TRUE)
@@ -230,40 +235,69 @@ SurvivalAnalysis <- function(BetaMatrix,
     #  rownames(tablePatientsAll) <- SurvivalFile_OrderedbyBetaMatrixPatients$LY_FL_ID
     # colnames(tablePatientsAll) <- c("CodeOS", "OS", "CodeTTP", "TTP", "Cluster", "ANNARBORstage", "FLIPI")
     
-    tablePatientsAll <- as.data.frame(cbind(as.numeric(CodeTTP), 
-                                              as.numeric(TTP), 
-                                              Cluster))
+    # For all
+    tablePatientsAll <- data.frame(event = as.numeric(CodeDDS),  #Code TTT is Code DDS
+                                   time = as.numeric(TTT))
     rownames(tablePatientsAll) <- SurvivalFile_OrderedbyBetaMatrixPatients$LY_FL_ID
-    colnames(tablePatientsAll) <- c("CodeTTP", "TTP", "Cluster")
+    colnames(tablePatientsAll) <- c("CodeDDS", "TTT")
+    # based on TTP create survival curves for all patients
+    survTTPall <- survival::survfit(Surv(time = TTT, 
+                                         event = CodeDDS) ~ 1, 
+                                    data = tablePatientsAll)
+    # print(summary(survTTPall, times = c(5, 10)))
+    cat("\n", colnames(tablePatientsAll)[1], "is generated \n")
+    print(survTTPall)
+    summary(survTTPall, times = c(5, 10))
+    
+  
+  
+    # By Cluster; for TTT see below 
+    tablePatientsAll <- data.frame(event = as.numeric(CodeTTP), 
+                                   time = as.numeric(TTP), 
+                                   Cluster = Cluster)
+    rownames(tablePatientsAll) <- SurvivalFile_OrderedbyBetaMatrixPatients$LY_FL_ID
+    colnames(tablePatientsAll) <- c("event", "time", "Cluster")
     # cat("\n tablePatientsAll is generated \n")
     # print(head(tablePatientsAll))
     
     # based on TTP create survival curves for all patients
-    survTTPall <- survival::survfit(Surv(time = as.numeric(TTP), 
-                                           event = as.numeric(CodeTTP)) ~ Cluster, 
+    survTTPall <- survival::survfit(Surv(time = time, 
+                                        event = event) ~ Cluster, 
                                       data = tablePatientsAll)
     # print(summary(survTTPall, times = c(5, 10)))
-    cat("\n survTTPall is generated \n")
+    cat("\n", colnames(tablePatientsAll)[1], "is generated \n")
     print(survTTPall)
-  
-
+    summary(survTTPall, times = c(5, 10))
+    
+    
+    
+    # plot CodeTTP and TTP
     pathNow <- getwd()
-    if (FigureGenerate == "Yes") {
-      grDevices::dev.off()
-      cat("\n Printing All image")
+    if (FigureGenerate == FigureGenerate) {
       
-      if (PNGorPDF == "png") {
-        grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP.", PNGorPDF))
-      }
-      if (PNGorPDF == "pdf") {
-        grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP.", PNGorPDF))
-      }
+      tablePatientsAll <- data.frame(event = as.numeric(CodeTTP), 
+                                     time = as.numeric(TTP), 
+                                     Cluster = Cluster)
+      survTTPall <- survival::survfit(Surv(time = time, 
+                                           event = event) ~ Cluster, 
+                                      data = tablePatientsAll)
+      
+      #  grDevices::dev.off()
+      # if (PNGorPDF == "png") {
+      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
+      # }
+      # if (PNGorPDF == "pdf") {
+      #   grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
+      # }
       
       kmTTPall <- survminer::ggsurvplot(survTTPall, 
-                                        title = "121 (132 - 10 DLBCL - 1 RLN) Samples - TTP by SNF cluster",
+                                        # title = "Disease−specific Survival",
+                                        # title = "Overall Survival",
+                                        title = "Time to Progression",
                                         font.main = "bold", 
-                                        xlab = "TTP (years)", 
-                                        ylab = "Proportion of patients surviving",
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Proportion of Patients Surviving",
                                         pval = TRUE, 
                                         pval.coord = c(0, 0.05), 
                                         conf.int = F,
@@ -279,17 +313,166 @@ SurvivalAnalysis <- function(BetaMatrix,
                                         risk.table.y.text = FALSE,
                                         legend = "top",
                                         legend.title = "Cluster")
-      ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".png"))
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)  
       # dev.off() 
       cat("\n Printed All image")
     }
+    
+    # plot CodeOS and OS
+    if (FigureGenerate == FigureGenerate) {
+      
+      tablePatientsAll <- data.frame(event = as.numeric(CodeOS), 
+                                     time = as.numeric(OS), 
+                                     Cluster = Cluster)
+      survOSall <- survival::survfit(Surv(time = time, 
+                                           event = event) ~ Cluster, 
+                                      data = tablePatientsAll)
+      
+      # grDevices::dev.off()
+      # 
+      # if (PNGorPDF == "png") {
+      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
+      # }
+      # if (PNGorPDF == "pdf") {
+      #  grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
+      # }
+      
+      kmTTPall <- survminer::ggsurvplot(survOSall, 
+                                        # title = "Disease−specific Survival",
+                                        title = "Overall Survival",
+                                        # title = "Time to Progression",
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Proportion of Patients Surviving",
+                                        pval = TRUE, 
+                                        pval.coord = c(0, 0.05), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_OS_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)  
+      # dev.off() 
+      cat("\n Printed All image")
+    }
+    
+    # plot CODE_DSS and OS    
+    if (FigureGenerate == FigureGenerate) {
+      
+      tablePatientsAll <- data.frame(event = as.numeric(CodeDDS), 
+                                     time = as.numeric(OS), 
+                                     Cluster = Cluster)
+      survDDSall <- survival::survfit(Surv(time = time, 
+                                           event = event) ~ Cluster, 
+                                      data = tablePatientsAll)
+      
+      # grDevices::dev.off()
+      # if (PNGorPDF == "png") {
+      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_DSS_", ImageName, ".", PNGorPDF))
+      # }
+      # if (PNGorPDF == "pdf") {
+      #  grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_DSS_", ImageName, ".", PNGorPDF))
+      # }
+      
+      kmTTPall <- survminer::ggsurvplot(survDDSall, 
+                                        title = "Disease−specific Survival",
+                                        # title = "Overall Survival",
+                                        # title = "Time to Progression",
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Proportion of Patients Surviving",
+                                        pval = TRUE, 
+                                        pval.coord = c(0, 0.05), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_DSS_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)      
+      # dev.off() 
+      cat("\n Printed All image")
+    }
+    
+    # plot CodeTRANSF and TTT       
+    if (FigureGenerate == FigureGenerate) { #  plot time to transformation as cumulative incidence or similar metric.
+      tablePatientsAll <- data.frame(event = as.numeric(CodeTRANSF), 
+                                     time = as.numeric(TTT), 
+                                     Cluster = Cluster)
+      survTTTall <- survival::survfit(Surv(time = time, 
+                                           event = event) ~ Cluster, 
+                                      data = tablePatientsAll)
 
+      # grDevices::dev.off()
+      # if (PNGorPDF == "png") {
+      #  grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF))
+      # }
+      # if (PNGorPDF == "pdf") {
+      #   grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF))
+      # }
+      
+      kmTTPall <- survminer::ggsurvplot(survTTTall, 
+                                        title = "Cumulative Incidence of Transformation",
+                                        data = tablePatientsAll, 
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Cumulative Hazard",
+                                        pval = TRUE, 
+                                        fun = "cumhaz", 
+                                        ylim = c(0, 0.4),
+                                        pval.coord = c(0, 0.4), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)
+      
+      
+    }
+
+    
+    return(invisible(NULL))
+  }
+
+
+ StageWiseSurvivalAnalysis15 <- function() {
     
     # Added pairwise difference calculation on 3 March 2020
     # Citation: http://www.sthda.com/english/wiki/survminer-0-3-0#pairwise-comparisons-for-survival-curves
     # Pairwise survdiff
-    TTPallPairwiseDiff <- survminer::pairwise_survdiff(Surv(time = as.numeric(TTP), 
-                                                             event = as.numeric(CodeTTP)) ~ Cluster, 
+    TTPallPairwiseDiff <- survminer::pairwise_survdiff(Surv(time = as.numeric(TTT), 
+                                                             event = as.numeric(CodeTRANSF)) ~ Cluster, 
                                                        data = tablePatientsAll)
     cat("\n Pariwise Differences for all patients:\n")
     print(TTPallPairwiseDiff)
@@ -305,45 +488,65 @@ SurvivalAnalysis <- function(BetaMatrix,
     ListAdvanced <- which(Stage == "ADVANCED")
     ListLimited <- which(Stage == "LIMITED")
     
+    
+    
+    CodeDDSadvanced <- as.numeric(CodeDDS[ListAdvanced])
+    CodePFSadvanced <- as.numeric(CodePFS[ListAdvanced])
     OSadvanced <- as.numeric(OS[ListAdvanced])
     CodeOSadvanced <- as.numeric(CodeOS[ListAdvanced])
     TTPadvanced <- as.numeric(TTP[ListAdvanced])
     CodeTTPadvanced <- as.numeric(CodeTTP[ListAdvanced])
+    TTTadvanced <- as.numeric(TTT[ListAdvanced])
+    CodeTTTadvanced <- as.numeric(CodeTRANSF[ListAdvanced])
     ClusterAdvanced  <- Cluster[ListAdvanced]
-    
     ANNARBORStageadvanced <- ANNARBORstage[ListAdvanced]
     FLIPIadvanced  <- FLIPI[ListAdvanced]
-    TablePatientsAdvanced <- as.data.frame(cbind(as.numeric(CodeOS[ListAdvanced]), 
-                                                   as.numeric(OS[ListAdvanced]), 
-                                                   as.numeric(CodeTTP[ListAdvanced]), 
-                                                   as.numeric(TTP[ListAdvanced]), 
-                                                   Cluster[ListAdvanced], 
-                                                   as.numeric(ANNARBORstage[ListAdvanced]), 
-                                                   as.numeric(FLIPI[ListAdvanced])))
+    TablePatientsAdvanced <- as.data.frame(cbind(as.numeric(CodeDDS[ListAdvanced]),
+                                                 as.numeric(CodePFS[ListAdvanced]),
+                                                 as.numeric(OS[ListAdvanced]), 
+                                                 as.numeric(CodeOS[ListAdvanced]),
+                                                 as.numeric(TTP[ListAdvanced]), 
+                                                 as.numeric(CodeTTP[ListAdvanced]), 
+                                                 as.numeric(TTT[ListAdvanced]), 
+                                                 as.numeric(CodeTRANSF[ListAdvanced]),                                                 
+                                                 Cluster[ListAdvanced], 
+                                                 as.numeric(ANNARBORstage[ListAdvanced]), 
+                                                 as.numeric(FLIPI[ListAdvanced])))
     rownames(TablePatientsAdvanced) <- ClinicalFile_OrderedbyBetaMatrixPatients$SAMPLE_ID[ListAdvanced]
-    colnames(TablePatientsAdvanced) <- c("CodeOSadvanced", "OSadvanced", "CodeTTPadvanced", 
-                                         "TTPadvanced", "ClusterAdvanced", 
+    colnames(TablePatientsAdvanced) <- c("CodeDDSadvanced", "CodePFSadvanced", "OSadvanced", 
+                                         "CodeOSadvanced", "TTPadvanced", "CodeTTPadvanced", 
+                                         "TTTadvanced", "CodeTTTadvanced", "ClusterAdvanced", 
                                          "ANNARBORStageadvanced", "FLIPIadvanced")
     # cat("\n Finished TablePatientsAdvanced \n")
     
     
+    CodeDDSlimited <- as.numeric(CodeDDS[ListLimited])
+    CodePFSlimited <- as.numeric(CodePFS[ListLimited])
     OSlimited <- as.numeric(OS[ListLimited])
     CodeOSlimited <- as.numeric(CodeOS[ListLimited])
     TTPlimited <- as.numeric(TTP[ListLimited])
     CodeTTPlimited <- as.numeric(CodeTTP[ListLimited])
-    ClusterLimited <- Cluster[ListLimited]
+    TTTlimited <- as.numeric(TTT[ListLimited])
+    CodeTTTlimited <- as.numeric(CodeTRANSF[ListLimited])
+    Clusterlimited  <- Cluster[ListLimited]
     ANNARBORStagelimited <- ANNARBORstage[ListLimited]
-    FLIPIlimited <- FLIPI[ListLimited]
-    tablePatientsLimited <- as.data.frame(cbind(as.numeric(CodeOS[ListLimited]), 
-                                                  as.numeric(OS[ListLimited]), 
-                                                  as.numeric(CodeTTP[ListLimited]), 
-                                                  as.numeric(TTP[ListLimited]), 
-                                                  Cluster[ListLimited], 
-                                                  as.numeric(ANNARBORstage[ListLimited]), 
-                                                  as.numeric(FLIPI[ListLimited])))
-    rownames(tablePatientsLimited) <- ClinicalFile_OrderedbyBetaMatrixPatients$SAMPLE_ID[ListLimited]
-    colnames(tablePatientsLimited) <- c("CodeOSlimited", "OSlimited", "CodeTTPlimited","TTPlimited",
-                                          "ClusterLimited", "ANNARBORStagelimited","FLIPIlimited")
+    FLIPIlimited  <- FLIPI[ListLimited]
+    TablePatientsLimited <- as.data.frame(cbind(as.numeric(CodeDDS[ListLimited]),
+                                                 as.numeric(CodePFS[ListLimited]),
+                                                 as.numeric(OS[ListLimited]), 
+                                                 as.numeric(CodeOS[ListLimited]),
+                                                 as.numeric(TTP[ListLimited]), 
+                                                 as.numeric(CodeTTP[ListLimited]), 
+                                                 as.numeric(TTT[ListLimited]), 
+                                                 as.numeric(CodeTRANSF[ListLimited]),                                                 
+                                                 Cluster[ListLimited], 
+                                                 as.numeric(ANNARBORstage[ListLimited]), 
+                                                 as.numeric(FLIPI[ListLimited])))
+    rownames(TablePatientsLimited) <- ClinicalFile_OrderedbyBetaMatrixPatients$SAMPLE_ID[ListLimited]
+    colnames(TablePatientsLimited) <- c("CodeDDSlimited", "CodePFSlimited", "OSlimited", 
+                                         "CodeOSlimited", "TTPlimited", "CodeTTPlimited", 
+                                         "TTTlimited", "CodeTTTlimited", "Clusterlimited", 
+                                         "ANNARBORStagelimited", "FLIPIlimited")
     # cat("\n Finished tablePatientsLimited \n")
     
   
@@ -372,17 +575,20 @@ SurvivalAnalysis <- function(BetaMatrix,
     # pval1Limited <- round(pval1Limited, 3) # 0.44
     
     # based on TTP create survival curves for advanced patients
-    survTTPadvanced <- survival::survfit(Surv(time = as.numeric(TTPadvanced), 
-                                              event = as.numeric(CodeTTPadvanced)) ~ ClusterAdvanced, 
+    survTTPadvanced <- survival::survfit(Surv(time = as.numeric(TTTadvanced), 
+                                              event = as.numeric(CodeTTTadvanced)) ~ ClusterAdvanced, 
                                          data = TablePatientsAdvanced)
     # print(summary(survTTPadvanced))
     # log rank test
-    survdiffTTPadvanced <- survival::survdiff(Surv(time = as.numeric(TTPadvanced), 
-                                                   event = as.numeric(CodeTTPadvanced)) ~ ClusterAdvanced, 
+    survdiffTTPadvanced <- survival::survdiff(Surv(time = as.numeric(TTTadvanced), 
+                                                   event = as.numeric(CodeTTTadvanced)) ~ ClusterAdvanced, 
                                               data = TablePatientsAdvanced) 
     pval1Advanced <- 1 - stats::pchisq(survdiffTTPadvanced$chisq, 
                                         length(survdiffTTPadvanced$n) - 1)
     pval1Advanced <- round(pval1Advanced, 3) # 0.478
+    
+    
+    
   
     if (FigureGenerate == "Yes") {
       cat("\n Printing advanced stage image")
@@ -394,9 +600,9 @@ SurvivalAnalysis <- function(BetaMatrix,
       }
       
       kmTTPadvanced <- survminer::ggsurvplot(survTTPadvanced, 
-                                               title = "121 (132 - 10 DLBCL - 1 RLN) Samples - TTP by SNF cluster advanced stage",
+                                               title = "59 Samples - TTT by SNF advanced stage: CodeTRANSF with TTT",
                                                font.main = "bold", 
-                                               xlab = "TTP (years)", 
+                                               xlab = "TTT (years)", 
                                                ylab = "Proportion of patients surviving",
                                                pval = TRUE, 
                                                pval.coord = c(0, 0.05), 
@@ -417,14 +623,48 @@ SurvivalAnalysis <- function(BetaMatrix,
                                                legend = "top",
                                                legend.title = "Cluster")
                                                #,legend.labs = c("C=1","C=2"))
-      dev.off() 
+      grDevices::dev.off() 
     }
+    
+    if (FigureGenerate == "Yes") { #  plot time to transformation as cumulative incidence or similar metric.
+      survTTPadvanced <- survival::survfit(Surv(time = as.numeric(TTTadvanced), 
+                                           event = as.numeric(CodeTTTadvanced)) ~ ClusterAdvanced, 
+                                           data = TablePatientsAdvanced)
+      
+      kmTTPadvanced <- survminer::ggsurvplot(survTTPadvanced, 
+                                             title = "59 Samples - TTT by SNF advanced stage: CodeTRANSF with TTT",
+                                             data = tablePatientsAll, 
+                                             font.main = "bold", 
+                                             xlab = "TTT (years)", 
+                                             ylab = "Cumulative Hazard",
+                                             pval = TRUE, 
+                                             fun = "cumhaz", 
+                                             ylim = c(0, 1),
+                                             pval.coord = c(0, 1), 
+                                             conf.int = F,
+                                             break.time.by = 1, 
+                                             ncensor.plot = F,
+                                             risk.table = TRUE, # Add risk table
+                                             risk.table.pos = "out", 
+                                             censor = T, 
+                                             risk.table.y.text.col = TRUE,
+                                             risk.table.col = "strata", # Change risk table color by groups
+                                             palette = colourPalette,
+                                             risk.table.height = 0.25,
+                                             risk.table.y.text = FALSE,
+                                             legend = "top",
+                                             legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_Advanced_", ImageName, ".png"), 
+                      width = 8, height = 5.5)
+      
+    }
+    
     
     # Added pairwise difference calculation on 3 March 2020
     # Citation: http://www.sthda.com/english/wiki/survminer-0-3-0#pairwise-comparisons-for-survival-curves
     # Pairwise survdiff
-    TTPadvancedPairwiseDiff <- survminer::pairwise_survdiff(Surv(time = as.numeric(TTPadvanced), 
-                                                                 event = as.numeric(CodeTTPadvanced)) ~ ClusterAdvanced, 
+    TTPadvancedPairwiseDiff <- survminer::pairwise_survdiff(Surv(time = as.numeric(TTTadvanced), 
+                                                                 event = as.numeric(CodeTTTadvanced)) ~ ClusterAdvanced, 
                                                             data = TablePatientsAdvanced)
     cat("\n Pariwise differences for advanced-stage patients:\n")
     print(TTPadvancedPairwiseDiff)
@@ -438,13 +678,13 @@ SurvivalAnalysis <- function(BetaMatrix,
   
   
     # based on TTP create survival curves for limited patients
-    survTTPlimited <- survfit(Surv(time = as.numeric(TTPlimited), 
-                                   event = as.numeric(CodeTTPlimited)) ~ ClusterLimited, 
+    survTTPlimited <- survfit(Surv(time = as.numeric(TTTlimited), 
+                                   event = as.numeric(CodeTTTlimited)) ~ ClusterLimited, 
                               data = tablePatientsLimited)
     # summary(survTTPlimited)  
     # log rank test
-    survdiffTTPlimited <- survdiff(Surv(time = as.numeric(TTPlimited), 
-                                          time2 = as.numeric(CodeTTPlimited)) ~ ClusterLimited, 
+    survdiffTTPlimited <- survdiff(Surv(time = as.numeric(TTTlimited), 
+                                          time2 = as.numeric(CodeTTTlimited)) ~ ClusterLimited, 
                                      data = tablePatientsLimited) 
     pval1Limited <- 1 - stats::pchisq(q = survdiffTTPlimited$chisq, 
                                        df = length(survdiffTTPlimited$n) - 1)
@@ -460,9 +700,9 @@ SurvivalAnalysis <- function(BetaMatrix,
       }
       
       kmTTPlimited <- survminer::ggsurvplot(survTTPlimited, 
-                                           title = "121 (132 - 10 DLBCL - 1 RLN) Samples - TTP by SNF cluster limited stage",
+                                           title = "42 Samples - TTT by SNF limited stage: CodeTRANSF with TTT",
                                            font.main = "bold", 
-                                           xlab = "TTP (years)", 
+                                           xlab = "TTT (years)", 
                                            ylab = "Proportion of patients surviving",
                                            pval = TRUE, 
                                            pval.coord = c(0, 0.05), 
@@ -483,8 +723,42 @@ SurvivalAnalysis <- function(BetaMatrix,
                                            legend = "top",
                                            legend.title = "Cluster")
                                    #,legend.labs = c("C=1","C=2"))
-      dev.off() 
+      grDevices::dev.off() 
     }
+    
+    if (FigureGenerate == "Yes") { #  plot time to transformation as cumulative incidence or similar metric.
+      survTTPlimited <- survival::survfit(Surv(time = as.numeric(TTTlimited), 
+                                                event = as.numeric(CodeTTTlimited)) ~ Clusterlimited, 
+                                           data = TablePatientsLimited)
+      
+      kmTTPadvanced <- survminer::ggsurvplot(survTTPlimited, 
+                                             title = "42 Samples - TTT by SNF limited stage: CodeTRANSF with TTT",
+                                             data = tablePatientsAll, 
+                                             font.main = "bold", 
+                                             xlab = "TTT (years)", 
+                                             ylab = "Cumulative Hazard",
+                                             pval = TRUE, 
+                                             fun = "cumhaz", 
+                                             ylim = c(0, 1),
+                                             pval.coord = c(0, 1), 
+                                             conf.int = F,
+                                             break.time.by = 1, 
+                                             ncensor.plot = F,
+                                             risk.table = TRUE, # Add risk table
+                                             risk.table.pos = "out", 
+                                             censor = T, 
+                                             risk.table.y.text.col = TRUE,
+                                             risk.table.col = "strata", # Change risk table color by groups
+                                             palette = colourPalette,
+                                             risk.table.height = 0.25,
+                                             risk.table.y.text = FALSE,
+                                             legend = "top",
+                                             legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_Limited_", ImageName, ".png"), 
+                      width = 8, height = 5.5)
+    
+    }
+    
     
     # Added pairwise difference calculation on 3 March 2020
     # Citation: http://www.sthda.com/english/wiki/survminer-0-3-0#pairwise-comparisons-for-survival-curves
@@ -561,6 +835,152 @@ SurvivalAnalysis <- function(BetaMatrix,
       # cat("\n Test the proportional hazards assumption for a Cox regression model fit \n")
       # print(cox.zph(coxph_TTP_flipi_limited))
     }
+    
+    
+    # An alternate - drawing by cluster
+    
+    tablePatientsAll <- as.data.frame(cbind(as.numeric(CodeTTP), 
+                                            as.numeric(TTP), 
+                                            Stage,
+                                            Cluster))
+    rownames(tablePatientsAll) <- SurvivalFile_OrderedbyBetaMatrixPatients$LY_FL_ID
+    colnames(tablePatientsAll) <- c("CodeTTP", "TTP", "Stage", "Cluster")
+    # cat("\n tablePatientsAll is generated \n")
+    # print(head(tablePatientsAll))
+    
+    # based on TTP create survival curves for all patients
+    survTTPallStage <- survival::survfit(Surv(time = as.numeric(TTP), 
+                                         event = as.numeric(CodeTTP)) ~ Stage, 
+                                    data = tablePatientsAll)
+    # print(summary(survTTPall, times = c(5, 10)))
+    cat("\n survTTPall is generated \n")
+    print(survTTPall)
+    
+    # making a table with information, seperating stages
+    ListOne <- which(Cluster == 1)
+    ListTwo <- which(Cluster == 2)
+    
+    OSC1 <- as.numeric(OS[ListOne])
+    OSC2 <- as.numeric(OS[ListTwo])
+    CodeOSC1 <- as.numeric(CodeOS[ListOne])
+    CodeOSC2 <- as.numeric(CodeOS[ListTwo])
+    TTPC1 <- as.numeric(TTP[ListOne])
+    TTPC2 <- as.numeric(TTP[ListTwo])
+    CodeTTPC1 <- as.numeric(CodeTTP[ListOne])
+    CodeTTPC2 <- as.numeric(CodeTTP[ListTwo])
+    StageC1 <- Stage[ListOne]
+    StageC2 <- Stage[ListTwo]
+    
+    ANNARBORStageC1 <- ANNARBORstage[ListOne]
+    ANNARBORStageC2 <- ANNARBORstage[ListTwo]
+    FLIPIC1  <- FLIPI[ListOne]
+    FLIPIC2  <- FLIPI[ListTwo]
+    TablePatientsC1 <- as.data.frame(cbind(as.numeric(CodeOS[ListOne]), 
+                                           as.numeric(OS[ListOne]), 
+                                           as.numeric(CodeTTP[ListOne]), 
+                                           as.numeric(TTP[ListOne]), 
+                                           Stage[ListOne], 
+                                           as.numeric(ANNARBORstage[ListOne]), 
+                                           as.numeric(FLIPI[ListOne])))
+    rownames(TablePatientsC1) <- ClinicalFile_OrderedbyBetaMatrixPatients$SAMPLE_ID[ListOne]
+    colnames(TablePatientsC1) <- c("CodeOSC1", "OSC1", "CodeTTPC1", 
+                                   "TTPC1", "StageC1", 
+                                   "ANNARBORStageC1", "FLIPIC1")
+    
+    TablePatientsC2 <- as.data.frame(cbind(as.numeric(CodeOS[ListTwo]), 
+                                           as.numeric(OS[ListTwo]), 
+                                           as.numeric(CodeTTP[ListTwo]), 
+                                           as.numeric(TTP[ListTwo]), 
+                                           Stage[ListTwo], 
+                                           as.numeric(ANNARBORstage[ListTwo]), 
+                                           as.numeric(FLIPI[ListTwo])))
+    rownames(TablePatientsC2) <- ClinicalFile_OrderedbyBetaMatrixPatients$SAMPLE_ID[ListTwo]
+    
+    
+    survTTPC1 <- survival::survfit(Surv(time = as.numeric(TTPC1), 
+                                        event = as.numeric(CodeTTPC1)) ~ StageC1, 
+                                   data = TablePatientsC1)
+    survTTPC2 <- survival::survfit(Surv(time = as.numeric(TTPC2), 
+                                        event = as.numeric(CodeTTPC2)) ~ StageC2, 
+                                   data = TablePatientsC2)
+    
+    
+    if (FigureGenerate == "Yes") {
+      cat("\n Printing C1 image")
+      if (PNGorPDF == "png") {
+        grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_C1", PNGorPDF))
+      }
+      if (PNGorPDF == "pdf") {
+        grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_C1.", PNGorPDF))
+      }
+      
+      kmTTPC1 <- survminer::ggsurvplot(survTTPC2, 
+                                             title = "101 Samples - TTP by SNF Cluster 2",
+                                             font.main = "bold", 
+                                             xlab = "TTP (years)", 
+                                             ylab = "Proportion of patients surviving",
+                                             pval = TRUE, 
+                                             pval.coord = c(0, 0.05), 
+                                             conf.int = F,
+                                             break.time.by = 1, 
+                                             ncensor.plot = F,
+                                             risk.table = TRUE, # Add risk table
+                                             risk.table.pos = "out", 
+                                             censor = T, 
+                                             risk.table.y.text.col = TRUE,
+                                             risk.table.col = "strata", # Change risk table color by groups
+                                             #linetype = "strata", # Change line type by groups
+                                             #surv.median.line = "hv", # Specify median survival
+                                             #ggtheme = theme_bw(), # Change ggplot2 theme
+                                             palette = colourPalette,
+                                             risk.table.height = 0.25,
+                                             risk.table.y.text = FALSE,
+                                             legend = "top",
+                                             legend.title = "Stage")
+      #,legend.labs = c("C=1","C=2"))
+      grDevices::dev.off() 
+    }
+    
+    
+    if (FigureGenerate == "Yes") {
+      cat("\n Printing C2 image")
+      if (PNGorPDF == "png") {
+        grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_C2", PNGorPDF))
+      }
+      if (PNGorPDF == "pdf") {
+        grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_C2.", PNGorPDF))
+      }
+      
+      kmTTPC1 <- survminer::ggsurvplot(survTTPC2, 
+                                       title = "101 Samples - TTP by SNF Cluster 2",
+                                       font.main = "bold", 
+                                       xlab = "TTP (years)", 
+                                       ylab = "Proportion of patients surviving",
+                                       pval = TRUE, 
+                                       pval.coord = c(0, 0.05), 
+                                       conf.int = F,
+                                       break.time.by = 1, 
+                                       ncensor.plot = F,
+                                       risk.table = TRUE, # Add risk table
+                                       risk.table.pos = "out", 
+                                       censor = T, 
+                                       risk.table.y.text.col = TRUE,
+                                       risk.table.col = "strata", # Change risk table color by groups
+                                       #linetype = "strata", # Change line type by groups
+                                       #surv.median.line = "hv", # Specify median survival
+                                       #ggtheme = theme_bw(), # Change ggplot2 theme
+                                       palette = colourPalette,
+                                       risk.table.height = 0.25,
+                                       risk.table.y.text = FALSE,
+                                       legend = "top",
+                                       legend.title = "Stage")
+      #,legend.labs = c("C=1","C=2"))
+      grDevices::dev.off() 
+    }
+    
+    
+    
+    
     
     RESULTS <- list(TTPSurvivalAdvanced = survTTPadvanced,
                     TTPSurvivalLimited = survTTPlimited,
