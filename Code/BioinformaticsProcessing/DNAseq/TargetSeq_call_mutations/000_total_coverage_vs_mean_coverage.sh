@@ -1,10 +1,6 @@
 #!/bin/bash
 #
 #SBATCH -N 1 # Ensure that all cores are on one machine
-#SBATCH -p himem
-#SBATCH -c 6
-#SBATCH --mem=40000M
-#SBATCH -t 5-00:00 # Runtime in D-HH:MM
 #SBATCH -J picard
 #SBATCH --array=0-130 # job array index - number of jobs = numb of unique samples with top up runs
 
