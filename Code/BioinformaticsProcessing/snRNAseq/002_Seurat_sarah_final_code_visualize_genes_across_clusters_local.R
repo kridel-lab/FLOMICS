@@ -59,6 +59,7 @@ combined <- NormalizeData(combined)
 
 #save results 
 #saveRDS(combined.markers, file="combined_markers_all_clusters.rds")
+#write.csv(combined.markers, file="April8_seurat_cluster_markers.csv", quote=F, row.names=F)
 
 combined.markers = readRDS("combined_markers_all_clusters.rds")
 

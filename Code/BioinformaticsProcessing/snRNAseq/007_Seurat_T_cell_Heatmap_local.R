@@ -71,7 +71,9 @@ combined = r
    #          "MKI67", "TCF7", "TOP2A", "IL2RA", "PLAC8", "KLF2", "CCL5", "GZMA", "NKG7", "CCL4", "CXCR5")
 
 genesall = c("IL7R", "CD4", "PLAC8", "KLF2", "GZMK", "CCL5", "GZMA", "NKG7", "CCL4", "CD8A", 
-             "PDCD1", "TOX", "TOX2", "CD200", "CXCR5", "ICOS", "IL2RA", "FOXP3", "TOP2A", "MKI67")
+             "PDCD1", "TOX", "TOX2", "CD200", "CXCR5", "ICOS", "IL2RA", "FOXP3", 
+             "CD40LG", "NKG7", "EOMES", "CXCL13", "HAVCR2",
+             "TOP2A", "MKI67", "CTLA4", "TIGIT", "LAG3", "CCR7", "SELL", "PRF1", "IL2RA")
 
 #FeaturePlot(subset.matrix, features = c("CD8A"), order=TRUE, label=TRUE)
 
@@ -89,7 +91,7 @@ combined <- NormalizeData(combined)
 combined_t <- subset(combined, idents = cells_t)
 subset.matrix <- combined_t[genesall, ] # Pull the raw expression matrix from the original Seurat object containing only the genes of interest
 
-pdf("Figure6D.pdf", width=6, height=3)
+pdf("Figure6D.pdf", width=8, height=4)
 dittoHeatmap(subset.matrix, annot.by = c("seurat_clusters"), scaled.to.max = TRUE, complex=FALSE)
 dev.off()
 
@@ -105,6 +107,9 @@ FeaturePlot(subset.matrix, features = c("TOP2A", "MKI67"), blend = TRUE, order=T
 
 dev.off()
 
-
+pdf("Figure6E.pdf", width=10, height=4)
+FeaturePlot(combined, features = c("TIGIT", "LAG3"), 
+            blend = TRUE, order=TRUE, label=TRUE, blend.threshold=0.5)
+dev.off()
 
 

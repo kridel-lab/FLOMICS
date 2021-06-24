@@ -30,6 +30,9 @@ exp$symbol = NULL
 exp$biotype = NULL
 exp = as.matrix(exp)
 
+#save final bulk RNA-seq matrix as input for bisque
+saveRDS(exp, file="/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/RNAseq/counts/bulk_rnaseq_input_for_bisque_KI.rds")
+
 #2. Single-cell data requires additional information in the ExpressionSet,
 #specificially cell type labels and individual labels. Individual labels
 #indicate which individual each cell originated from.

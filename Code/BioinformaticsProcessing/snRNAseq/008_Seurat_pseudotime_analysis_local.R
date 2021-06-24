@@ -123,7 +123,7 @@ get_pseudotime_vs_cluster = function(root_cells){
   medians = as.data.table(med_pseuds %>% dplyr::group_by(seurat_clusters) %>% dplyr::summarize(median = median(Pseudotime)))
   medians = medians[order(median)]
   
-  f = ggboxplot(med_pseuds, x="seurat_clusters", y="Pseudotime", order=medians$seurat_clusters, fill="seurat_clusters",
+  f = ggboxplot(med_pseuds, x="seurat_clusters", y="Pseudotime", order=medians$seurat_clusters, color="seurat_clusters",
                 palette = cols[as.numeric(medians$seurat_clusters)+1], legend="none")+
     theme(axis.line = element_line(colour = 'black', size = 1),
           text = element_text(size = 20), axis.text = element_text(size = 20)) + xlab("Cell Population")
@@ -176,7 +176,7 @@ r.cds <- cluster_cells(cds = r.cds, reduction_method = "UMAP")
 #learn graph
 r.cds <- learn_graph(r.cds, use_partition = TRUE)
 #check partitions created
-dev.off()
+#dev.off()
 
 pdf("Estimated_partitions_by_Monocle_for_pseudotime.pdf")
 plot_cells(r.cds, color_cells_by = "partition")

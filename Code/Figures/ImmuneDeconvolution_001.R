@@ -69,19 +69,29 @@ combined <- NormalizeData(combined)
 combined_b <- subset(combined, idents = cells_b)
 
 #plot
-p1 <- DimPlot(combined, reduction = "umap", group.by = "sample")+
+p1 <- DimPlot(combined, reduction = "umap", label=FALSE, group.by = "sample", split.by="sample")+
+  NoLegend()+
   theme(axis.line = element_line(colour = 'black', size = 1),
-        text = element_text(size = 20), axis.text = element_text(size = 20))
+        text = element_text(size = 15), axis.text = element_text(size = 15))
 
-p2 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=5, cols = cols)+
+p2 <- DimPlot(combined, reduction = "umap", label=TRUE, split.by = "sample", label.size=3, cols = cols)+
+  NoLegend()+
   theme(axis.line = element_line(colour = 'black', size = 1),
-        text = element_text(size = 20), axis.text = element_text(size = 20))
+        text = element_text(size = 15), axis.text = element_text(size = 15))
+
+p3 <- DimPlot(combined, reduction = "umap", label = TRUE, label.size=5, cols = cols)+
+  theme(axis.line = element_line(colour = 'black', size = 1),
+        text = element_text(size = 15), axis.text = element_text(size = 15))
 
 #save 
-pdf("Figure6A.pdf", width=5, height=5)
+pdf("Figure6A_v1.pdf", width=8, height=4)
 print(p1)
 dev.off()
 
-pdf("Figure6B.pdf", width=5, height=5)
+pdf("Figure6A_v2.pdf", width=8, height=4)
 print(p2)
+dev.off()
+
+pdf("Figure6B.pdf", width=5, height=4)
+print(p3)
 dev.off()

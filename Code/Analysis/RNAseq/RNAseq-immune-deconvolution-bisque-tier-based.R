@@ -28,9 +28,17 @@ colnames(old_labels)[2] = "SAMPLE_ID"
 print(table(old_labels$SNFClust))
 
 #labels updated after mutations for n=31 plos medicine patients were reanalzyed
-labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
+
+#labels used for previous version of manuscriript (feb 10)
+#labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_10Feb2021.csv")
+#colnames(labels)[2] = "SAMPLE_ID"
+#labels$SNFClust = labels$SNFClust10Feb2021
+#print(table(labels$SNFClust))
+
+#new labels by Anjali May 10
+labels = fread("/Users/kisaev/UHN/kridel-lab - Documents (1)/FLOMICS/Cluster Labels/InfiniumClust_SNF_tSeq_Labels_9May2021.csv")
 colnames(labels)[2] = "SAMPLE_ID"
-labels$SNFClust = labels$SNFClust10Feb2021
+labels$SNFClust = labels$SNF7May2021NoTransloc
 print(table(labels$SNFClust))
 
 rnaseq_qc = merge(rnaseq_qc, labels, by="SAMPLE_ID")
@@ -74,13 +82,6 @@ get_bisque_summ = function(dat, tier){
 
   immune_cells = immune_cells[order(cell_facet, cell_type)]
   immune_cells$cell_type = factor(immune_cells$cell_type, levels=unique(immune_cells$cell_type))
-
-#  immune_cells$cell_type = factor(immune_cells$cell_type, levels=c("B cells_0", "B cells_1",
-#"B cells_2", "naive B or malignant B_9", "proliferating B cell_11", "memory B cell_12",
-#"Cluster 13", "Tfh cells_3", "CD8 T cells_4", "CD4 Treg cells_5", "naive T cells_7", "memory T cells_8",
-#"proliferating T cell_17", "Cluster 6", "macrophage or monocyte_10", "stromal cells_14",
-#"endothelial cells_15", "Cluster 16", "macrophage or monocyte_18" ,"Cluster 19"))
-
   immune_cells$cell_facet = factor(immune_cells$cell_facet, levels=unique(immune_cells$cell_facet))
 
   #plot distribution of each cell type frequency across disease and stages
@@ -108,19 +109,19 @@ get_bisque_summ = function(dat, tier){
   type_analysis$fdr[z] = ""
 
   #looking at InfinumClust
-  infi_analysis = as.data.table(filter(immune_cells, !(is.na(InfinumClust))))
-  res_infi_analysis = as.data.table(infi_analysis %>% group_by(cell_type) %>%
-        dplyr::summarize(pval = wilcox.test(value ~ InfinumClust)$p.value))
-  res_infi_analysis$fdr = p.adjust(res_infi_analysis$pval)
-  res_infi_analysis$fdr=round(res_infi_analysis$fdr, digits=4)
-  infi_analysis=merge(infi_analysis, res_infi_analysis, by="cell_type")
-  z = which(duplicated(infi_analysis[,c("cell_type", "fdr")]))
-  infi_analysis$fdr[z] = ""
+#  infi_analysis = as.data.table(filter(immune_cells, !(is.na(InfinumClust))))
+#  res_infi_analysis = as.data.table(infi_analysis %>% group_by(cell_type) %>%
+#        dplyr::summarize(pval = wilcox.test(value ~ InfinumClust)$p.value))
+#  res_infi_analysis$fdr = p.adjust(res_infi_analysis$pval)
+#  res_infi_analysis$fdr=round(res_infi_analysis$fdr, digits=4)
+#  infi_analysis=merge(infi_analysis, res_infi_analysis, by="cell_type")
+#  z = which(duplicated(infi_analysis[,c("cell_type", "fdr")]))
+#  infi_analysis$fdr[z] = ""
 
   #looking at SNFClust
   snf_analysis = as.data.table(filter(immune_cells, !(is.na(SNFClust))))
   res_snf_analysis = as.data.table(snf_analysis %>% group_by(cell_type) %>%
-        dplyr::summarize(pval = wilcox.test(value ~ SNFClust)$p.value))
+        dplyr::summarize(pval = kruskal.test(value ~ SNFClust)$p.value))
   res_snf_analysis$fdr = p.adjust(res_snf_analysis$pval)
   res_snf_analysis$fdr=round(res_snf_analysis$fdr, digits=4)
   snf_analysis=merge(snf_analysis, res_snf_analysis, by="cell_type")
@@ -161,18 +162,19 @@ get_bisque_summ = function(dat, tier){
    g2 = ggpar(g2, legend="bottom")
 
   #InfinumClust
-  g3 = ggboxplot(infi_analysis, x="cell_type", y="value", fill="InfinumClust",palette = "jco", outlier.shape=20) +
-  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-  ggtitle(paste(names(table(patients_dat$InfinumClust)[1]), table(patients_dat$InfinumClust)[1],
- names(table(patients_dat$InfinumClust)[2]), table(patients_dat$InfinumClust)[2]))
-  g3 = facet(g3, facet.by="cell_facet", scales = "free")+
-      geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
-  g3 = ggpar(g3, legend="bottom")
+  #g3 = ggboxplot(infi_analysis, x="cell_type", y="value", fill="InfinumClust",palette = "jco", outlier.shape=20) +
+  #theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  #ggtitle(paste(names(table(patients_dat$InfinumClust)[1]), table(patients_dat$InfinumClust)[1],
+ #names(table(patients_dat$InfinumClust)[2]), table(patients_dat$InfinumClust)[2]))
+  #g3 = facet(g3, facet.by="cell_facet", scales = "free")+
+  #    geom_text(aes(label = fdr, y=0.55), size=2)+xlab("Cell Type")+ylab("Fraction of cells")
+  #g3 = ggpar(g3, legend="bottom")
 
   #SNF "1" = "#4363D8", "2" = "#F58231"
-  snf_analysis$SNFClust = factor(snf_analysis$SNFClust, levels=c(1,2))
-  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", fill="SNFClust",
-  palette = c("#4363D8", "#F58231"), outlier.shape=20, legend="bottom") +
+#  snf_analysis$SNFClust = factor(snf_analysis$SNFClust, levels=c(1,2))
+
+  g4 = ggboxplot(snf_analysis, x="cell_type", y="value", color="SNFClust",
+  palette = c("#4363D8", "#F58231", "purple", "red", "black"), outlier.shape=20, legend="bottom") +
   theme_classic() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))#+
 #  ggtitle(paste(names(table(patients_dat$SNFClust)[1]), table(patients_dat$SNFClust)[1],
  #names(table(patients_dat$SNFClust)[2]), table(patients_dat$SNFClust)[2]))
@@ -193,7 +195,7 @@ get_bisque_summ = function(dat, tier){
 
   print(g1)
   print(g2)
-  print(g3)
+#  print(g3)
   print(g4)
   print(g5)
 
