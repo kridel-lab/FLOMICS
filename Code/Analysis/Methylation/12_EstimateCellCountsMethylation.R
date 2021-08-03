@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Created 25 June 2020
 # Function: Create box plots with siginificance shown, for fraction of tumor represented by cell 
 # type as estimated from FlowSorted.Blood.EPIC::estimateCellCounts2() function. 
@@ -18,17 +19,18 @@
 # PNGorPDF: Output format of the image, options = "png" or "pdf".
 
 # Output: 
+# DataTable: A data frame with cell count estimates. 
 
 # Visuals saved to img folder
 # 12_BoxPlot_MeanBetaValue_", CategoryToVisualize, ".".p*
 
-estimateCellCountsMethylation <- function(CellTypesFile = "NA",
-                                          RGChannelSet = "NA",
-                                          ClinicalFile, 
-                                          ClusterLabels = NA,
-                                          FigureGenerate = "Yes",
-                                          PNGorPDF = "png") {
-  
+estimateCellCountsMethylation12 <- function(CellTypesFile = "NA",
+                                            RGChannelSet = "NA",
+                                            ClinicalFile, 
+                                            ClusterLabels = NA,
+                                            FigureGenerate = "Yes",
+                                            PNGorPDF = "png") {
+    
 
   # Loading needed packages
   # LoadCheckPkg(RegularPckgs=c("celltypes450")
@@ -151,7 +153,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                               stat_compare_means(comparisons = ComparisonOptions) + 
                               # Add pairwise comparisons p-value
                               stat_compare_means(aes(group = STAGE))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TYPE") {
@@ -164,7 +167,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TYPE))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "SEX") {
@@ -177,7 +181,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = SEX))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "SITE_BIOPSY") {
@@ -190,7 +195,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = SITE_BIOPSY))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TYPE_BIOPSY") {
@@ -203,7 +209,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TYPE_BIOPSY))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "INSTITUTION") {
@@ -216,7 +223,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = INSTITUTION))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TRANSLOC_14_18") {
@@ -229,7 +237,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TRANSLOC_14_18))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "EPIC_QC") {
@@ -242,7 +251,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = EPIC_QC))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       
@@ -256,7 +266,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = CLUSTER))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
 
       
@@ -332,7 +343,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = STAGE))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TYPE") {
@@ -345,7 +357,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TYPE))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "SEX") {
@@ -358,7 +371,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = SEX))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "SITE_BIOPSY") {
@@ -371,7 +385,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = SITE_BIOPSY))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TYPE_BIOPSY") {
@@ -384,7 +399,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TYPE_BIOPSY))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "INSTITUTION") {
@@ -397,7 +413,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = INSTITUTION))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "TRANSLOC_14_18") {
@@ -410,7 +427,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = TRANSLOC_14_18))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
       if (category == "EPIC_QC") {
@@ -423,7 +441,8 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
                                 stat_compare_means(comparisons = ComparisonOptions) + 
                                 # Add pairwise comparisons p-value
                                 stat_compare_means(aes(group = EPIC_QC))
-        ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/12_BoxPlot_FractionOfTumor_", category, ".", PNGorPDF), 
+               width = 40, height = 20, units = "cm")
       }
       
         
@@ -436,6 +455,6 @@ estimateCellCountsMethylation <- function(CellTypesFile = "NA",
   class(RESULTS) <- "BoxPlotsMehtylation_ASilva"
   return(RESULTS)
 }
-      
+# [END]      
     
   
