@@ -18,7 +18,7 @@
 # SheetUpdSamplesOrderedT2: metharray sheet updated by removing samples, keeping both T1 and T2 samples passing QC.
 
 
-QCRemoveSamples <- function(ClinicalFile, 
+QCRemoveSamples1 <- function(ClinicalFile, 
                             Path = "/Users/anjalisilva/Desktop/UHN/FLOMICS/GitHub/Methylation/Pipeline/extdata") {
 
   library(data.table)
