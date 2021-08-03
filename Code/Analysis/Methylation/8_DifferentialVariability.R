@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 26 March 2019
 # Function: Differential variability with no summarization. Rather than testing for differences 
 #           in mean methylation, test for differences between group variances.
@@ -24,11 +25,11 @@
 # Visuals saved to img folder
 # 6_VolcanoPlot_",ContrastColumnName,ProbeOrGene,"_toplogFC.p*
 
-DifferentialVariability <- function(ClinicalFile, 
-                                    MvalueMatrix, 
-                                    ProbeOrGene, 
-                                    ContrastColumnName, 
-                                    PNGorPDF) {
+DifferentialVariability8 <- function(ClinicalFile, 
+                                     MvalueMatrix, 
+                                     ProbeOrGene, 
+                                     ContrastColumnName, 
+                                     PNGorPDF) {
   
   # Loading needed packages
   library(limma)
@@ -50,61 +51,78 @@ DifferentialVariability <- function(ClinicalFile,
   # Differential methylation between ADVANCED-LIMITED
   # Select advanced and limited stage cases only from the FL cases
   if(ContrastColumnName == "STAGE") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"),
-                                                  which(colnames(ClinicalFile) == "STAGE")]), 
-                           levels = c("ADVANCED", "LIMITED"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "FL"),
+                                              which(colnames(ClinicalFile) == "STAGE")]), 
+                                              levels = c("ADVANCED", "LIMITED"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[,which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "FL")], 
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[, which(ClinicalFile[ , 
+                                        which(colnames(ClinicalFile) == "TYPE")] == "FL")], 
+                                        design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   } else if(ContrastColumnName == "SEX") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"),
-                                                  which(colnames(ClinicalFile) == "SEX")]), levels = c("M", "F"), 
-                           labels = c("Male", "Female"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "FL"),
+                                              which(colnames(ClinicalFile) == "SEX")]), 
+                                              levels = c("M", "F"), 
+                                              labels = c("Male", "Female"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL")], 
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(ClinicalFile[ , 
+                                        which(colnames(ClinicalFile) == "TYPE")] == "FL")], 
+                                        design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   } else if(ContrastColumnName == "SITE_BIOPSY") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))),
-                                                  which(colnames(ClinicalFile) == "SITE_BIOPSY")]), levels = c("EN", "LN"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))),
+                                              which(colnames(ClinicalFile) == "SITE_BIOPSY")]), 
+                                              levels = c("EN", "LN"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE)))],
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , 
+                                        which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE)))],
+                                        design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   } else if(ContrastColumnName == "TYPE_BIOPSY"){
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")), 
-                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), levels = c("CORE", "TISSUE"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")), 
+                                              which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
+                                              levels = c("CORE", "TISSUE"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE"))], 
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , 
+                                        which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE"))], 
+                                        design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   } else if(ContrastColumnName == "COO") {
     # https://support.bioconductor.org/p/44216/ # contrasts for multiple comparisons
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"),
-                                                  which(colnames(ClinicalFile) == "COO")]), levels = c("GCB", "ABC"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"),
+                                              which(colnames(ClinicalFile) == "COO")]), 
+                                              levels = c("GCB", "ABC"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL")], 
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(ClinicalFile[, 
+                                        which(colnames(ClinicalFile) == "TYPE")] == "DLBCL")], 
+                                        design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   } else if(ContrastColumnName == "TRANSLOC_14_18") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
-                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), levels = c("0", "1"), 
-                           labels = c("NoTranslocation", "Translocation"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(! is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
+                                              which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
+                                              levels = c("0", "1"), 
+                                              labels = c("NoTranslocation", "Translocation"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)], 
-                     design = design_epic2, coef = c(1, 2))
+    fitvar <- missMethyl::varFit(data = MvalueMatrix[ , which(! is.na(ClinicalFile[ , 
+                                 which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)], 
+                                 design = design_epic2, coef = c(1, 2))
     summary <- summary(decideTests(fitvar))
     topDV <- missMethyl::topVar(fitvar, coef = 2)
   #}else if(ContrastColumnName=="INSTITUTION"){
@@ -141,14 +159,14 @@ DifferentialVariability <- function(ClinicalFile,
   if(ProbeOrGene == "Probe") {
     # gene ontology analysis 
     sigCpGs <- rownames(topDV) # names of top 50 CpG sites
-    gst_epic <- gometh(sig.cpg = sigCpGs, 
+    gstEpic <- gometh(sig.cpg = sigCpGs, 
                        all.cpg = rownames(MvalueMatrix), 
                        collection = c("GO","KEGG"), 
                        array.type = "EPIC")
-    topGOList <- topGSA(gst_epic)
+    topGOList <- topGSA(gstEpic)
   
   } else if(ProbeOrGene == "Gene") {
-    gst_epic <- "For GO output, input of probes (not genes) needed"
+    gstEpic <- "For GO output, input of probes (not genes) needed"
     topGOList <- "For GO output, input of probes (not genes) needed"
   }
 
@@ -156,11 +174,10 @@ DifferentialVariability <- function(ClinicalFile,
   RESULTS <- list(AllVariabilityResults = fitvar,
                   SummaryVariabilityResults = summary,
                   topVariabilityResults = topDV,
-                  GOResults = gst_epic,
+                  GOResults = gstEpic,
                   topGOResults = topGOList)
   
   class(RESULTS) <- "DifferentialVariability_ASilva"
   return(RESULTS)
-
 }
-
+# [END]
