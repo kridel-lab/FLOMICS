@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 12 Feb 2019
 # Function: Create the heat plot using beta values.
 # Author: Anjali Silva
@@ -18,10 +19,10 @@
 # Visuals saved to img folder
 # 6_HeatPlot_.p*
 
-HeatPlot <- function(BetaMatrix, 
-                     ClinicalFile, 
-                     CategoryToVisualize, 
-                     PNGorPDF) {
+HeatPlot11 <- function(BetaMatrix, 
+                       ClinicalFile, 
+                       CategoryToVisualize, 
+                       PNGorPDF) {
   
   # Loading needed packages
   # LoadCheckPkg(RegularPckgs=c("tidyverse","ggplot2"))
@@ -33,12 +34,14 @@ HeatPlot <- function(BetaMatrix,
   pathNow <- getwd()
   
   # Obtaining the unique categories within CategoryToVisualize
-  NamesWithinCategoryToVisualize <- names(table(ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)]))
+  NamesWithinCategoryToVisualize <- names(table(ClinicalFile[ , 
+                                    which(colnames(ClinicalFile) == CategoryToVisualize)]))
   
   # Obtaining rowMeans from BetaMatrix
   BetaMatrix_ProbeMeans <- as.data.frame(sapply(c(1:length(NamesWithinCategoryToVisualize)), 
-                                                function(x) rowMeans(BetaMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)] 
-                                                                                         == NamesWithinCategoryToVisualize[x])])))
+                                                function(x) rowMeans(BetaMatrix[ ,
+                                                which(ClinicalFile[ , which(colnames(ClinicalFile) == CategoryToVisualize)] 
+                                                == NamesWithinCategoryToVisualize[x])])))
   colnames(BetaMatrix_ProbeMeans) <- NamesWithinCategoryToVisualize
   
   # Remove NA values
@@ -93,9 +96,8 @@ HeatPlot <- function(BetaMatrix,
     cat("\n*** Warning: The Argument CategoryToVisualize =",CategoryToVisualize ,"has more than 3 categories.
         \nFunction can only intake in upto 3 different categories within CategoryToVisualize.\n")
   }
-      # Developed by Anjali Silva
   return(NULL)
 }
-
+# [END]
 
 
