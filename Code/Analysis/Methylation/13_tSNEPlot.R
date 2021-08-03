@@ -1,10 +1,12 @@
+# Updated 3 Aug 2021
 # Updated 26 Feb 2019
 # Function: Generate tSNE plots using beta values. 
 # Author: Anjali Silva
 
 # Input:
 # tSNEOutput: Output produced from running Rtsne() function from Rtsne package.
-# Perplexity: Value used for perplexity parameter.
+# Perplexity: Value used for perplexity parameter. 
+#             If NA, then use deafault value set by Rtsnepackage. 
 # tSNEDataFrame: The dataframe used to produce the ggplot of tSNE output.
 # ClusterLabels: Provide cluster labels from another method for comparison purposes.
 # Filter: If to filter by patient type, options = "FL".
@@ -16,8 +18,8 @@
 # Visuals saved to img folder
 # tSNE results 13_tSNE_perplexity=X.p*
 
-tSNEPlotGeneration <- function(BetaMatrix, 
-                               PerplexityParameter, 
+tSNEPlotGeneration <- function(InputMatrix, 
+                               PerplexityParameter = NA, 
                                ClinicalFile,
                                ClusterLabels = NA, 
                                Filter = NA, 
@@ -36,46 +38,67 @@ tSNEPlotGeneration <- function(BetaMatrix,
 
   set.seed(1234)
   # T-distributed Stochastic Neighbor Embedding implementation
-  tsne_out <- Rtsne::Rtsne(t(BetaMatrix),
-                           perplexity = PerplexityParameter,
-                           check_duplicates = F)
+  if(is.na(PerplexityParameter) == TRUE) { 
+    # If PerplexityParameter is NA, run with default value
+    tsneOut <- Rtsne::Rtsne(t(InputMatrix),
+                             check_duplicates = F)
+    
+  } else {
+    tsneOut <- Rtsne::Rtsne(t(InputMatrix),
+                             perplexity = PerplexityParameter,
+                             check_duplicates = F)
+  }
+
   
   facna_stage <- addNA(ClinicalFile$STAGE)
   levels(facna_stage) <- c(levels(facna_stage), "NoInformation")
   if(is.na(Filter) == FALSE) {
-    facna_stage <- addNA(ClinicalFile$STAGE[which(substr(colnames(BetaMatrix), 4, 5) == Filter)])
+    facna_stage <- addNA(ClinicalFile$STAGE[which(substr(colnames(InputMatrix), 4, 5) == Filter)])
     levels(facna_stage) <- c(levels(facna_stage), "NoInformation")
   }
   
   facna_sex <- addNA(ClinicalFile$SEX)
   levels(facna_sex) <- c(levels(facna_sex), "NoInformation")
   if(is.na(Filter) == FALSE) {
-    facna_sex <- addNA(ClinicalFile$SEX[which(substr(colnames(BetaMatrix), 4, 5) == Filter)])
+    facna_sex <- addNA(ClinicalFile$SEX[which(substr(colnames(InputMatrix), 4, 5) == Filter)])
     levels(facna_sex) <- c(levels(facna_sex), "NoInformation")
   }
   
   facna_translocation <- addNA(ClinicalFile$TRANSLOC_14_18)
   levels(facna_translocation) <- c(levels(factor(facna_translocation)), "NoInformation")
   if(is.na(Filter) == FALSE) {
-    facna_translocation <- addNA(ClinicalFile$TRANSLOC_14_18)[which(substr(colnames(BetaMatrix), 4, 5) == Filter)]
+    facna_translocation <- addNA(ClinicalFile$TRANSLOC_14_18)[which(substr(colnames(InputMatrix), 4, 5) == Filter)]
     levels(facna_translocation) <- c(levels(factor(facna_translocation)), "NoInformation")
   }
   
-  df.tsne <- data.frame(colnames(BetaMatrix), 
-                        as.data.frame(tsne_out$Y), 
+  facnaInstitution <- addNA(ClinicalFile$INSTITUTION)
+  levels(facnaInstitution) <- c(levels(factor(facnaInstitution)), "NoInformation")
+  if(is.na(Filter) == FALSE) {
+    facnaInstitution <- addNA(ClinicalFile$INSTITUTION)[which(substr(colnames(InputMatrix), 4, 5) == Filter)]
+    levels(facnaInstitution) <- c(levels(factor(facnaInstitution)), "NoInformation")
+  }
+  
+  
+  df.tsne <- data.frame(colnames(InputMatrix), 
+                        as.data.frame(tsneOut$Y), 
                         factor(facna_stage), 
                         factor(facna_sex), 
-                        factor(facna_translocation))
-  colnames(df.tsne) <- c("samples", "D1", "D2", "Stage", "Sex", "Translocation")
+                        factor(facna_translocation),
+                        factor(facnaInstitution),
+                        colnames(InputMatrix))
+  colnames(df.tsne) <- c("samples", "D1", "D2", "Stage", "Sex", "Translocation", "Institution", "ID")
   
   if(is.na(ClusterLabels)[1] != TRUE) {
-    df.tsne <- data.frame(colnames(BetaMatrix), 
-                          as.data.frame(tsne_out$Y), 
+    df.tsne <- data.frame(colnames(InputMatrix), 
+                          as.data.frame(tsneOut$Y), 
                           factor(facna_stage), 
                           factor(facna_sex), 
                           factor(facna_translocation), 
-                          factor(ClusterLabels))
-    colnames(df.tsne) <- c("samples", "D1", "D2", "Stage", "Sex", "Translocation", "ClusterLabels")
+                          factor(facnaInstitution),
+                          factor(ClusterLabels),
+                          colnames(InputMatrix))
+    colnames(df.tsne) <- c("samples", "D1", "D2", "Stage", "Sex", "Translocation",  
+                           "Institution", "ClusterLabels", "ID")
   }
 
   df.tsne$samples <- as.character(df.tsne$samples)
@@ -166,6 +189,21 @@ tSNEPlotGeneration <- function(BetaMatrix,
                   PerplexityParameter,"_",ImageName,".",PNGorPDF))
     
     
+    ggplot2::ggplot(as.data.frame(df.tsne), 
+                    aes(x = D1, 
+                        y = D2, 
+                        color = Institution, 
+                        sample = samples)) + 
+      geom_point(size = 2) +
+      theme_bw() + 
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank()) + 
+      scale_color_manual(values = c('#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6')) + 
+      theme(aspect.ratio = 1, text = element_text(size = 15))
+    ggplot2::ggsave(paste0(pathNow,"/img/13_tSNE_INSTITUTION_perplexity=",
+                           PerplexityParameter,"_",ImageName,".",PNGorPDF))
+    
+    
     # Define colours:
     coloursBarPlot <- c('#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
                         '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324',
@@ -206,22 +244,24 @@ tSNEPlotGeneration <- function(BetaMatrix,
                       geom_point(size = 2) +
                       theme_bw() + 
                       theme(panel.grid.major = element_blank(), 
-                            panel.grid.minor = element_blank()) + 
-                      scale_color_manual(values = colourPalette) + 
-                      theme(aspect.ratio = 1, text = element_text(size = 15))
+                            panel.grid.minor = element_blank(),
+                            aspect.ratio = 1, 
+                            axis.text = element_text(size = rel(1.5), color = "black"),
+                            axis.title = element_text(size = rel(1.5), color = "black"),
+                            legend.text = element_text(size = rel(1.5), color = "black"),
+                            legend.title = element_text(size = rel(1.5), color = "black")) + 
+                      scale_color_manual(values = colourPalette) 
       ggplot2::ggsave(paste0(pathNow, "/img/13_tSNE_ExternalClusterLabs_perplexity=",
                              PerplexityParameter, "_", ImageName, ".", PNGorPDF))
+      
     }
   }
   
-  RESULTS <- list(tSNEOutput = tsne_out,
+  RESULTS <- list(tSNEOutput = tsneOut,
                   Perplexity = PerplexityParameter,
                   tSNEDataFrame = as.data.frame(df.tsne))
   
   class(RESULTS) <- "tSNEPlotGeneration_ASilva"
   return(RESULTS)
 }
-
-
-
-
+# [END]
