@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 3 June 2019
 # Function: bumphunter package looks for genomic regions that are differentially methylated 
 #          between two conditions; DMRcate extracts the most differentially methylated 
@@ -45,7 +46,7 @@
 # Note to self 
 #************** FIX line 379
 
-DiffMethylatedRegions <- function(Method = "DMRcate", 
+DiffMethylatedRegions9 <- function(Method = "DMRcate", 
                                   BetaMatrix,
                                   MvalueMatrix, 
                                   ContrastColumnName = "TYPE", 
@@ -85,7 +86,9 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
   # Define  phenotype of interest
   # One way to define model matrix
   if(ContrastColumnName == "TYPE") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[,which(colnames(ClinicalFile)=="TYPE")]), levels = c("DLBCL","FL","RLN"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , 
+                           which(colnames(ClinicalFile) == "TYPE")]), 
+                           levels = c("DLBCL","FL","RLN"))
     design_epic2 <- stats::model.matrix (~stage_status)
     
     # obtaining only the rows in Beta matrix from annotation file 
@@ -106,7 +109,7 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     DLBCLvsRLN <- bumphunter(object = BetaMatrix, 
                              design = design_epic2, 
                              cutoff = 0.2, 
-                             coef=3,
+                             coef = 3,
                              B = 100, 
                              nullMethod = "bootstrap",
                              type = "Beta",
@@ -115,11 +118,11 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
 
     
     type2 <- relevel(stage_status, "FL")
-    design_epic3 <- stats::model.matrix(~ type2)
+    designEpic3 <- stats::model.matrix(~ type2)
     
     # Found 190 bumps.
     FLvsRLN <- bumphunter(object = BetaMatrix, 
-                          design = design_epic3, 
+                          design = designEpic3, 
                           cutoff = 0.2, 
                           coef=3,
                           B = 100,
@@ -129,10 +132,10 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
                           pos = as.vector(AnnotationFile$pos[matchingrows]))
     
     if(ProduceImages == "Yes") {
-      if (PNGorPDF=="png") {
+      if (PNGorPDF == "png") {
         png(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_Bumphunter.",PNGorPDF))
       }
-      if (PNGorPDF=="pdf") { 
+      if (PNGorPDF == "pdf") { 
         pdf(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_Bumphunter.",PNGorPDF))
       }
     
@@ -229,21 +232,26 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     return(RESULTS)
   }
 
-  if(ContrastColumnName == "STAGE"){
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[, which(colnames(ClinicalFile) =="TYPE")]=="FL"), which(colnames(ClinicalFile) == "STAGE")]), levels = c("ADVANCED", "LIMITED"))
+  if(ContrastColumnName == "STAGE") {
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                           which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
+                           which(colnames(ClinicalFile) == "STAGE")]), 
+                           levels = c("ADVANCED", "LIMITED"))
     design_epic2 <- stats::model.matrix (~stage_status)
     
     # obtaining only the rows in Beta matrix from annotation file 
-    matchingrows <- match(rownames(BetaMatrix[which(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")] == "FL"), ]), AnnotationFile$X)
+    matchingrows <- match(rownames(BetaMatrix[which(ClinicalFile[ , 
+                          which(colnames(ClinicalFile) == "TYPE")] == "FL"), ]), AnnotationFile$X)
     
-    AdvVsLimited <- bumphunter(object = BetaMatrix[which(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")] == "FL"), ], 
-                            design = design_epic2, 
-                            cutoff = 0.2, 
-                            B = 100, 
-                            coef = 2,
-                            type = "Beta",
-                            chr = as.vector(AnnotationFile$chr[matchingrows]),
-                            pos = as.vector(AnnotationFile$pos[matchingrows]))
+    AdvVsLimited <- bumphunter(object = BetaMatrix[which(ClinicalFile[, 
+                               which(colnames(ClinicalFile) == "TYPE")] == "FL"), ], 
+                               design = design_epic2, 
+                               cutoff = 0.2, 
+                               B = 100, 
+                               coef = 2,
+                               type = "Beta",
+                               chr = as.vector(AnnotationFile$chr[matchingrows]),
+                               pos = as.vector(AnnotationFile$pos[matchingrows]))
   }
   
   RESULTS <- list(Bumphunter_Output = bh_dmrs2)
@@ -296,46 +304,66 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     if(ContrastColumnName == "STAGE") {
       # check if NA values are present, if so remove those patients 
       if(length(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "STAGE")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "STAGE")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "STAGE")]),  levels = c("ADVANCED", "LIMITED"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , 
+                                                  which(colnames(ClinicalFile) == "STAGE")]) == TRUE)), 
+                                                  which(colnames(ClinicalFile) == "STAGE")]), 
+                                                  levels = c("ADVANCED", "LIMITED"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                                       which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[,which(colnames(ClinicalFile) == "STAGE")]), levels = c("ADVANCED", "LIMITED"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[ , 
+                               which(colnames(ClinicalFile) == "STAGE")]), 
+                               levels = c("ADVANCED", "LIMITED"))
       }
       design_epic2 <- stats::model.matrix (~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
-      contrasts <- limma::makeContrasts("LIMITED-ADVANCED", levels = design_epic2)
+      contrasts <- limma::makeContrasts("ADVANCED-LIMITED", levels = design_epic2)
     } else if(ContrastColumnName == "SEX") {
       if(length(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "SEX")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "SEX")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "SEX")]),  levels = c("M", "F"), labels = c("Male", "Female"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "SEX")]) == TRUE)), 
+                                                  which(colnames(ClinicalFile) == "SEX")]),
+                                                  levels = c("M", "F"), 
+                                                  labels = c("Male", "Female"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                        which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "SEX")]),  levels = c("M", "F"), labels = c("Male","Female"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[, 
+                               which(colnames(ClinicalFile) == "SEX")]),  
+                               levels = c("M", "F"), labels = c("Male","Female"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
       contrasts <- limma::makeContrasts("Female-Male", levels = design_epic2)
     } else if(ContrastColumnName == "SITE_BIOPSY") {
       if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "SITE_BIOPSY")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "SITE_BIOPSY")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "SITE_BIOPSY")]),  levels = c("EN", "LN"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[- 
+                               c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "SITE_BIOPSY")]) == TRUE)), 
+                               which(colnames(ClinicalFile) == "SITE_BIOPSY")]),  levels = c("EN", "LN"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                                    which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       }else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
-                                                      which(colnames(ClinicalFile) == "SITE_BIOPSY")]), levels = c("EN", "LN"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
+                                                  which(colnames(ClinicalFile) == "SITE_BIOPSY")]), 
+                                                  levels = c("EN", "LN"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
       contrasts <- limma::makeContrasts("LN-EN", levels = design_epic2)
     } else if(ContrastColumnName == "TYPE_BIOPSY") {
       if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), levels = c("CORE", "TISSUE"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == TRUE)), 
+                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
+                                                  levels = c("CORE", "TISSUE"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                                                   which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE_BIOPSY")] == TRUE))), 
-                                                      which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), levels = c("CORE", "TISSUE"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")] == TRUE))), 
+                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
+                                                  levels = c("CORE", "TISSUE"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
@@ -343,35 +371,50 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     } else if(ContrastColumnName == "INSTITUTION") {
       # https://support.bioconductor.org/p/44216/
       if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "INSTITUTION")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "INSTITUTION")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "INSTITUTION")]), levels = c("BCCA", "UHN","JGH"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[,
+                               which(colnames(ClinicalFile) == "INSTITUTION")]) == TRUE)), 
+                               which(colnames(ClinicalFile) == "INSTITUTION")]), 
+                               levels = c("BCCA", "UHN","JGH"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                        which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "INSTITUTION")]), levels = c("BCCA", "UHN","JGH"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "INSTITUTION")]), 
+                               levels = c("BCCA", "UHN","JGH"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
       contrasts <- limma::makeContrasts("UHN-BCCA", "JGH-BCCA", "JGH-UHN", levels = design_epic2)
     } else if(ContrastColumnName == "EPIC_QC") {
       if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "EPIC_QC")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "EPIC_QC")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "EPIC_QC")]), levels = c("Fair", "Good", "Poor"))
-        MvalueMatrix<- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "EPIC_QC")]) == TRUE)), 
+                                                  which(colnames(ClinicalFile) == "EPIC_QC")]), 
+                                                  levels = c("Fair", "Good", "Poor"))
+        MvalueMatrix<- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                       which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "EPIC_QC")]), levels = c("Fair","Good","Poor"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[, 
+                        which(colnames(ClinicalFile) == "EPIC_QC")]), 
+                        levels = c("Fair","Good","Poor"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
-      contrasts <- limma::makeContrasts("Good-Fair", "Poor-Good", "Poor-Fair", levels = design_epic2)
+      contrasts <- limma::makeContrasts("Good-Fair", "Poor-Good", "Poor-Fair", 
+                                        levels = design_epic2)
     } else if(ContrastColumnName == "COO") {
       # https://support.bioconductor.org/p/44216/ # contrasts for multiple comparisons
       if(length(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "COO")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "COO")]) == TRUE)), 
-                                                      which(colnames(ClinicalFile) == "COO")]), levels = c("GCB", "ABC"))
-        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "COO")]) == TRUE)), 
+                                                  which(colnames(ClinicalFile) == "COO")]), 
+                                                  levels = c("GCB", "ABC"))
+        MvalueMatrix <- MvalueMatrix[, which(is.na(ClinicalFile[, 
+                        which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
-                                                      which(colnames(ClinicalFile) == "COO")]), levels = c("GCB", "ABC"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
+                                                  which(colnames(ClinicalFile) == "COO")]), 
+                                                  levels = c("GCB", "ABC"))
       }
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
@@ -379,12 +422,17 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     } else if(ContrastColumnName == "TYPE") {
       if(length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")]) == TRUE)) > 0) {
         if (length(unique(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")])) == 2) {
-          stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")]) == TRUE)), 
-                                                        which(colnames(ClinicalFile) == "TYPE")]), levels = c("DLBCL", "FL", "RLN"))
+          stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ ,
+                                                    which(colnames(ClinicalFile) == "TYPE")]) == TRUE)), 
+                                                    which(colnames(ClinicalFile) == "TYPE")]), 
+                                                    levels = c("DLBCL", "FL", "RLN"))
         } else {
-          stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]) == TRUE)), 
-                                                        which(colnames(ClinicalFile) =="TYPE")]), levels = c("DLBCL", "FL", "RLN"))}
-        MvalueMatrix<- MvalueMatrix[, which(is.na(ClinicalFile[,which(colnames(ClinicalFile) ==ContrastColumnName)]) == FALSE)]
+          stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[, 
+                                                    which(colnames(ClinicalFile) == "TYPE")]) == TRUE)), 
+                                                    which(colnames(ClinicalFile) =="TYPE")]), 
+                                                    levels = c("DLBCL", "FL", "RLN"))}
+        MvalueMatrix<- MvalueMatrix[, which(is.na(ClinicalFile[,
+                       which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       }else{
         if (length(unique(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")])) == 2) {
           stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]))
@@ -396,50 +444,72 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
       design_epic2 <- stats::model.matrix(~ 0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
       if (length(unique(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")])) == 2) {
-        contrasts <- limma::makeContrasts(paste0(unique(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")])[1], "-", 
-                                                 unique(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")])[2]), 
+        contrasts <- limma::makeContrasts(paste0(unique(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")])[1], "-", 
+                                                 unique(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")])[2]), 
                                           levels = design_epic2)
-      } else {
-        contrasts <- limma::makeContrasts("FL-DLBCL", "RLN-DLBCL", "RLN-FL", levels = design_epic2)
+      } else { 
+        contrasts <- limma::makeContrasts("DLBCL-FL", "DLBCL-RLN", "FL-RLN", levels = design_epic2)
       }
     } else if (ContrastColumnName == "TRANSLOC_14_18") {
       if (length(which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)) > 0) {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)),
-                                                      which(colnames(ClinicalFile) == "TRANSLOC_14_18")]),  
-                               levels = c("0","1"), labels = c("NoTranslocation", "Translocation"))
-        MvalueMatrix <- MvalueMatrix[ ,which(is.na(ClinicalFile[,which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[-c(which(is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)),
+                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]),  
+                                                  levels = c("0","1"), 
+                                                  labels = c("NoTranslocation", "Translocation"))
+        MvalueMatrix <- MvalueMatrix[ , which(is.na(ClinicalFile[,
+                                    which(colnames(ClinicalFile) == ContrastColumnName)]) == FALSE)]
       } else {
-        stage_status <- factor(stringi::stri_trim(ClinicalFile[which(!is.na(ClinicalFile[,which(colnames(ClinicalFile) == "TRANSLOC_14_18")])==TRUE),
-                                                      which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
-                               levels = c("0","1"), labels = c("NoTranslocation", "Translocation"))
+        stage_status <- factor(stringi::stri_trim(ClinicalFile[which(! is.na(ClinicalFile[, 
+                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
+                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
+                                                  levels = c("0","1"), 
+                                                  labels = c("NoTranslocation", "Translocation"))
       }
       design_epic2 <- stats::model.matrix(~ 0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
-      contrasts <- limma::makeContrasts("Translocation-NoTranslocation", levels = design_epic2)
+      contrasts <- limma::makeContrasts("Translocation-NoTranslocation", 
+                                        levels = design_epic2)
     } else if(ContrastColumnName == "CLUSTER") {
       if (sum(is.na(ClusterLabels)) > 0) {
-        stop("ContrastColumnName is set to CLUSTER, but ClusterLabels not provided. Provide the ClusterLabels");}
+        stop("ContrastColumnName is set to CLUSTER, but \n
+             ClusterLabels not provided. Provide the ClusterLabels");}
       if (length(unique(ClusterLabels)) == 5) {
-        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3", "4", "5"), labels = c("one", "two", "three", "four", "five"))
+        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3", "4", "5"), 
+                               labels = c("one", "two", "three", "four", "five"))
       } else if (length(unique(ClusterLabels)) == 4) {
-        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3", "4"), labels = c("one", "two", "three", "four"))
+        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3", "4"), 
+                               labels = c("one", "two", "three", "four"))
       } else if(length(unique(ClusterLabels)) == 3) {
-        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3"), labels = c("one", "two", "three"))
+        stage_status <- factor(ClusterLabels, levels = c("1", "2", "3"), 
+                               labels = c("one", "two", "three"))
       } else if(length(unique(ClusterLabels)) == 2) {
-        stage_status <- factor(ClusterLabels, levels = c("1", "2"), labels = c("one", "two"))
+        stage_status <- factor(ClusterLabels, levels = c("1", "2"), 
+                               labels = c("one", "two"))
       } else{
-        stop("ClusterLabels have more than 5 clusters. Currently only upto 4 clusters supported");}
+        stop("ClusterLabels have more than 5 clusters. \n
+             Currently only upto 4 clusters supported");}
 
       design_epic2 <- stats::model.matrix(~0 + stage_status)
       colnames(design_epic2) <- levels(stage_status)
       if (length(unique(ClusterLabels)) == 5) {
-        contrasts <- limma::makeContrasts("one-two","one-three","one-four", "one-five", "two-three","two-four", "two-five", "three-four", "three-five", "four-five", levels = design_epic2)
+        contrasts <- limma::makeContrasts("one-two", "one-three",
+                                          "one-four", "one-five", 
+                                          "two-three", "two-four", 
+                                          "two-five", "three-four", 
+                                          "three-five", "four-five", 
+                                          levels = design_epic2)
       } else if (length(unique(ClusterLabels)) == 4) {
-        contrasts <- limma::makeContrasts("one-two","one-three","one-four","two-three","two-four","three-four", levels = design_epic2)
+        contrasts <- limma::makeContrasts("one-two", "one-three",
+                                          "one-four", "two-three",
+                                          "two-four", "three-four", 
+                                          levels = design_epic2)
       } else if (length(unique(ClusterLabels)) == 3) {
-        contrasts <- limma::makeContrasts("one-two","one-three","two-three", levels = design_epic2)
+        contrasts <- limma::makeContrasts("one-two", "one-three", "two-three",
+                                          levels = design_epic2)
       } else if(length(unique(ClusterLabels)) == 2) {
-        contrasts <- limma::makeContrasts("one-two", levels = design_epic2)
+        contrasts <- limma::makeContrasts("one-two", 
+                                          levels = design_epic2)
       }
       
     } else {
@@ -447,13 +517,15 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     }
     cat("\n Contrast has been set")
     
-    cat("\n Filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05")
+    cat("\n Filter out probes 2 nucleotides or closer \n 
+        to a SNP that have a minor allele frequency greater than 0.05")
     # Measurements on the array may be confounded by proximity to SNPs, and cross-hybridisation to other areas of the genome
     # So filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05
     myMs.noSNPs <- DMRcate::rmSNPandCH(MvalueMatrix, dist = 2, mafcut = 0.05) # 557951 probes
     
     cat("\n After filtering,", nrow(MvalueMatrix) - nrow(myMs.noSNPs), 
-        "probes were removed from the original", nrow(MvalueMatrix), "probes. \n Now there are", 
+        "probes were removed from the original", 
+        nrow(MvalueMatrix), "probes. \n Now there are", 
         nrow(myMs.noSNPs), "probes.")
     cat("\n Setting contrast for ContrastColumnName:", ContrastColumnName)
     
@@ -475,7 +547,8 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     cat("\n Setting function for cpgannotation")
     cat("\n Annotate CpGs with their chromosome position and test statistic")
     # Annotate CpGs with their chromosome position and test statistic
-    myannotations <- lapply(c(1:length(colnames(contrasts))), function(x) cpgannotation(x))
+    myannotations <- lapply(c(1:length(colnames(contrasts))), 
+                            function(x) cpgannotation(x))
     names(myannotations) <- c(colnames(contrasts))
     print(myannotations)
     
@@ -490,7 +563,8 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
       tryCatch({
         cat("\n Running dmrcate for contrast: ", colnames(contrasts)[j])
         dmrcoutput[[j]] <- DMRcate::dmrcate(object = myannotations[[j]], lambda = 1000, C = 2)
-        if(typeof(dmrcoutput[[j]]) == "logical") {stop(paste0("Contrast: ", colnames(contrasts)[j], "didn't work."))}
+        if(typeof(dmrcoutput[[j]]) == "logical") {stop(paste0("Contrast: ", 
+                                  colnames(contrasts)[j], "didn't work."))}
       }, error = function(e){cat("ERROR :", conditionMessage(e), "\n")}) 
     }
     
@@ -508,7 +582,8 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
       tryCatch({
         cat("\n Running DMRcate::extractRanges for contrast: ", colnames(contrasts)[k])
         results.ranges[[k]] <- DMRcate::extractRanges(dmrcoutput[[k]], genome = "hg19")
-        if(typeof(results.ranges[[k]]) == "logical") {stop(paste0("Contrast: ", colnames(contrasts)[k], "didn't work."))}
+        if(typeof(results.ranges[[k]]) == "logical") {stop(paste0("Contrast: ", 
+                                      colnames(contrasts)[k], "didn't work."))}
       }, error = function(e){cat("ERROR :", conditionMessage(e), "\n")}) 
       
       # when ranked based on adjusted p values, the top DMRs overlapped with the promoters of genes 
@@ -525,8 +600,10 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
     for (k in 1:length(colnames(contrasts))) {
       # Getting genes falling in DMRs
       # This is given by: results.ranges[[1]][, 8]$overlapping.genes 
-      geneVector[[k]] <- unique(unlist(strsplit(results.ranges[[k]]@elementMetadata$overlapping.genes, split=", ")))
-      chromosomeVector[[k]] <- unlist(lapply(c(1:length(results.ranges[[k]])), function(x) results.ranges[[k]]@seqnames[x]@values))
+      geneVector[[k]] <- unique(unlist(strsplit(results.ranges[[k]]@elementMetadata$overlapping.genes, 
+                                split=", ")))
+      chromosomeVector[[k]] <- unlist(lapply(c(1:length(results.ranges[[k]])), 
+                              function(x) results.ranges[[k]]@seqnames[x]@values))
     }
     names(geneVector) <- c(colnames(contrasts))
     
@@ -553,10 +630,12 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
                    #samps=c(1:length(which(stage_status %in% unlist(strsplit(colnames(contrasts)[r], "-")) == TRUE))))
 
         if (PNGorPDF == "png") {
-          png(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_DMR_", DMR, "_comparison_", colnames(contrasts)[r], ".", PNGorPDF))
+          png(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_DMR_", 
+                     DMR, "_comparison_", colnames(contrasts)[r], ".", PNGorPDF))
         }
         if (PNGorPDF == "pdf") { 
-          pdf(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_DMR_", DMR, "_comparison_", colnames(contrasts)[r], ".", PNGorPDF), width = 10, height = 20)
+          pdf(paste0(pathNow,"/img/9_DifferentiallyMethylatedRegions_DMR_", 
+                     DMR, "_comparison_", colnames(contrasts)[r], ".", PNGorPDF), width = 10, height = 20)
         }
         
         # old code 
@@ -575,7 +654,7 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
         # )
       }
       
-      figuregenerator_Volcano <- function(p) {
+      figuregeneratorVolcano <- function(p) {
         
         new_work <- function(TumEnvGeneExp = TumEnvGeneExp) {
           # Annotating points with gene expression data provided on 1 Aug 2019
@@ -657,6 +736,7 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
             geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
             #geom_hline(yintercept= -log10(0.01), linetype="dotted") +  
             theme_bw() + 
+            labs(x = "Mean difference", y = "-log10(Stouffer)") + 
             theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
             scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
             theme(aspect.ratio = 1, text = element_text(size = 15))
@@ -675,17 +755,17 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
       }
       
       if (length(levels(stage_status)) == 2) {
-        numb_comparisons = 1
+        numbComparisons = 1
       } else if (length(levels(stage_status)) == 3) {
-        numb_comparisons = 3
+        numbComparisons = 3
       } else if (length(levels(stage_status)) == 4) {
-        numb_comparisons = 6
+        numbComparisons = 6
       } else if (length(levels(stage_status)) == 5) {
-        numb_comparisons = 10
+        numbComparisons = 10
       }
       
-      for (u in rev(1: numb_comparisons)) {
-        figuregenerator_Volcano(p = u)
+      for (u in rev(1: numbComparisons)) {
+        figuregeneratorVolcano(p = u)
         #figuregenerator_DMR(r = u) # only plot first 30 samples
       }
     }
@@ -758,3 +838,4 @@ DiffMethylatedRegions <- function(Method = "DMRcate",
   class(RESULTSFinal) <- "DifferentiallyMethylatedRegions_ASilva"
   return(RESULTSFinal)
 }
+# [END]
