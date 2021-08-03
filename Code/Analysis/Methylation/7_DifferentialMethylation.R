@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 12 Feb 2019
 # https://bioconductor.org/packages/devel/bioc/vignettes/missMethyl/inst/doc/missMethyl.html#testing-for-differential-methylation-using
 # Function: Differential methylation based on probe level (with no summarization)
@@ -7,20 +8,25 @@
 # ClinicalFile: File with patient sample names, and categories. 
 # MvalueMatrix: A matrix of probes x patients, with probes in rows and patients as columns.
 # BetaMatrix: 
-# ProbeOrGene: Indicate whether the MvalueMatrix has probes or genes. ProbeOrGene options include "Gene" or "Probe".
+# ProbeOrGene: Indicate whether the MvalueMatrix has probes or genes. ProbeOrGene options include 
+#              "Gene" or "Probe".
 # ContrastColumnName: Type of differential analysis to be done. ContrastColumnName options include "STAGE", "SEX",
 #                     "SITE_BIOPSY", "TYPE_BIOPSY", "INSTITUTION", "COO", "TYPE", "TRANSLOC_14_18", "EPIC_QC".
+# Pvalue: An integer specifying the p value. Default is 0.05.
 # ProduceImages: Produce images or not, options = "Yes" or "No"
 # PNGorPDF: Output format of the image, options = "png" or "pdf"
 
 # Output:
 # SummaryOfResults: results output from Multiple Testing Across Genes and Contrasts using limma package
 # MArrayLM: Empirical Bayes Statistics from applying limma::eBayes function
-# topP: Table of all features from Linear Model Fit (probes or genes as defined) based on P value using limma::eBayes() and limma::topTable() functions
-# topPGOTesting: All results from gene ontology enrichment for the vector of CpG sites from topP using gometh() function
+# topP: Table of all features from Linear Model Fit (probes or genes as defined) based on P value using 
+#       limma::eBayes() and limma::topTable() functions
+# topPGOTesting: All results from gene ontology enrichment for the vector of CpG sites from topP using 
+#                gometh() function
 # topPGOList: 20 most enriched pathways for the vector of CpG sites from topP using topGO() function
 # topLogFC: Table of all features from Linear Model Fit (probes or genes as defined) based on LogFC
-# topLogFCTesting: All results from gene ontology enrichment for the vector of CpG sites from topLogFC using gometh() function
+# topLogFCTesting: All results from gene ontology enrichment for the vector of CpG sites from topLogFC 
+#                  using gometh() function
 # topLogFCGOList: 20 most enriched pathways for the vector of CpG sites from topLogFC using topGO() function
 
 # Visuals saved to img folder
@@ -28,13 +34,15 @@
 
 
 
-DifferentialMethylation <- function(ClinicalFile, 
+DifferentialMethylation7 <- function(ClinicalFile, 
                                     MvalueMatrix, 
                                     BetaMatrix, 
                                     ProbeOrGene, 
                                     ContrastColumnName, 
-                                    RGChannelSet, 
-                                    SampleSheet, 
+                                    RGChannelSet = NA, 
+                                    SampleSheet = NA, 
+                                    Pvalue = 0.05,
+                                    logFCcutoff = 2,
                                     ProduceImages = "Yes", 
                                     PNGorPDF = "png",
                                     AnnotationFile = NA) { 
@@ -59,76 +67,95 @@ DifferentialMethylation <- function(ClinicalFile,
   # Differential methylation between ADVANCED-LIMITED
   # Select advanced and limited stage cases only from the FL cases
   if(ContrastColumnName == "STAGE") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
-                                                   which(colnames(ClinicalFile) == "STAGE")]), 
-                           levels = c("ADVANCED", "LIMITED"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
+                                              which(colnames(ClinicalFile) == "STAGE")]), 
+                                              levels = c("ADVANCED", "LIMITED"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
+    fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , 
+                                which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
     contrasts <- limma::makeContrasts("ADVANCED-LIMITED", levels = design_epic2)
   } else if(ContrastColumnName == "SEX") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
-                                                  which(colnames(ClinicalFile) == "SEX")]), 
-                           levels = c("M", "F"), labels = c("Male", "Female"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "FL"), 
+                                              which(colnames(ClinicalFile) == "SEX")]), 
+                                              levels = c("M", "F"), labels = c("Male", "Female"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
+    fit.reduced <- limma::lmFit(MvalueMatrix[ , which(ClinicalFile[ , 
+                                which(colnames(ClinicalFile) == "TYPE")] == "FL")], design_epic2)
     contrasts <- limma::makeContrasts("Female-Male", levels = design_epic2)
   } else if(ContrastColumnName == "SITE_BIOPSY") { 
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
-                                                  which(colnames(ClinicalFile) == "SITE_BIOPSY")]), 
-                           levels = c("EN", "LN"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE))), 
+                                              which(colnames(ClinicalFile) == "SITE_BIOPSY")]), 
+                                              levels = c("EN", "LN"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE)))], 
+    fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , 
+                                which(colnames(ClinicalFile) == "SITE_BIOPSY")] == TRUE)))], 
                                 design_epic2)
     contrasts <- limma::makeContrasts("LN-EN", levels = design_epic2)
   } else if(ContrastColumnName == "TYPE_BIOPSY") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")),
-                                                  which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
-                           levels = c("CORE", "TISSUE"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[- c(which(is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE")),
+                                              which(colnames(ClinicalFile) == "TYPE_BIOPSY")]), 
+                                              levels = c("CORE", "TISSUE"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE"))], 
+    fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , 
+                                which(colnames(ClinicalFile) == "TYPE_BIOPSY")]) == "TRUE"))], 
                                 design_epic2)
     contrasts <- limma::makeContrasts("TISSUE-CORE", levels = design_epic2)
   } else if(ContrastColumnName == "INSTITUTION") { 
     # https://support.bioconductor.org/p/44216/
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "INSTITUTION")]), 
-                           levels = c("BCCA", "UHN","JGH"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "INSTITUTION")]), 
+                                              levels = c("BCCA", "UHN","JGH"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
     contrasts <- limma::makeContrasts("UHN-BCCA", "JGH-BCCA", "JGH-UHN", levels = design_epic2)
   } else if(ContrastColumnName == "EPIC_QC") { 
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , which(colnames(ClinicalFile) == "EPIC_QC")]), 
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[ , 
+                           which(colnames(ClinicalFile) == "EPIC_QC")]), 
                            levels = c("Fair", "Good", "Poor"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
-    contrasts <- limma::makeContrasts("Good-Fair", "Poor-Good", "Poor-Fair", levels = design_epic2)
+    contrasts <- limma::makeContrasts("Good-Fair", "Poor-Good", "Poor-Fair", 
+                                      levels = design_epic2)
   } else if(ContrastColumnName == "COO") { 
     # https://support.bioconductor.org/p/44216/ # contrasts for multiple comparisons
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
-                                                  which(colnames(ClinicalFile) == "COO")]), levels = c("GCB", "ABC"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(ClinicalFile[, 
+                                              which(colnames(ClinicalFile) == "TYPE")] == "DLBCL"), 
+                                              which(colnames(ClinicalFile) == "COO")]), 
+                                              levels = c("GCB", "ABC"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[, which(ClinicalFile[,which(colnames(ClinicalFile) == "TYPE")] == "DLBCL")], design_epic2)
+    fit.reduced <- limma::lmFit(MvalueMatrix[, which(ClinicalFile[ ,
+                                which(colnames(ClinicalFile) == "TYPE")] == "DLBCL")], 
+                                design_epic2)
     contrasts <- limma::makeContrasts("ABC-GCB", levels = design_epic2)
   } else if(ContrastColumnName == "TYPE") {
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]), levels = c("DLBCL", "FL", "RLN"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[, which(colnames(ClinicalFile) == "TYPE")]), 
+                           levels = c("DLBCL", "FL", "RLN"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
     # contrasts <- limma::makeContrasts("FL-DLBCL", "RLN-DLBCL", "RLN-FL", levels = design_epic2)
     contrasts <- limma::makeContrasts("DLBCL-FL", "DLBCL-RLN", "FL-RLN", levels = design_epic2)
   } else if(ContrastColumnName == "TRANSLOC_14_18") { 
-    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(!is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
-                                                  which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
-                           levels = c("0", "1"), labels = c("NoTranslocation", "Translocation"))
+    stage_status <- factor(stringi::stri_trim(ClinicalFile[which(!is.na(ClinicalFile[ , 
+                                              which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE),
+                                              which(colnames(ClinicalFile) == "TRANSLOC_14_18")]), 
+                                              levels = c("0", "1"), 
+                                              labels = c("NoTranslocation", "Translocation"))
     design_epic2 <- stats::model.matrix (~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
-    fit.reduced <- limma::lmFit(MvalueMatrix[, which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)], 
+    fit.reduced <- limma::lmFit(MvalueMatrix[, which(! is.na(ClinicalFile[, 
+                                which(colnames(ClinicalFile) == "TRANSLOC_14_18")]) == TRUE)], 
                                 design_epic2)
     contrasts <- limma::makeContrasts("Translocation-NoTranslocation", levels = design_epic2)
   } else if(ContrastColumnName == "CLUSTER") {
@@ -153,7 +180,8 @@ DifferentialMethylation <- function(ClinicalFile,
     design_epic2 <- stats::model.matrix(~ 0 + stage_status)
     colnames(design_epic2) <- levels(stage_status)
     if(length(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "CLUSTER")] == TRUE))) > 0) {
-      fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == "CLUSTER")] == TRUE)))], 
+      fit.reduced <- limma::lmFit(MvalueMatrix[ , - c(which(is.na(ClinicalFile[ , 
+                                  which(colnames(ClinicalFile) == "CLUSTER")] == TRUE)))], 
                                   design_epic2)
     } else {
       fit.reduced <- limma::lmFit(MvalueMatrix, design_epic2)
@@ -177,9 +205,9 @@ DifferentialMethylation <- function(ClinicalFile,
   }
   
   fit.reduced <- limma::eBayes(contrasts.fit(fit.reduced, contrasts))
-  fit.reduced_MultipleTesting <- limma::decideTests(fit.reduced, adjust.method = "BH", p.value = 0.01)
+  fit.reduced_MultipleTesting <- limma::decideTests(fit.reduced, adjust.method = "BH", p.value = Pvalue)
+  Summary_Results <- summary(limma::decideTests(fit.reduced, adjust.method = "BH", p.value = Pvalue))
   Significant_Probes <- rownames(fit.reduced_MultipleTesting)[which(fit.reduced_MultipleTesting != 0)]
-  Summary_Results <- summary(limma::decideTests(fit.reduced, adjust.method = "BH", p.value = 0.01))
   
   # Getting the path of the file, which should contain a folder called "img"
   pathNow <- getwd()
@@ -189,23 +217,32 @@ DifferentialMethylation <- function(ClinicalFile,
   # sorted by P value
   if(length(levels(stage_status)) >= 3) { 
     # need to adjust for multiple testing  
-    # order probes by P value and then select probes with adj.P.Val < 0.01
-    top_P_Coef1 <- limma::topTable(fit.reduced, adjust.method="BH", 
+    # order probes by P value and then select probes with adj.P.Val < Pvalue
+    top_P_Coef1 <- limma::topTable(fit.reduced, adjust.method = "BH", 
                                    coef = 1, number = nrow(MvalueMatrix), sort.by="p")
-    top_P_Coef11 <- top_P_Coef1[which(top_P_Coef1[, 5] < 0.01), ]
+    top_P_Coef11 <- top_P_Coef1[which(top_P_Coef1$adj.P.Val < Pvalue), ]
+    top_P_Coef11 <- top_P_Coef11[which(abs(top_P_Coef11$logFC) > logFCcutoff), ]
+    
     top_P_Coef2 <- limma::topTable(fit.reduced, adjust.method = "BH", 
                                    coef = 2, number = nrow(MvalueMatrix), sort.by="p")
-    top_P_Coef22 <- top_P_Coef2[which(top_P_Coef2[, 5] < 0.01), ]
+    top_P_Coef22 <- top_P_Coef2[which(top_P_Coef2$adj.P.Val < Pvalue), ]
+    top_P_Coef22 <- top_P_Coef22[which(abs(top_P_Coef22$logFC) > logFCcutoff), ]
+    
     top_P_Coef3 <- limma::topTable(fit.reduced, adjust.method = "BH", 
                                    coef = 3, number = nrow(MvalueMatrix), sort.by="p")
-    top_P_Coef33 <- top_P_Coef3[which(top_P_Coef3[, 5] < 0.01), ]
+    top_P_Coef33 <- top_P_Coef3[which(top_P_Coef3$adj.P.Val < Pvalue), ]
+    top_P_Coef33 <- top_P_Coef33[which(abs(top_P_Coef33$logFC) > logFCcutoff), ]
     
     top_P <- list(FirstComparison = top_P_Coef11,
                   SecondComparison = top_P_Coef22,
                   ThirdComparison = top_P_Coef33)
+    names(top_P) <- colnames(Summary_Results)
     
-    # Among the 3 contrasts, find common probes (those that have been selected based on adj.P.Val < 0.01)
-    ProbesAmongAll <- Reduce(intersect, list(rownames(top_P_Coef11),rownames(top_P_Coef22),rownames(top_P_Coef33)))
+    # Among the 3 contrasts, find common probes (those that have been selected based on adj.P.Val < Pvalue)
+    ProbesAmongAll <- Reduce(intersect, 
+                             list(rownames(top_P_Coef11),
+                                  rownames(top_P_Coef22),
+                                  rownames(top_P_Coef33)))
     
     if(length(ProbesAmongAll) == 0) {
       cat("\n No common", paste0(ProbeOrGene, "s"),"were found among all comparisons.")
@@ -213,17 +250,20 @@ DifferentialMethylation <- function(ClinicalFile,
       # length(ProbesAmongAll) # 1537
       
       # Iding the locations where the probes are located in each comparison 
-      Locations <- lapply(c(1:length(ProbesAmongAll)), function(i) c(which(rownames(top_P_Coef11) == ProbesAmongAll[i]), 
-                                                                     which(rownames(top_P_Coef22) == ProbesAmongAll[i]), 
-                                                                     which(rownames(top_P_Coef33) == ProbesAmongAll[i])))
+      Locations <- lapply(c(1:length(ProbesAmongAll)), function(i) 
+        c(which(rownames(top_P_Coef11) == ProbesAmongAll[i]), 
+          which(rownames(top_P_Coef22) == ProbesAmongAll[i]), 
+          which(rownames(top_P_Coef33) == ProbesAmongAll[i])))
       
-      # Save the locations into a matrix with ncols = number of comparisons and nrows = number of rows
-      Locations2 <- matrix(do.call(c, Locations), byrow = T, ncol = length(levels(stage_status)))
+      # Save the locations into a matrix with ncols = number of 
+      # comparisons and nrows = number of rows
+      Locations2 <- matrix(do.call(c, Locations), byrow = T, 
+                           ncol = length(levels(stage_status)))
       # dim(Locations2) # 1537    3
       
       # Construct a Volcano plot for FL-DLBCL
       # Volcano plot; Note 1.3 is -log10(0.05)
-      # Note 2 is -log10(0.01) 
+      # Note 2 is -log10(Pvalue) 
       
       # find needed genes in top_P
       # position_20genes <- match(rownames(beta.sel), rownames(top_P_Coef1))
@@ -259,7 +299,7 @@ DifferentialMethylation <- function(ClinicalFile,
       #   theme(aspect.ratio=1, text = element_text(size=15))
       
       if(ProduceImages == "Yes") { 
-        volcanoplot <- ggplot2::ggplot(top_P_Coef1, aes(logFC, -log10(adj.P.Val))) +
+        volcanoplot <- ggplot2::ggplot(top_P_Coef1, aes(logFC, - log10(adj.P.Val))) +
                                        geom_point(color = "#e0e0e0") +
                                        ggtitle(paste0("Plot of ", colnames(Summary_Results)[1])) +
                                        geom_text_repel(data = top_P_Coef11[Locations2[c(1:10), 1], ], 
@@ -275,12 +315,14 @@ DifferentialMethylation <- function(ClinicalFile,
                                                   colour = "#4d4d4d", size = 3) + 
                                        labs(color = "GeneClass", y = "-log10(adj.P.Value)")+
                                        geom_hline(yintercept = 1.3, linetype = "dotted") +
-                                       geom_hline(yintercept = 2, linetype = "dotted") +  
+                                       geom_vline(xintercept = c(-2, 2), linetype = "dotted") +
+                                       #geom_hline(yintercept = 2, linetype = "dotted") +  
                                        theme_bw() +  
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size=15))
-        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_topPValue.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                               "_1stComparison_topPValue.", PNGorPDF))
         
         # Construct a Volcano plot for RLN-DLBCL
         volcanoplot <- ggplot2::ggplot(top_P_Coef2, aes(logFC, -log10(adj.P.Val))) +
@@ -299,12 +341,13 @@ DifferentialMethylation <- function(ClinicalFile,
                                                   colour = "#4d4d4d", size = 3) + 
                                        labs(color = "GeneClass", y="-log10(adj.P.Value)") +
                                        geom_hline(yintercept = 1.3, linetype = "dotted") +
-                                       geom_hline(yintercept = 2, linetype = "dotted") +  
+          geom_vline(xintercept = c(-2, 2), linetype = "dotted") +
                                        theme_bw() + 
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size = 15))
-        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_topPValue.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                               "_2ndComparison_topPValue.", PNGorPDF))
         
         # Construct a Volcano plot for RLN-FL
         volcanoplot <- ggplot2::ggplot(top_P_Coef3, aes(logFC, -log10(adj.P.Val))) +
@@ -324,18 +367,20 @@ DifferentialMethylation <- function(ClinicalFile,
                                                  labs(color = "GeneClass", 
                                                       y = "-log10(adj. P.Value)") +
                                       geom_hline(yintercept = 1.3, linetype = "dotted") +
-                                      geom_hline(yintercept = 2, linetype = "dotted") +  
+          geom_vline(xintercept = c(-2, 2), linetype = "dotted") +  
                                       theme_bw() + 
                                       theme(panel.grid.major = element_blank(), 
                                             panel.grid.minor = element_blank()) + 
                                       scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                       theme(aspect.ratio = 1, text = element_text(size=15))
-        ggplot2::ggsave(paste0(pathNow,"/img/7_VolcanoPlot_",ContrastColumnName,"_3rdComparison_topPValue.",PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                               "_3rdComparison_topPValue.", PNGorPDF))
       }
     }
   } else if(length(levels(stage_status)) == 2) { 
-    top_P <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix), sort.by = "p")
-    top_P_Coef11 <- top_P[which(top_P$adj.P.Val < 0.01), ]
+    top_P <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix),
+                             adjust.method =  "BH", sort.by = "p")
+    #top_P <- top_P[which(top_P$adj.P.Val < Pvalue), ]
     
     # Determine hyper and hypomethylation
     # length(which((top_P_Coef22$logFC > 0) == TRUE))
@@ -343,7 +388,8 @@ DifferentialMethylation <- function(ClinicalFile,
     if (all(is.na(AnnotationFile) != TRUE)) {
       testing_up <- match(rownames(top_P_Coef11[which((top_P_Coef11$logFC > 0) == TRUE), ]), 
                           AnnotationFile$V1)
-      (table(AnnotationFile$Relation_to_Island[testing_up]) / sum(table(AnnotationFile$Relation_to_Island[testing_up]))) * 100
+      (table(AnnotationFile$Relation_to_Island[testing_up]) / 
+          sum(table(AnnotationFile$Relation_to_Island[testing_up]))) * 100
       geneRegion <- sub("\\;.*", "", AnnotationFile$UCSC_RefGene_Group)
       geneRegion[which(geneRegion == "")] <- "NA"
       table(geneRegion[testing_up])
@@ -376,8 +422,10 @@ DifferentialMethylation <- function(ClinicalFile,
       
       
       
-      testing_down <- match(rownames(top_P_Coef11[which((top_P_Coef11$logFC < 0) == TRUE), ]), AnnotationFile$V1)
-      (table(AnnotationFile$Relation_to_Island[testing_down]) / sum(table(AnnotationFile$Relation_to_Island[testing_down]))) * 100
+      testing_down <- match(rownames(top_P_Coef11[which((top_P_Coef11$logFC < 0) == TRUE), ]), 
+                            AnnotationFile$V1)
+      (table(AnnotationFile$Relation_to_Island[testing_down]) / 
+          sum(table(AnnotationFile$Relation_to_Island[testing_down]))) * 100
       #table(AnnotationFile$chr[testing_down])
       #table(AnnotationFile$Phantom4_Enhancers[testing_down])
       #table(AnnotationFile$Phantom5_Enhancers[testing_down])
@@ -402,12 +450,16 @@ DifferentialMethylation <- function(ClinicalFile,
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       
       
-      # }
+      }
       
       
       # rank by p value
-      top_P <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix), sort.by = "p")
-      # length(which(top_P$adj.P.Val < 0.01)) # of significant probes
+      topPoriginal <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix), sort.by = "p")
+      top_P <- topPoriginal[which(topPoriginal$adj.P.Val < Pvalue), ]
+      top_P <- top_P[which(abs(top_P$logFC) > logFCcutoff), ]
+      
+      
+      # length(which(top_P$adj.P.Val < Pvalue)) # of significant probes
       
       # find needed genes in top_P
       # position_20genes <- match(rownames(beta.sel), rownames(top_P))
@@ -416,24 +468,25 @@ DifferentialMethylation <- function(ClinicalFile,
       
       
       # Volcano plot; Note 1.3 is -log10(0.05)
-      volcanoplot <- ggplot2::ggplot(top_P, aes(logFC, - log10(adj.P.Val) )) +
+      volcanoplot <- ggplot2::ggplot(topPoriginal, aes(logFC, - log10(adj.P.Val) )) +
                                      geom_point(color = "#e0e0e0") +
                                      ggtitle(paste0("Plot of ", colnames(Summary_Results))) +
-                                     geom_text_repel(data = top_P[position_20genes, ], 
+                                     geom_text_repel(data = topPoriginal[position_20genes, ], 
                                                     aes(x = logFC, 
                                                         y = -log10(adj.P.Val), 
-                                                        label = rownames(top_P)[position_20genes]),
+                                                        label = rownames(topPoriginal)[position_20genes]),
                                                         fontface = 3 ) + 
-                                     geom_point(data = top_P[position_20genes[1:5], ], 
+                                     geom_point(data = topPoriginal[position_20genes[1:5], ], 
                                                 aes(x = logFC, 
                                                     y = -log10(adj.P.Val)), 
                                                 colour = "#b2182b", 
                                                 size = 2) + 
-                                     geom_point(data = top_P[position_20genes[6:10], ], 
+                                     geom_point(data = topPoriginal[position_20genes[6:10], ], 
                                                 aes(x = logFC, y = -log10(adj.P.Val)),
                                                 colour = "#4d4d4d", size = 2) + 
                                      labs(color = "GeneClass", y = "-log10(adj.P.Value)")+
                                      geom_hline(yintercept =  1.3, linetype = "dotted") +  
+                                     geom_vline(xintercept = c(-2, 2), linetype = "dotted") +
                                      theme_bw() + 
                                      theme(panel.grid.major = element_blank(), 
                                            panel.grid.minor = element_blank()) + 
@@ -472,25 +525,30 @@ DifferentialMethylation <- function(ClinicalFile,
                                          coef = 1, 
                                          number = nrow(MvalueMatrix), 
                                          sort.by = "logFC")
-      top_logFC_Coef11 <- top_logFC_Coef1[which(top_logFC_Coef1[ , 5] < 0.01), ]
+      top_logFC_Coef11 <- top_logFC_Coef1[which(top_logFC_Coef1$adj.P.Val < Pvalue), ]
+      top_logFC_Coef11 <- top_logFC_Coef1[which(abs(top_logFC_Coef11$logFC) > logFCcutoff), ]
+      
       top_logFC_Coef2 <- limma::topTable(fit.reduced, 
                                          adjust.method = "BH", 
                                          coef = 2, 
                                          number = nrow(MvalueMatrix), 
                                          sort.by = "logFC")
-      top_logFC_Coef22 <- top_logFC_Coef2[which(top_logFC_Coef2[ , 5] < 0.01), ]
+      top_logFC_Coef22 <- top_logFC_Coef2[which(top_logFC_Coef2$adj.P.Val < Pvalue), ]
+      top_logFC_Coef22 <- top_logFC_Coef22[which(abs(top_logFC_Coef22$logFC) > logFCcutoff), ]
+      
       top_logFC_Coef3 <- limma::topTable(fit.reduced, 
                                          adjust.method = "BH", 
                                          coef = 3, 
                                          number = nrow(MvalueMatrix), 
                                          sort.by = "logFC")
-      top_logFC_Coef33 <- top_logFC_Coef3[which(top_logFC_Coef3[ , 5] < 0.01), ]
+      top_logFC_Coef33 <- top_logFC_Coef3[which(top_logFC_Coef3$adj.P.Val < Pvalue), ]
+      top_logFC_Coef33 <- top_logFC_Coef33[which(abs(top_logFC_Coef33$logFC) > logFCcutoff), ]
       
       top_logFC <- list(FirstComparison = top_logFC_Coef11,
                         SecondComparison = top_logFC_Coef22,
                         ThirdComparison = top_logFC_Coef33)
       
-      # Among the 3 contrasts, find common probes (those that have been selected based on adj.P.Val < 0.01)
+      # Among the 3 contrasts, find common probes (those that have been selected based on adj.P.Val < Pvalue)
       ProbesAmongAll_logFC <- Reduce(intersect, 
                                      list(rownames(top_logFC_Coef11),
                                           rownames(top_logFC_Coef22),
@@ -535,7 +593,8 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_1stComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                                 "_1stComparison_FC.", PNGorPDF))
           
           
           volcanoplot <- ggplot2::ggplot(top_logFC_Coef2, aes(logFC, - log10(adj.P.Val) )) +
@@ -559,7 +618,8 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_2ndComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                                 "_2ndComparison_FC.", PNGorPDF))
           
           
           volcanoplot <- ggplot2::ggplot(top_logFC_Coef3, aes(logFC, -log10(adj.P.Val) )) +
@@ -582,11 +642,13 @@ DifferentialMethylation <- function(ClinicalFile,
                                          theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                          scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                          theme(aspect.ratio = 1, text = element_text(size = 15))
-          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, "_3rdComparison_FC.", PNGorPDF))
+          ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                                 "_3rdComparison_FC.", PNGorPDF))
         }
       }
     } else if (length(levels(stage_status)) == 2) {
-      top_logFC <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix), sort.by = "logFC")
+      top_logFC <- limma::topTable(fit.reduced, coef = 1, number = nrow(MvalueMatrix),
+                                   adjust.method = "BH", sort.by = "logFC")
       
       if (ProduceImages == "Yes") {
         volcanoplot <- ggplot2::ggplot(top_logFC, aes(logFC, -log10(adj.P.Val) )) +
@@ -604,12 +666,14 @@ DifferentialMethylation <- function(ClinicalFile,
                                                   aes(x=logFC, y=-log10(adj.P.Val)),
                                                   colour = "#4d4d4d", size = 2) + 
                                        labs(color = "GeneClass", y = "-log10(adj.P.Value)") +
+                                       geom_vline(xintercept = c(-2, 2), linetype = "dotted") +
                                        geom_hline(yintercept = 1.3, linetype = "dotted") +  
                                        theme_bw() + 
                                        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
                                        scale_color_manual(values = c("#e0e0e0", "#b2182b", "#4d4d4d")) + 
                                        theme(aspect.ratio = 1, text = element_text(size=15))
-        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, ProbeOrGene, "_toplogFC.", PNGorPDF))
+        ggplot2::ggsave(paste0(pathNow, "/img/7_VolcanoPlot_", ContrastColumnName, 
+                               ProbeOrGene, "_toplogFC.", PNGorPDF))
         
         # ggplot2::ggplot(top_logFC, aes(logFC, -log10(adj.P.Val) )) +
         #   geom_point(color="#e0e0e0") +
@@ -623,7 +687,7 @@ DifferentialMethylation <- function(ClinicalFile,
         
       }
     }
-  }
+  
     
     
   
@@ -638,7 +702,7 @@ DifferentialMethylation <- function(ClinicalFile,
   
   
   
-  
+  dontRun <- function() {
     if(ProbeOrGene == "Probe" && length(levels(stage_status)) == 2) { 
       # gene ontology analysis based on topP
       sigCpGs <- rownames(top_P) # names of top 50 CpG sites
@@ -662,6 +726,7 @@ DifferentialMethylation <- function(ClinicalFile,
       topPGOList <- "Code needs to be adjusted for multiple comparisons"
       topGO_list_FC <- "Code needs to be adjusted for multiple comparisons"
     }
+  }
     
     # Plotting
     if (ProduceImages == "Yes" && length(levels(stage_status)) == 2) {
@@ -872,7 +937,7 @@ DifferentialMethylation <- function(ClinicalFile,
       # samp_1 <- colnames(myExpr)[1:10]
       # samp_2 <- colnames(myExpr)[11:20]
       # mydf <- calDEG(myExpr, Sample_1 = samp_1, Sample_2 = samp_2, SaveOut = F, "")
-      # xx <- calGSEA(myExpr, mydf, DEGthr = c(0, 0.01), Sample_1 = samp_1, Sample_2 = samp_2, OutFile = "", GeneSet = "C2")    
+      # xx <- calGSEA(myExpr, mydf, DEGthr = c(0, Pvalue), Sample_1 = samp_1, Sample_2 = samp_2, OutFile = "", GeneSet = "C2")    
       
       
       BiocManager::install("methylGSA")
@@ -907,14 +972,15 @@ DifferentialMethylation <- function(ClinicalFile,
                     SignificantProbes = Significant_Probes,
                     MArrayLM = fit.reduced,
                     topP = top_P,
-                    topPGOTesting = gst_epic,
-                    topPGOList = topPGOList,
+                    # topPGOTesting = gst_epic,
+                    # topPGOList = topPGOList,
                     topLogFC = top_logFC,
-                    topLogFCTesting = gst_epic_FC,
-                    topLogFCGOList = topGO_list_FC,
+                    # topLogFCTesting = gst_epic_FC,
+                    # topLogFCGOList = topGO_list_FC,
                     MultipleComparisonCommonProbes = MultipleComparisonCommonProbes)
     
     class(RESULTS) <- "DifferentialMethylation_ASilva"
     return(RESULTS)
     
-  }
+}
+# [END]
