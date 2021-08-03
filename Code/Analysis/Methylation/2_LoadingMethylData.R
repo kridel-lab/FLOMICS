@@ -1,3 +1,5 @@
+# Updated 3 Aug 2021
+# Updated 18 Nov 2020
 # Updated 5 Feb 2020
 # Updated 8 Nov 2019
 # Updated 7 Feb 2019
@@ -41,11 +43,12 @@
 #               for samples from minfi::minfiQC.
 
 
-LoadingMethylData <- function(Sheet, 
+LoadingMethylData2 <- function(Sheet, 
                               ClinicalFile, 
                               AnnotationFile,
                               FigureGenerate = "No", 
                               TableGenerate = "No", 
+                              FilterProbes = "Yes",
                               PNGorPDF = "png") {
   
   
@@ -112,20 +115,24 @@ LoadingMethylData <- function(Sheet,
   estSex <- minfi::getSex(GMSet)
   GMSetNew <- minfi::addSex(GMSet, sex = estSex)
   # densityPlot(mSet, sampGroups = ClinicalFile$TYPE)
+  # densityPlot(mSet, sampGroups = ClinicalFile$STAGE)
   
   # Plotting QC plots
   if (FigureGenerate == "Yes") {
     if (PNGorPDF == "pdf") {
-      pdf(paste0(pathNow, "/img/1_QCplots.pdf"), width = 60, height = 60, pointsize = 50)
+      pdf(paste0(pathNow, "/img/1_QCplots.pdf"), 
+          width = 60, 
+          height = 60, 
+          pointsize = 50)
     } else {
       png(paste0(pathNow,"/img/1_QCplots.png"))
     }
     par(mfrow = c(1,2))
     # which uses the log median intensity in both the methylated (M) and unmethylated (U) 
     # channels
-    plotQC(QCanalysis$qc, badSampleCutoff = 10.5)
+    minfi::plotQC(QCanalysis$qc, badSampleCutoff = 10.5)
     
-    performing_internal_analysis <- function() {
+    performingInternalAnalysis <- function() {
       # Performing internal QC analysis
       
       # First with 170 samples (then with 177 samples)
@@ -176,9 +183,9 @@ LoadingMethylData <- function(Sheet,
       SamplesDifferSex_mSet <- match(ClinicalFile$SAMPLE_ID[SamplesDifferSex], colnames(mSet))
       
       par(mfrow = c(2,2))
-      densityPlot(mSet[, BadSamples], main = "Raw, 15 bad samples")
-      densityPlot(mSet[, SamplesDifferSex_mSet], main = "Raw, 7 samples with sex difference")
-      densityPlot(mSet, main = "Raw, all samples")
+      minfi::densityPlot(mSet[, BadSamples], main = "Raw, 17 bad samples")
+      minfi::densityPlot(mSet[, SamplesDifferSex_mSet], main = "Raw, 7 samples with sex difference")
+      minfi::densityPlot(mSet, main = "Raw, all samples")
     }
     # 
     GMSetNew <- minfi::addSex(GMSet, sex = estSex)
@@ -248,13 +255,13 @@ LoadingMethylData <- function(Sheet,
     } else {
       png(paste0(pathNow,"/img/1_DensityPlots_RawVsSWAN_LY_DLC_001.png"))
     }
-    par(mfrow = c(1,2))
+    par(mfrow = c(1, 2))
     # Sample LY_DLC_001
     densityByProbeType(mSet[, 1], main = "Raw, Sample LY_DLC_001")
     densityByProbeType(mSetSw[, 1], main = "missMethyl SWAN")
     #densityByProbeType(mSet[, 1], main = "Raw, Sample LY_DLC_001")
     #densityByProbeType(datSwan[, 1], main = "minfi SWAN")
-    dev.off()
+    grDevices::dev.off()
     
     if (PNGorPDF == "pdf") {
       pdf(paste0(pathNow, "/img/1_DensityPlots_RawVsSWAN_LY_FL_008_T1.pdf"), 
@@ -264,8 +271,8 @@ LoadingMethylData <- function(Sheet,
     }
     par(mfrow = c(1,2))
     # Sample LY_FL_008_T1
-    densityByProbeType(mSet[, 13], main = "Raw, Sample LY_FL_008_T1")
-    densityByProbeType(mSetSw[, 13], main = "missMethyl SWAN")
+    missMethyl::densityByProbeType(mSet[, 13], main = "Raw, Sample LY_FL_008_T1")
+    missMethyl::densityByProbeType(mSetSw[, 13], main = "missMethyl SWAN")
     #densityByProbeType(mSet[, 13], main = "Raw, Sample LY_FL_008_T1")
     #densityByProbeType(datSwan[, 13], main = "minfi SWAN")
     dev.off()
@@ -278,135 +285,190 @@ LoadingMethylData <- function(Sheet,
     }
     par(mfrow = c(1,2))
     # Sample LY_RLN_001
-    densityByProbeType(mSet[, 166], main = "Raw, Sample LY_RLN_001")
-    densityByProbeType(mSetSw[, 166], main = "missMethyl SWAN")
+    missMethyl::densityByProbeType(mSet[, 166], main = "Raw, Sample LY_RLN_001")
+    missMethyl::densityByProbeType(mSetSw[, 166], main = "missMethyl SWAN")
     #densityByProbeType(mSet[, 166], main = "Raw, Sample LY_RLN_001")
     #densityByProbeType(datSwan[, 166], main = "minfi SWAN")
-    dev.off()
+    grDevices::dev.off()
   }
   
   
-  ########################################## #
-  # Filter out poor quality probes 
-  ########################################## #
-  
-  # Poor quality probes can be filtered out based on the detection p-value less than 0.01
+  # Poor quality probes can be detected based on the detection p-value less than 0.01
   detP <- minfi::detectionP(RGset)
-  keep <- base::rowSums(detP < 0.01) == ncol(RGset)
-  mSetSw_new <- mSetSw[keep, ]
-  # dim(mSetSw_new) # 628221    177
   
-  ########################################## #
-  # Filtering probes affected by SNPs
-  ########################################## #
-  
-  # https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#methylset-and-ratioset
-  # Probe, CpG and SBE correspond the SNPs present inside the probe body, at
-  # the CpG interrogation and at the single nucleotide extension respectively.
-  # The columns with rs give the names of the SNPs while the columns with maf 
-  # gives the minor allele frequency of the SNPs based on the dbSnp database. 
-  
-  # GRset_SNP <- addSnpInfo(RGset)
-  # Error in .isGenomicOrStop(object) : 
-  # object is of class 'RGChannelSet', but needs to be of class 'GenomicMethylSet' or 
-  # 'GenomicRatioSet'
-  # GRset_SNP <- dropLociWithSnps(GRset_SNP, snps=c("SBE","CpG"), maf=0)
-  
-  # We strongly recommend to drop the probes that contain either a SNP at the CpG 
-  # interrogation (CpG_rs) or at the single nucleotide extension (SBE_rs),for any minor 
-  # allele frequency
-  probes.SNPs <- minfi::getSnpInfo(mSetSw_new) 
-  CpG_rs <- which(! is.na(probes.SNPs$CpG_rs) == "TRUE")
-  length(CpG_rs) # 19,671
-  SBE_rs <- which(! is.na(probes.SNPs$SBE_rs) == "TRUE")
-  length(SBE_rs) # 10,554
-  # Probe_rs <- which(! is.na(probes.SNPs$Probe_rs) == "TRUE")
-  #length(Probe_rs) # 109,785
-  # Testing <- dropLociWithSnps(GMSet, snps=c("SBE","CpG"), maf=0) # 30,435 probes
-  
-  # Find common SNPs between CpG_rs, SBE_rs
-  # CommonSNPs <- Reduce(intersect, list(CpG_rs, SBE_rs))
-  AllSNPs <- union(CpG_rs, SBE_rs) # 20,073
-  # length(CommonSNPs) # 10152
-  mSetSw_new <- mSetSw_new[- AllSNPs, ]
-  # dim(mSetSw_new) # 618069    170
-  
-  # method shown in minfi tutorial 
-  # https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#qc-plot
-  # TestSNPs <- minfi::getSnpInfo(GMSet) 
-  # Only provides SNPs present inside the probe body, nothing for 
-  # SNPs at the CpG interrogation and at the single nucleotide extension
-  # GRset <-  minfi::addSnpInfo(GMSet)
-  # GRset <-  minfi::dropLociWithSnps(GRset, snps=c("SBE","CpG"), maf=0)
-  
-  
-  
-  ########################################## #
-  # Filtering probes corresponding sex chromosomes (X and Y)
-  ########################################## #
-  
-  # Obtaining same probes as that remain in BetaMatrix after removal of probes based on other criteria
-  obtain_probes_annotationFile_order <- match(rownames(mSetSw_new), AnnotationFile$V1)
-  # AnnotationFile$V1[obtain_probes_annotationFile_order] # checked order is correct
-  # See which of these probes are from sex chromosomes
-  remove_sex_csome_X <- which(AnnotationFile$chr[obtain_probes_annotationFile_order] == "chrX")
-  # length(remove_sex_csome_X) # 12541
-  remove_sex_csome_Y <- which(AnnotationFile$chr[obtain_probes_annotationFile_order] == "chrY")
-  # length(remove_sex_csome_Y) #  117
-  mSetSw_new <- mSetSw_new[- c(remove_sex_csome_X, remove_sex_csome_Y), ]
-  # dim(mSetSw_new) # 605411    170
-  
-  
-  ########################################## #
-  # Extracting Beta and M-values
-  ########################################## #
-  meth <- minfi::getMeth(mSetSw_new)
-  unmeth <- minfi::getUnmeth(mSetSw_new)
-  Mval <- base::log2((meth + 100) / (unmeth + 100))
-  # dim(Mval) # 605411    170
-  
-  # M-values; M = logit(Beta) = log( Meth / Unmeth )
-  # Mval <- minfi::getM(mSetSw_new)
-  
-  # Beta values; Beta = Meth / (Meth + Unmeth + offset)
-  beta <- minfi::getBeta(mSetSw_new)
-  # densityPlot(mSetSw_new, sampGroups = ClinicalFile$TYPE)
-  # dim(beta)  # 605411    170
-  
-  ########################################## #
-  # Extracting copy number values
-  ########################################## #
-  # get copy number values which are defined as the sum of the methylation and 
-  # unmethylation channel.
-  # copynumber <- minfi::getCN(mSetSw_new)
-  # dim(copynumber) #  605411    170
-  
-  
-  ########################################## #
-  # Remove probes that show value of 0 across all samples
-  ########################################## #
-  ZeroRows_beta <- which(rowSums(beta) == 0) # no probes were present with rowSums 0
-  if(length(ZeroRows_beta) >0 ) {
-    # Remove these probes from Beta matrix
-    beta <- beta[- ZeroRows_beta, ]
+  # Carry out filtering of probes 
+  if (FilterProbes == "Yes") {
+    
+      ########################################## #
+      # Filter out poor quality probes 
+      ########################################## #
+      
+      # Poor quality probes can be filtered out based on the detection p-value less than 0.01
+      keep <- base::rowSums(detP < 0.01) == ncol(RGset)
+      mSetSwNew <- mSetSw[keep, ]
+      # dim(mSetSwNew) # 628221    177
+      
+      ########################################## #
+      # Filtering probes affected by SNPs
+      ########################################## #
+      
+      # https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#methylset-and-ratioset
+      # Probe, CpG and SBE correspond the SNPs present inside the probe body, at
+      # the CpG interrogation and at the single nucleotide extension respectively.
+      # The columns with rs give the names of the SNPs while the columns with maf 
+      # gives the minor allele frequency of the SNPs based on the dbSnp database. 
+      
+      # GRset_SNP <- addSnpInfo(RGset)
+      # Error in .isGenomicOrStop(object) : 
+      # object is of class 'RGChannelSet', but needs to be of class 'GenomicMethylSet' or 
+      # 'GenomicRatioSet'
+      # GRset_SNP <- dropLociWithSnps(GRset_SNP, snps=c("SBE","CpG"), maf=0)
+      
+      # We strongly recommend to drop the probes that contain either a SNP at the CpG 
+      # interrogation (CpG_rs) or at the single nucleotide extension (SBE_rs),for any minor 
+      # allele frequency
+      probes.SNPs <- minfi::getSnpInfo(mSetSwNew) 
+      CpG_rs <- which(! is.na(probes.SNPs$CpG_rs) == "TRUE")
+      length(CpG_rs) # 19,671
+      SBE_rs <- which(! is.na(probes.SNPs$SBE_rs) == "TRUE")
+      length(SBE_rs) # 10,554
+      # Probe_rs <- which(! is.na(probes.SNPs$Probe_rs) == "TRUE")
+      #length(Probe_rs) # 109,785
+      # Testing <- dropLociWithSnps(GMSet, snps=c("SBE","CpG"), maf=0) # 30,435 probes
+      
+      # Find common SNPs between CpG_rs, SBE_rs
+      # CommonSNPs <- Reduce(intersect, list(CpG_rs, SBE_rs))
+      AllSNPs <- union(CpG_rs, SBE_rs) # 20,073
+      # length(CommonSNPs) # 10152
+      mSetSwNew <- mSetSwNew[- AllSNPs, ]
+      # dim(mSetSwNew) # 618069    170
+      
+      # method shown in minfi tutorial 
+      # https://www.bioconductor.org/help/course-materials/2015/BioC2015/methylation450k.html#qc-plot
+      # TestSNPs <- minfi::getSnpInfo(GMSet) 
+      # Only provides SNPs present inside the probe body, nothing for 
+      # SNPs at the CpG interrogation and at the single nucleotide extension
+      # GRset <-  minfi::addSnpInfo(GMSet)
+      # GRset <-  minfi::dropLociWithSnps(GRset, snps=c("SBE","CpG"), maf=0)
+      
+      
+      
+      ########################################## #
+      # Filtering probes corresponding sex chromosomes (X and Y)
+      ########################################## #
+      
+      # Obtaining same probes as that remain in BetaMatrix after removal of probes based on other criteria
+      obtainProbesAnnotationFileOrder <- match(rownames(mSetSwNew), AnnotationFile$V1)
+      # AnnotationFile$V1[obtainProbesAnnotationFileOrder] # checked order is correct
+      # See which of these probes are from sex chromosomes
+      removeSexCsomeX <- which(AnnotationFile$chr[obtainProbesAnnotationFileOrder] == "chrX")
+      # length(removeSexCsomeX) # 12541
+      removeSexCsomeY <- which(AnnotationFile$chr[obtainProbesAnnotationFileOrder] == "chrY")
+      # length(removeSexCsomeY) #  117
+      mSetSwNew <- mSetSwNew[- c(removeSexCsomeX, removeSexCsomeY), ]
+      # dim(mSetSwNew) # 605411    170
+      
+      
+      ########################################## #
+      # Extracting Beta and M-values
+      ########################################## #
+      meth <- minfi::getMeth(mSetSwNew)
+      unmeth <- minfi::getUnmeth(mSetSwNew)
+      Mval <- base::log2((meth + 100) / (unmeth + 100))
+      # dim(Mval) # 605411    170
+      
+      # M-values; M = logit(Beta) = log( Meth / Unmeth )
+      # Mval <- minfi::getM(mSetSwNew)
+      
+      # Beta values; Beta = Meth / (Meth + Unmeth + offset)
+      beta <- minfi::getBeta(mSetSwNew)
+      # densityPlot(mSetSwNew, sampGroups = ClinicalFile$TYPE)
+      # dim(beta)  # 605411    170
+      
+      ########################################## #
+      # Extracting copy number values
+      ########################################## #
+      # get copy number values which are defined as the sum of the methylation and 
+      # unmethylation channel.
+      # copynumber <- minfi::getCN(mSetSwNew)
+      # dim(copynumber) #  605411    170
+      
+      
+      ########################################## #
+      # Remove probes that show value of 0 across all samples
+      ########################################## #
+      ZeroRowsBeta <- which(rowSums(beta) == 0) # no probes were present with rowSums 0
+      if(length(ZeroRowsBeta) > 0 ) {
+        # Remove these probes from Beta matrix
+        beta <- beta[- ZeroRowsBeta, ]
+      }
+      # dim(beta) # 605411    170
+      
+      # cat("\n Writing Results")
+      RESULTS <- list(PhenoData = pd,
+                      ArrayAnnotation = AnnotationPackage[2],
+                      RGChannelSet = RGset,
+                      GenomicMethylSet = GMSetNew, 
+                      TotalProbes = nrow(detP),
+                      FilteredProbes = nrow(detP) - nrow(mSetSwNew),
+                      MethylSetRaw = mSet,
+                      MethylSetWithNorm = mSetSwNew,
+                      BetaMatrix = beta,
+                      MvalueMatrix = Mval,
+                      PredictedSex = QCanalysis$qc$predictedSex)
+  } else {
+    
+    ########################################## #
+    # Extracting Beta and M-values
+    ########################################## #
+    meth <- minfi::getMeth(mSetSw)
+    unmeth <- minfi::getUnmeth(mSetSw)
+    Mval <- base::log2((meth + 100) / (unmeth + 100))
+    # dim(Mval) # 605411    170
+    
+    # M-values; M = logit(Beta) = log( Meth / Unmeth )
+    # Mval <- minfi::getM(mSetSwNew)
+    
+    # Beta values; Beta = Meth / (Meth + Unmeth + offset)
+    beta <- minfi::getBeta(mSetSw)
+    # densityPlot(mSetSwNew, sampGroups = ClinicalFile$TYPE)
+    # dim(beta)  # 605411    170
+    
+    ########################################## #
+    # Extracting copy number values
+    ########################################## #
+    # get copy number values which are defined as the sum of the methylation and 
+    # unmethylation channel.
+    # copynumber <- minfi::getCN(mSetSwNew)
+    # dim(copynumber) #  605411    170
+    
+    
+    ########################################## #
+    # Remove probes that show value of 0 across all samples
+    ########################################## #
+    ZeroRowsBeta <- which(rowSums(beta) == 0) # no probes were present with rowSums 0
+    if(length(ZeroRowsBeta) >0 ) {
+      # Remove these probes from Beta matrix
+      beta <- beta[- ZeroRowsBeta, ]
+    }
+    # dim(beta) # 605411    170
+    
+    
+    # cat("\n Writing Results")
+    RESULTS <- list(PhenoData = pd,
+                    ArrayAnnotation = AnnotationPackage[2],
+                    RGChannelSet = RGset,
+                    GenomicMethylSet = GMSetNew, 
+                    MethylSetRaw = mSet,
+                    BetaMatrix = beta,
+                    MvalueMatrix = Mval,
+                    PredictedSex = QCanalysis$qc$predictedSex,
+                    detectionP = detP)
   }
-  # dim(beta) # 605411    170
   
-  # cat("\n Writing Results")
-  RESULTS <- list(PhenoData = pd,
-                  ArrayAnnotation = AnnotationPackage[2],
-                  RGChannelSet = RGset,
-                  GenomicMethylSet = GMSetNew, 
-                  TotalProbes = nrow(detP),
-                  FilteredProbes = nrow(detP) - nrow(mSetSw_new),
-                  MethylSetRaw = mSet,
-                  MethylSetWithNorm = mSetSw_new,
-                  BetaMatrix = beta,
-                  MvalueMatrix = Mval,
-                  PredictedSex = QCanalysis$qc$predictedSex)
+  
   
   class(RESULTS) <- "LoadingMethylData_ASilva"
   return(RESULTS)
 }
-
-
+# [END]
