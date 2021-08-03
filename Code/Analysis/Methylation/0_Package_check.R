@@ -4,51 +4,63 @@
 
 
 RegularPckgs <- c("ade4",
-                 "BiocManager",
-                 #"BootValidation",
-                 "BiocGenerics",
-                 "caret",
-                 "cluster",
-                 "corrplot",
-                 "csSAM",
-                 "data.table",
-                 "devtools",
-                 "dplyr",
-                 "enrichR",
-                 "factoextra",
-                 "ggpubr",
-                 "gprofiler2",
-                 "gplots",
-                 "ggplot2",
-                 "ggrepel",
-                 "magrittr",
-                 "mclust",
-                 "minfi",
-                 "MASS",
-                 "pastecs",
-                 "pheatmap",
-                 "plotly",
-                 "plotmo",
-                 "pROC",
-                 "Rtsne",
-                 "readr",
-                 "reshape2",
-                 "rlang",
-                 "RPMM",
-                 "RColorBrewer",
-                 "SNFtool",
-                 "stringi",
-                 "stats",
-                 "survival",
-                 "survminer",
-                 "tidyverse",
-                 "data.table",
-                 "tidyr")
+                  "BioCircos",
+                  "BiocManager",
+                  #"BootValidation",
+                  "BiocGenerics",
+                  "BisqueRNA",
+                  "caret",
+                  "cluster",
+                  "corrplot",
+                  "csSAM",
+                  "cowplot",
+                  "data.table",
+                  "devtools",
+                  "dplyr",
+                  "enrichR",
+                  "EnvStats",
+                  "fpc",
+                  "factoextra",
+                  "ggpubr",
+                  "gprofiler2",
+                  "gplots",
+                  "ggplot2",
+                  "ggrepel",
+                  "InfiniumPurify",
+                  "magrittr",
+                  "mclust",
+                  "minfi",
+                  "MASS",
+                  "pastecs",
+                  "pheatmap",
+                  "plotly",
+                  "plotmo",
+                  "pROC",
+                  "Rtsne",
+                  "readr",
+                  "reshape2",
+                   "rlang",
+                   "rjags",
+                   "RPMM",
+                   "RColorBrewer",
+                   "SNFtool",
+                   "scales",
+                   "Seurat",
+                   "stringi",
+                   "stats",
+                   "survival",
+                   "survminer",
+                   "tidyverse",
+                   "tibble",
+                   "data.table",
+                   "tidyr")
 
 BioManagerPckgs <- c("AnnotationDbi", 
+                     "Biobase",
                      "bumphunter",
                      "DMRcate",
                      "EnhancedVolcano",
+                     "FlowSorted.Blood.EPIC",
                      "eulerr",
                      "edgeR",
                      "Gviz",
@@ -63,10 +75,11 @@ BioManagerPckgs <- c("AnnotationDbi",
                      "TOAST")
                      #"WGCNA")
 
-GitHubPckgs <- c("brentp/celltypes450")
+GitHubPckgs <- c("brentp/celltypes450",
+                 "rasmusab/bayesian_first_aid")
 
 # A function that loads the packages if not found - not used 
-LoadCheckPkg <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
+LoadCheckPkg <- function(RegularPckgs = NA, BioManagerPckgs = NA, GitHubPckgs = NA) {
   
   # Code developed by A.Silva based on code provided by Dr. Marcelo Ponce, April 2019
   if (! is.na(RegularPckgs)[1]) {
@@ -139,7 +152,7 @@ LoadCheckPkg <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
   # Developed by Anjali Silva and Marcelo Ponce
 }
 
-CheckPackageOnly <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
+CheckPackageOnly0 <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
   fail = FALSE
   # Code developed by A.Silva based on code provided by Dr. Marcelo Ponce, April 2019
   if (! is.na((RegularPckgs)[1])) {
@@ -193,7 +206,7 @@ CheckPackageOnly <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
           library(pckg1, character.only = TRUE, verbose = FALSE)
         } else {
           cat("**************** Package: ", pckg1, "is not found. Install using", 
-              paste("install_github('", pckg, "') ****************\n", sep = "")) 
+              paste("devtools::install_github('", pckg, "') ****************\n", sep = "")) 
           fail = TRUE
         }
       }
@@ -204,5 +217,8 @@ CheckPackageOnly <- function(RegularPckgs = NA, BioManagerPckgs = NA) {
   # Developed by Anjali Silva and Marcelo Ponce
 }
 
-CheckPackageOnly(RegularPckgs = RegularPckgs, 
+# Run the function CheckPackageOnly0- for auto check
+CheckPackageOnly0(RegularPckgs = RegularPckgs, 
                  BioManagerPckgs = BioManagerPckgs)
+
+# [END]
