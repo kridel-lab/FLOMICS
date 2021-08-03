@@ -14,8 +14,8 @@
 # Output: 
 # ClinicalFile_updSamples_Ordered_T1: Clinical file updated by removing samples, keeping only T1 samples passing QC.
 # ClinicalFile_updSamples_Ordered_T2: Clinical file updated by removing samples, keeping both T1 and T2 samples passing QC.
-# Sheet_updSamples_Ordered_T1: metharray sheet updated by removing samples, keeping only T1 samples passing QC.
-# Sheet_updSamples_Ordered_T2: metharray sheet updated by removing samples, keeping both T1 and T2 samples passing QC.
+# SheetUpdSamplesOrderedT1: metharray sheet updated by removing samples, keeping only T1 samples passing QC.
+# SheetUpdSamplesOrderedT2: metharray sheet updated by removing samples, keeping both T1 and T2 samples passing QC.
 
 
 QCRemoveSamples <- function(ClinicalFile, 
@@ -32,17 +32,20 @@ QCRemoveSamples <- function(ClinicalFile,
   ########################################## #
   
   # Check if ClinicalFile has EPIC data
-  epic_data <- which(ClinicalFile[, which(colnames(ClinicalFile) == "EPIC_DATA")] == "TRUE") 
+  epicData <- which(ClinicalFile[, which(colnames(ClinicalFile) == "EPIC_DATA")] == "TRUE") 
   
   # Further analysis is only performed if EPIC data is present in Clinical File
-  if (length(epic_data) > 0) {
+  if (length(epicData) > 0) {
     
     # ClinicalFile with QC passed T1 timepoints only
-    ClinicalFile_RmdSamples_T1 <- ClinicalFile %>%
-      filter(EPIC_QC != "Bad" & EPIC_INCLUDE == "YES" & TIME_POINT == "T1")
+    ClinicalFileRmdSamplesT1 <- ClinicalFile %>%
+      filter(EPIC_DATA == "TRUE") %>%
+      filter(EPIC_QC != "Bad") %>%
+      filter(EPIC_INCLUDE == "YES") %>%  
+      filter(TIME_POINT == "T1")
     
     # ClinicalFile with QC passed T1 and T2 timepoints 
-    ClinicalFile_RmdSamples_T2 <- ClinicalFile %>%
+    ClinicalFileRmdSamplesT2 <- ClinicalFile %>%
       filter(EPIC_QC != "Bad" & EPIC_INCLUDE == "YES")
     
     # Check column for EPIC_QC data
@@ -56,17 +59,22 @@ QCRemoveSamples <- function(ClinicalFile,
     stop("\n No EPIC_DATA present in ClinicalFile provided. \n");
   }
   
-  # If samples to be removed present based on EPIC_QC, EPIC_INCLUDE from Clinical File
-  message("\nBased on 'EPIC_DATA = TRUE', EPIC_QC == BAD', 'EPIC_INCLUDE == NO', \n the following ", 
-          length(unique(c(quality, include))) ," sample(s) is (are) removed from Clinical File: 
+  if((length(quality) > 1) || (length(include) > 1)) {
+    # If samples to be removed present based on EPIC_QC, EPIC_INCLUDE from Clinical File
+    message("\nBased on 'EPIC_DATA = TRUE', EPIC_QC == BAD', 'EPIC_INCLUDE == NO', \n the following ", 
+            length(unique(c(quality, include))) ," sample(s) is (are) removed from Clinical File: 
           \n", as.character(ClinicalFile$SAMPLE_ID[unique(c(quality, include))]), ".\n")
+  }
 
+  
+ 
   
   ########################################## #
   # Defining the path to reading the an Illumina methylation sample sheet
   ########################################## #
   
   # sheet <- read.metharray.sheet(base =file.path(SampleSheet_Path, "extdata"))
+  
   sheet <- minfi::read.metharray.sheet(base = Path)
   # class(RGset) # "RGChannelSet"
   # RGChannelSet: raw data from the IDAT files; this data is organized at the probe 
@@ -78,33 +86,34 @@ QCRemoveSamples <- function(ClinicalFile,
     paste0(sheet$Sample_Name[which(substr(sheet$Sample_Name, 10, 12) == "")], "_T1")
   
   # Saving original sample sheet
-  sheet_original <- sheet
+  sheetOriginal <- sheet
   # Manually remove "LY_FL_159_T1" and keep only "LY_FL_159_T1_rep"
   sheet <- sheet[- which(sheet$Sample_Name == "LY_FL_159_T1"), ]
   sheet$Sample_Name[which(sheet$Sample_Name == "LY_FL_159_T1_rep")] <- "LY_FL_159_T1"
   
-  # Order sample sheet sample names by ClinicalFile_RmdSamples_T1
-  OrderSamples_T1 <- match(ClinicalFile_RmdSamples_T1$SAMPLE_ID, sheet$Sample_Name)
+  # Order sample sheet sample names by ClinicalFileRmdSamplesT1
+  OrderSamplesT1 <- match(ClinicalFileRmdSamplesT1$SAMPLE_ID, sheet$Sample_Name)
   
   # sheet$Sample_Name[OrderSamples[!is.na(OrderSamples)]]
-  Sheet_updSamples_Ordered_T1 <- sheet[OrderSamples_T1[! is.na(OrderSamples_T1)], ]
+  SheetUpdSamplesOrderedT1 <- sheet[OrderSamplesT1[! is.na(OrderSamplesT1)], ]
   
-  # Order sample sheet sample names by ClinicalFile_RmdSamples_T1
-  OrderSamples_T2 <- match(ClinicalFile_RmdSamples_T2$SAMPLE_ID, sheet$Sample_Name)
+  # Order sample sheet sample names by ClinicalFileRmdSamplesT1
+  OrderSamplesT2 <- match(ClinicalFileRmdSamplesT2$SAMPLE_ID, sheet$Sample_Name)
   # sheet$Sample_Name[OrderSamples[!is.na(OrderSamples)]]
-  Sheet_updSamples_Ordered_T2 <- sheet[OrderSamples_T2[! is.na(OrderSamples_T2)], ]
+  SheetUpdSamplesOrderedT2 <- sheet[OrderSamplesT2[! is.na(OrderSamplesT2)], ]
   
   # Generate a clinical file with all samples
   ClinicalFile_AllSamples <- ClinicalFile[match(sheet$Sample_Name, ClinicalFile$SAMPLE_ID), ]
 
-  RESULTS <- list(ClinicalFile_updSamples_170_Ordered_T1 = ClinicalFile_RmdSamples_T1,
-                  ClinicalFile_updSamples_170_Ordered_T2 = ClinicalFile_RmdSamples_T2,
-                  ClinicalFile_updSamples_176 = ClinicalFile_AllSamples,
-                  Sheet_updSamples_170_Ordered_T1 = Sheet_updSamples_Ordered_T1,
-                  Sheet_updSamples_170_Ordered_T2 = Sheet_updSamples_Ordered_T2,
-                  Sheet_AllSamples_177 = sheet_original)
+  RESULTS <- list(ClinicalFileUpdSamplesT1 = ClinicalFileRmdSamplesT1,
+                  ClinicalFileUpdSamplesT2 = ClinicalFileRmdSamplesT2,
+                  ClinicalFileUpdSamples = ClinicalFile_AllSamples,
+                  SheetUpdSamplesT1 = SheetUpdSamplesOrderedT1,
+                  SheetUpdSamplesT2 = SheetUpdSamplesOrderedT2,
+                  SheetAllSamples177 = sheetOriginal)
   
   class(RESULTS) <- "SamplesToRemove_ASilva"
   return(RESULTS)
 }
 
+# [END]
