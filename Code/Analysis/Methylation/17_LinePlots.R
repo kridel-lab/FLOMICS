@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 26 April 2019
 # Function: Generate Line Plot (still under construction) of provided values and mean (in yellow).
 # Author: Anjali Silva
@@ -61,25 +62,25 @@ LinePlot <- function(Dataset,
   
   for(cluster in unique(ClusterMembershipVector)) {
     # Save how many observations below to each cluster size, given by 'cluster'
-    toplot_1 <- t(as.matrix(DataPlusLabs[c(1:nrow(Dataset)),
+    toplot1 <- t(as.matrix(DataPlusLabs[c(1:nrow(Dataset)),
                                          which(DataPlusLabs[nrow(Dataset) + 1, ] == cluster)], 
                             ncol = ncol(Dataset)))
     # Save column mean in last row
-    toplot1 <- cbind(toplot_1, rowMeans(toplot_1 + 1))
+    toplot1 <- cbind(toplot1, rowMeans(toplot1 + 1))
     
 
     graphics::matplot(toplot1, type = "l", pch = 1,
-                      col = c(rep(coloursBarPlot[cluster], nrow(toplot_1)), 7),
+                      col = c(rep(coloursBarPlot[cluster], nrow(toplot1)), 7),
                       xlab = "Samples", ylab = "Value", cex = 1,
-                      lty = c(rep(2, nrow(toplot_1)), 1),
-                      lwd = c(rep(3, nrow(toplot_1)), 4),
+                      lty = c(rep(2, nrow(toplot1)), 1),
+                      lwd = c(rep(3, nrow(toplot1)), 4),
                       xaxt = "n", xlim = c(1, ncol(toplot1)),
                       main = paste("Cluster ", cluster))
-    axis(1, at = c(1:(nrow(toplot1)-1)), labels = rownames(toplot1)[- (nrow(toplot1))])
+    axis(1, at = c(1:(nrow(toplot1) - 1)), labels = rownames(toplot1)[- (nrow(toplot1))])
     grDevices::dev.off()
   }
   
   
   return(NULL)
-  # Developed by Anjali Silva
 }
+# [END]
