@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Date: 26 June 2020
 # Function: Using output from gprofiler2() function, create a plot with term names and p value. 
 #           If more than 50 terms are present, only the first 50 terms with smallest p value are plotted. 
@@ -22,14 +23,14 @@
 # Visuals saved to img folder
 # 26_gProfiler_", ConditionName.*
 
-GProfilerAnalysis <- function(GeneIDs,
-                              Organism = "hsapiens",
-                              OrderedQuery = FALSE,
-                              PvalAlphaLevel = 0.01,
-                              PositiveorNegFC = NA,
-                              ConditionName = "condition",
-                              ProduceImages = "Yes", 
-                              PNGorPDF = "png") {
+GProfilerAnalysis26 <- function(GeneIDs,
+                                Organism = "hsapiens",
+                                OrderedQuery = FALSE,
+                                PvalAlphaLevel = 0.01,
+                                PositiveorNegFC = NA,
+                                ConditionName = "condition",
+                                ProduceImages = "Yes", 
+                                PNGorPDF = "png") {
   
   library(gprofiler2)
   library(grDevices)
@@ -37,19 +38,33 @@ GProfilerAnalysis <- function(GeneIDs,
   
   set.seed(1234)
   Output <- gprofiler2::gost(query = GeneIDs, 
-                                         organism = Organism, 
-                                         ordered_query = OrderedQuery,
-                                         user_threshold = PvalAlphaLevel)
+                             organism = Organism, 
+                             ordered_query = OrderedQuery,
+                             user_threshold = PvalAlphaLevel)
+  
+  
+  
   if(is.null(Output) == FALSE) {
+    if(substr(Output$meta$query_metadata$organism, 1, 2) != "gp") { # if a regular run
     TablePlot <- Table <- Output %>%
                           .$result %>%
                           arrange(p_value) %>%
-                          mutate(log.p = -log10(p_value)) %>%
+                          mutate(log.p = round(-log10(p_value), 1) ) %>%
                           mutate(term.name = paste(term_id, term_name, sep = "\n")) %>%
                           mutate(term.name = fct_reorder(term.name, p_value, .desc = TRUE)) %>%
                           dplyr::select(term_name, term_size, 
                                         query_size, intersection_size, log.p) %>%
-                          mutate(condition = ConditionName)
+                          mutate(condition = ConditionName) 
+    } else if (substr(Output$meta$query_metadata$organism, 1, 2) == "gp") { # if a .gmt run
+      TablePlot <- Table <- Output %>%
+        .$result %>%
+        arrange(p_value) %>%
+        mutate(log.p = round(-log10(p_value), 1) ) %>%
+        mutate(term_id = fct_reorder(term_id, p_value, .desc = TRUE)) %>%
+        dplyr::select(term_id, term_size, 
+                      query_size, intersection_size, log.p) %>%
+        mutate(condition = ConditionName)
+    }
   
  
   
@@ -69,27 +84,58 @@ GProfilerAnalysis <- function(GeneIDs,
   } else if((is.na(PositiveorNegFC) == FALSE) && (PositiveorNegFC == "negative")) {
     colours = c("#023858", "#045a8d", "#0570b0", "#74a9cf", "white")
   } else {
-    colours = c("#e5f5f9", "#99d8c9", "#66c2a4", "#41ae76", "white")
+    colours = c("#41ae76", "#66c2a4", "#99d8c9", "#e5f5f9", "white")
   }
   
-  par(mfrow = c(1, 1))
-  TablePlot %>%
-    ggplot2::ggplot(aes(x = factor(condition), y = term_name, fill = log.p, colour = factor(condition))) + 
-          geom_tile(colour = "white") +
-          labs(x = "Category", y = "gProfiler Term Name", fill = "-log10(P value)") +
-          # geom_text(aes(label = intersection_size), size = 2) +
-          theme_classic() +
-          scale_fill_gradientn(values = c(1.0, 0.75, 0.5, 0.25, 0), 
-                               colours = colours, 
-                               na.value = "white") +  #facet_wrap(~ cell_line, scales = "free_x") + theme_classic() +
-          theme(axis.title.x = element_blank(), 
-                axis.text.x = element_text(size = 9, angle = 90, hjust = 1),
-                axis.title.y = element_blank(),
-                panel.grid.major = element_blank(), 
-                panel.grid.minor = element_blank(),
-                axis.text.y = element_text(size = 6),
-                panel.background = element_rect(colour = "black", size = 0.5), 
-                strip.text.x = element_text(size = 8), strip.background = element_blank())
+  if(substr(Output$meta$query_metadata$organism, 1, 2) != "gp") {
+    par(mfrow = c(1, 1))
+    TablePlot %>%
+      ggplot2::ggplot(aes(x = factor(condition), 
+                          y = reorder(term_name, log.p), 
+                          fill = log.p, 
+                          colour = factor(condition))) + 
+            geom_tile(colour = "white") +
+            labs(x = "Category", 
+                 y = "gProfiler Term Name", 
+                 fill = "-log10(P value)") +
+            # geom_text(aes(label = intersection_size), size = 2) +
+            theme_classic() +
+            scale_fill_gradientn(values = c(1.0, 0.75, 0.5, 0.25, 0), 
+                                 colours = colours, 
+                                 na.value = "white") +  #facet_wrap(~ cell_line, scales = "free_x") + theme_classic() +
+            theme(axis.title.x = element_blank(), 
+                  axis.text.x = element_text(size = 9, angle = 90, hjust = 1),
+                  axis.title.y = element_blank(),
+                  panel.grid.major = element_blank(), 
+                  panel.grid.minor = element_blank(),
+                  axis.text.y = element_text(size = 6),
+                  panel.background = element_rect(colour = "black", size = 0.5), 
+                  strip.text.x = element_text(size = 8), 
+                  strip.background = element_blank())
+  } else if (substr(Output$meta$query_metadata$organism, 1, 2) == "gp") { # if a .gmt run
+    par(mfrow = c(1, 1))
+    TablePlot %>%
+      ggplot2::ggplot(aes(x = factor(condition), 
+                          y = reorder(term_id, log.p), 
+                          fill = log.p, colour = factor(condition))) + 
+      geom_tile(colour = "white") +
+      labs(x = "Category", 
+           y = "gProfiler Term Name", 
+           fill = "-log10(P value)") +
+      # geom_text(aes(label = intersection_size), size = 2) +
+      theme_classic() +
+      scale_fill_gradientn(values = c(1.0, 0.75, 0.5, 0.25, 0), 
+                           colours = colours, 
+                           na.value = "white") +  #facet_wrap(~ cell_line, scales = "free_x") + theme_classic() +
+      theme(axis.title.x = element_blank(), 
+            axis.text.x = element_text(size = 9, angle = 90, hjust = 1),
+            axis.title.y = element_blank(),
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            axis.text.y = element_text(size = 6),
+            panel.background = element_rect(colour = "black", size = 0.5), 
+            strip.text.x = element_text(size = 8), strip.background = element_blank())
+  }
 
    pathNow <- getwd() # getting the path
    if (PNGorPDF == "pdf") {
