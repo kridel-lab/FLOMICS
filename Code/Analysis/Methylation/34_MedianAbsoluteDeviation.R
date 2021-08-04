@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # 26 Feb 2020
 # Function: Return probes that has a Median Absolute Deviation value above a given threshold across samples, 
 #           using Beta values OR return X probes with the highest MAD value.
@@ -20,11 +21,11 @@
 # MvalueMatrix_MAD_Filtered Matrix of M values for probes over the specified median absolute deviation x patients. 
 # All_MAD_Values: A vector specifying MAD value for each probe in the Beta Matrix.
 
-MedianAbsoluteDeviation <- function(BetaMatrix, 
-                                    MvalueMatrix = NA, 
-                                    CutOff = NA, 
-                                    NumberofProbes = NA) {
-  
+MedianAbsoluteDeviation34 <- function(BetaMatrix, 
+                                      MvalueMatrix = NA, 
+                                      CutOff = NA, 
+                                      NumberofProbes = NA) {
+    
   # Checking input values
   if(! is.na(CutOff) && ! is.na(NumberofProbes)) {
     stop("\n Cannot provide values for both CutOff and NumberofProbes. Leave one argument as NA.")
@@ -46,9 +47,11 @@ MedianAbsoluteDeviation <- function(BetaMatrix,
   
     # If using number of probes
     if (! is.na(NumberofProbes)) {
-      BetaMatrix_MAD_Filtered <- BetaMatrix[match(names(sort(MADEachProbe, decreasing = TRUE)[1:NumberofProbes]), rownames(BetaMatrix)), ]
+      BetaMatrix_MAD_Filtered <- BetaMatrix[match(names(sort(MADEachProbe, 
+                                 decreasing = TRUE)[1:NumberofProbes]), rownames(BetaMatrix)), ]
       if(! is.na(MvalueMatrix)[1]) {
-        MvalueMatrix_MAD_Filtered <- MvalueMatrix[match(rownames(BetaMatrix_MAD_Filtered), rownames(MvalueMatrix)), ]
+        MvalueMatrix_MAD_Filtered <- MvalueMatrix[match(rownames(BetaMatrix_MAD_Filtered), 
+                                                        rownames(MvalueMatrix)), ]
       } else {
         MvalueMatrix_MAD_Filtered <- MvalueMatrix
       }
@@ -62,3 +65,4 @@ MedianAbsoluteDeviation <- function(BetaMatrix,
   class(RESULTS) <- "MedianAbsoluteDeviation_ASilva"
   return(RESULTS)
 }
+# [END]
