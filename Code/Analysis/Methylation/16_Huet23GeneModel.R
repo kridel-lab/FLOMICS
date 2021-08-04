@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 28 July 2020
 # Updated 12 April 2019
 # Function: Huet23GeneModel
@@ -52,8 +53,10 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
   
   notRun <- function() {
     # Getting location of genes in the summarized Beta values matrix that correspond to 23 genes
-    GoodGenesLocation <- unlist(sapply(c(1:length(goodGenes)), function(i) which(rownames(BetaMatrixSummarized) == goodGenes[i])))
-    BadGeneLocation <- unlist(sapply(c(1:length(badGenes)), function(i) which(rownames(BetaMatrixSummarized) == badGenes[i])))
+    GoodGenesLocation <- unlist(sapply(c(1:length(goodGenes)), function(i) 
+      which(rownames(BetaMatrixSummarized) == goodGenes[i])))
+    BadGeneLocation <- unlist(sapply(c(1:length(badGenes)), function(i) 
+      which(rownames(BetaMatrixSummarized) == badGenes[i])))
     
     # Visualizations using summarized beta values
     if(FigureGenerate == "Yes") {
@@ -92,9 +95,11 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
     # Matching rownames in methylation file with corresponding probe location in annotation file
     match_ids_methylation_beta <- match(rownames(BetaMatrix), ann[, which(colnames(ann) == "Name")])
     
-    # Some annotations are missing. This was confirmed using excel sheet too. This is due to the way annotation file is.
+    # Some annotations are missing. This was confirmed using excel sheet too. This is due to the 
+    # way annotation file is.
     # column 22 is UCSC_RefGene_Name
-    missing_annotation_methylation_beta <- which(ann[match_ids_methylation_beta,which(colnames(ann) == "UCSC_RefGene_Name")] == "")
+    missing_annotation_methylation_beta <- which(ann[match_ids_methylation_beta,which(colnames(ann) == 
+                                                                          "UCSC_RefGene_Name")] == "")
     
     # Getting annotations with missing gene rows removed
     ann_missing_removed_beta <- ann[match_ids_methylation_beta[-missing_annotation_methylation_beta],]
@@ -103,8 +108,8 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
     beta_lymph_missing_removed <- BetaMatrix[-missing_annotation_methylation_beta,]
     
     # Only taking first feature
-    ann_missing_removed_truncated <- sub ("\\;.*", "" , 
-                                          ann_missing_removed_beta[, which(colnames(ann_missing_removed_beta) == "UCSC_RefGene_Name")] ) 
+    ann_missing_removed_truncated <- sub ("\\;.*", "" , ann_missing_removed_beta[, 
+                                          which(colnames(ann_missing_removed_beta) == "UCSC_RefGene_Name")] ) 
    
     GoodGenesLocation_Unsummarized <- sapply(c(1:length(goodGenes)), 
                                              function(i)  which(ann_missing_removed_truncated == goodGenes[i]))
@@ -175,7 +180,10 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
       if (PNGorPDF == "pdf") {
         pdf(paste0(pathNow, "/img/16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering.", PNGorPDF))
       }
-      # pheatmap(as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),unlist(GoodGenesLocation_Unsummarized)),TypeLymphomVector_FL]), cluster_rows = FALSE,  scale ="none", show_colnames = T, fontface="italic", legend = T, border_color = "black", color =  rev(redgreen(1000)) )
+      # pheatmap(as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),
+      # unlist(GoodGenesLocation_Unsummarized)),TypeLymphomVector_FL]), cluster_rows = FALSE,  
+      # scale ="none", show_colnames = T, fontface="italic", legend = T, border_color = "black", 
+      # color =  rev(redgreen(1000)) )
       gplots::heatmap.2(as.matrix(beta_lymph_missing_removed[c(unlist(BadGeneLocation_Unsummarized),
                                                                unlist(GoodGenesLocation_Unsummarized)),
                                                              TypeLymphomVector_FL]), 
@@ -199,7 +207,8 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
   # RNAseq analysis
   # Annotate RNA matrix with gene names
   RNAseqCountMatrixNormalizedName <- data.frame(RNAseqCountMatrixNormalized,
-                                                name = ENSMBLid[match(rownames(RNAseqCountMatrixNormalized), RNAseqAnnotationFile$gene), ])
+                                                name = ENSMBLid[match(rownames(RNAseqCountMatrixNormalized), 
+                                                                      RNAseqAnnotationFile$gene), ])
   # retain the same column names as 
   colnames(RNAseqCountMatrixNormalizedName)[(ncol(RNAseqCountMatrixNormalized) + 1):ncol(RNAseqCountMatrixNormalizedName)] <- 
     colnames(RNAseqAnnotationFile)
@@ -212,11 +221,11 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
   # giving all the bad genes (1:15) a coefficient of 1
   # giving all good genes (16:20) a coefficient of -1
   
-  scoreSamples <- sapply(c(1:ncol(RNAseqCountMatrixNormalizedName[goodGenesMatched, 1:ncol(RNAseqCountMatrixNormalized)])), 
+  scoreSamples <- sapply(c(1:ncol(RNAseqCountMatrixNormalizedName[goodGenesMatched, 
+                               1:ncol(RNAseqCountMatrixNormalized)])), 
                                function(sample) 
-                               (sum((1 * RNAseqCountMatrixNormalizedName[badGenesMatched, sample])) + 
-                                sum(- 1 * RNAseqCountMatrixNormalizedName[goodGenesMatched, sample]))
-                               )
+                               (sum((1 * RNAseqCountMatrixNormalizedName[badGenesMatched, sample]), na.rm = TRUE) + 
+                                sum((- 1 * RNAseqCountMatrixNormalizedName[goodGenesMatched, sample]), na.rm = TRUE)))
   
   names(scoreSamples) <- colnames(RNAseqCountMatrixNormalized)
 
@@ -231,7 +240,10 @@ Huet23GeneModel <- function(BetaMatrixSummarized = NA,
                                                                                 GoodGenesLocation),
                                                                               TypeLymphomVector]))
   } else {
-    RESULTS <- list(scores = scoreSamples)
+    RESULTS <- list(scores = scoreSamples,
+                    goodGenesMatched = RNAseqCountMatrixNormalizedName$name[goodGenesMatched],
+                    badGenesMatched = RNAseqCountMatrixNormalizedName$name[badGenesMatched],
+                    RNAseqMatrix = RNAseqCountMatrixNormalizedName[c(goodGenesMatched, badGenesMatched), ])
   }
   
   
