@@ -1,5 +1,7 @@
+# Updated 3 Aug 2021
 # Updated 23 April 2020
-# Function: Clustering of Methylation Data using either Kmeans, Medoids, Hierarchical, RPMM or InfiniumClust.
+# Function: Clustering of Methylation Data using either Kmeans, Medoids, Hierarchical, 
+#           RPMM or InfiniumClust.
 # Author: Anjali Silva
 
 # Input:
@@ -20,6 +22,7 @@
 
 # *** If using probes, all input files should be for probes. If using genes, then all input files should
 #     be for genes. 
+
 
 # Output:
 # BetaMatrixProbesUsedClustering: Input probe list with corresponding Beta values used for clustering.
@@ -1695,3 +1698,4 @@ Clustering <- function(TypeofClustering = "all",
   class(RESULTS) <- "Clustering_ASilva"
   return(RESULTS)
 }
+# [END]
