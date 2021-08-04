@@ -1,11 +1,14 @@
+# Updated 3 Aug 2021
 # Updated 3 May 2019
-# Function: Fit a multinomial model for feature selection using penalized logistic regression via lasso regression.
-#           Features (probes) are then selected for BetaMatrix and MvalueMatrix. Currently developed only for "TYPE".
+# Function: Fit a multinomial model for feature selection using penalized logistic regression
+#           via lasso regression. Features (probes) are then selected for BetaMatrix and 
+#           MvalueMatrix. Currently developed only for "TYPE".
 # Ref: http://www.sthda.com/english/articles/36-classification-methods-essentials/149-penalized-logistic-regression-essentials-in-r-ridge-lasso-and-elastic-net/
 # Author: Anjali Silva
 
 # Input:
-# BetaMatrix: A matrix of beta values for probes x patients, with probes in rows and patients as columns.
+# BetaMatrix: A matrix of beta values for probes x patients, with probes in rows and patients 
+#             as columns.
 # MvalueMatrix: A matrix of probes x patients, with probes in rows and patients as columns.
 # FigureGenerate: Produce images or not, options = "Yes" or "No"; default "Yes". 
 # PNGorPDF: Output format of the image, options = "png" or "pdf"; default "png".
@@ -22,8 +25,9 @@ GlmnetFeatureSelection <- function(BetaMatrix,
                                     FigureGenerate = "Yes", 
                                     PNGorPDF = "png") {
   
-  # Loading needed packages
- # LoadCheckPkg(RegularPckgs = c("tidyverse", "caret", "glmnet", "plotmo", "pROC", "BootValidation"))
+ # Loading needed packages
+ # LoadCheckPkg(RegularPckgs = c("tidyverse", "caret", "glmnet", 
+ # "plotmo", "pROC", "BootValidation"))
   library(tidyverse)
   library(caret)
   library(glmnet)
@@ -47,7 +51,8 @@ GlmnetFeatureSelection <- function(BetaMatrix,
                                 y = ColVector, 
                                 alpha = 1, 
                                 family = "multinomial")
-  # cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "multinomial", type.multinomial = "grouped", nfolds = 10, weights = weights)
+  # cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "multinomial", type.multinomial = "grouped", 
+  #                       nfolds = 10, weights = weights)
   
   if (PNGorPDF == "png") {
     grDevices::png(paste0(pathNow, "/img/20_GlmnetFeatureSelection.", PNGorPDF))
@@ -64,15 +69,20 @@ GlmnetFeatureSelection <- function(BetaMatrix,
   #   coef(cv.lasso, cv.lasso$lambda.1se)[[1]] was not used
 
   # Determine the regression coefficients using lambda.min as the best lambda
-  coefs_lambda.min <- list(FL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[1]])[which(coef(cv.lasso, cv.lasso$lambda.min)[[1]] != 0)[- 1]],
-                           DL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[2]])[which(coef(cv.lasso, cv.lasso$lambda.min)[[2]] != 0)[- 1]],
-                           RL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[3]])[which(coef(cv.lasso, cv.lasso$lambda.min)[[3]] != 0)[- 1]]) 
+  coefs_lambda.min <- list(FL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[1]])[which(
+                                coef(cv.lasso, cv.lasso$lambda.min)[[1]] != 0)[- 1]],
+                           DL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[2]])[
+                                which(coef(cv.lasso, cv.lasso$lambda.min)[[2]] != 0)[- 1]],
+                           RL = rownames(coef(cv.lasso, cv.lasso$lambda.min)[[3]])[
+                                which(coef(cv.lasso, cv.lasso$lambda.min)[[3]] != 0)[- 1]]) 
   
   # Getting the corresponding probe names from BetaMatrix
   BetaMatrix_coefs_lambda.min <- BetaMatrix[sapply(1:length(unique(unlist(coefs_lambda.min))), 
-                                                   function(x) which(rownames(BetaMatrix) == unique(unlist(coefs_lambda.min))[x])), ]
+                                            function(x) 
+                                            which(rownames(BetaMatrix) == unique(unlist(coefs_lambda.min))[x])), ]
   MvalueMatrix_coefs_lambda.min <- MvalueMatrix[sapply(1:length(unique(unlist(coefs_lambda.min))), 
-                                                       function(x) which(rownames(BetaMatrix) == unique(unlist(coefs_lambda.min))[x])), ] 
+                                                function(x) 
+                                                which(rownames(BetaMatrix) == unique(unlist(coefs_lambda.min))[x])), ] 
   
   # Standardize coefficients
   # See https://stats.stackexchange.com/questions/14853/variable-importance-from-glmnet/211396#211396
@@ -92,3 +102,4 @@ GlmnetFeatureSelection <- function(BetaMatrix,
   class(RESULTS) <- "GlmnetFeatureSelection_ASilva"
   return(RESULTS)
 }
+# [END]
