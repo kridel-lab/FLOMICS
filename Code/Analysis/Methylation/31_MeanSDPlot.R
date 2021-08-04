@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 10 Feb 2020
 # Function: Plot the mean vs standard deviation values for probes seperated by cluster labels.
 #           Only support upto 5 cluster labels.
@@ -24,7 +25,7 @@
 # Visuals saved to img folder
 # 31_MeanSDPlot_ImageName.p*
 
-MeanSDPlot <- function(BetaMatrix, 
+MeanSDPlot31 <- function(BetaMatrix, 
                        ClinicalFile, 
                        ClusterLabels, 
                        FigureGenerate = "Yes", 
@@ -49,7 +50,8 @@ MeanSDPlot <- function(BetaMatrix,
   B.matrix.sd.mean1 <- t(BetaMatrix[, which(ClusterLabels == 1)]) %>%
                        data.frame() %>%
                        dplyr::mutate(SAMPLE_ID = row.names(.)) %>%
-                       dplyr::left_join(ClinicalFile[,c("SAMPLE_ID", "TYPE")], by = "SAMPLE_ID") %>%
+                       dplyr::left_join(ClinicalFile[,c("SAMPLE_ID", "TYPE")], 
+                                        by = "SAMPLE_ID") %>%
                        tidyr::pivot_longer(cols = -c(SAMPLE_ID, TYPE), names_to = "cg") %>%
                        dplyr::group_by(cg, TYPE) %>%
                        dplyr::summarize(mean = mean(value), sd = sd(value)) %>%
@@ -157,6 +159,4 @@ MeanSDPlot <- function(BetaMatrix,
   
   return(NULL) # Only the plots are returned
 }
-  
-
-
+# [END]  
