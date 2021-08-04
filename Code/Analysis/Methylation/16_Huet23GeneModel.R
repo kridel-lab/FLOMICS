@@ -24,15 +24,15 @@
 # 16_Huet23GeneModel_NonSummarized_Beta_NoClustering*
 # 16_Huet23GeneModel_NonSummarized_Beta_FLSamplesOnly_Clustering*
 
-Huet23GeneModel <- function(BetaMatrixSummarized = NA, 
-                            BetaMatrixNotSummarized = NA, 
-                            MvalueMatrixSummarized = NA, 
-                            MethylationAnnotationFile = NA,
-                            RNAseqCountMatrixNormalized,
-                            RNAseqAnnotationFile,
-                            ClinicalFile, 
-                            FigureGenerate = "Yes", 
-                            PNGorPDF = "png") {
+Huet23GeneModel16 <- function(BetaMatrixSummarized = NA, 
+                              BetaMatrixNotSummarized = NA, 
+                              MvalueMatrixSummarized = NA, 
+                              MethylationAnnotationFile = NA,
+                              RNAseqCountMatrixNormalized,
+                              RNAseqAnnotationFile,
+                              ClinicalFile, 
+                              FigureGenerate = "Yes", 
+                              PNGorPDF = "png") {
 
   # Loading needed packages
   # LoadCheckPkg(RegularPckgs=c("gplots","ggplot2","pheatmap","RColorBrewer","IlluminaHumanMethylationEPICanno.ilm10b2.hg19"))
