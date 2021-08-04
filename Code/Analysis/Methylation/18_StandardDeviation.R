@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 26 April 2019
 # Function: Obtain probes that has a standard deviation (SD) value across samples, above a given cutoff. 
 # Values calculated using Beta values! (Similar work has been done by Hinoue, T et al., 2012: 
@@ -34,6 +35,13 @@ SDeviation <- function(BetaMatrix,
   set.seed(1)
   SDEachProbe <- apply(BetaMatrix, 1, sd)
   
+  # apply(TargetedSeqMatrix, 1, summary)
+  # apply(TargetedSeqMatrix, 1, sd)
+  # sqrt((0.613* (1-0.613)))
+  # sd of a binary variable
+  # link: https://www.bristol.ac.uk/media-library/sites/cmm/migrated/documents/6-r-sample.pdf
+ 
+  
   # If using cut off
   if (! is.na(CutOff)) {
     BetaMatrix_SD_Filtered <- BetaMatrix[which(SDEachProbe > CutOff), ]
@@ -46,10 +54,12 @@ SDeviation <- function(BetaMatrix,
   
   # If using number of probes
   if (! is.na(NumberofProbes)) {
-    BetaMatrix_SD_Filtered <- BetaMatrix[match(names(sort(SDEachProbe, decreasing = TRUE)[1:NumberofProbes]), 
-                                               rownames(BetaMatrix)), ]
+    BetaMatrix_SD_Filtered <- BetaMatrix[match(names(sort(SDEachProbe, 
+                                              decreasing = TRUE)[1:NumberofProbes]), 
+                                              rownames(BetaMatrix)), ]
     if(! is.na(MvalueMatrix)[1]) {
-      MvalueMatrix_SD_Filtered <- MvalueMatrix[match(rownames(BetaMatrix_SD_Filtered), rownames(MvalueMatrix)), ]
+      MvalueMatrix_SD_Filtered <- MvalueMatrix[match(rownames(BetaMatrix_SD_Filtered), 
+                                                     rownames(MvalueMatrix)), ]
     } else {
       MvalueMatrix_SD_Filtered <- MvalueMatrix
     }
@@ -57,8 +67,9 @@ SDeviation <- function(BetaMatrix,
   
   RESULTS <- list(BetaMatrix_SD_Filtered = BetaMatrix_SD_Filtered,
                   MvalueMatrix_SD_Filtered = MvalueMatrix_SD_Filtered,
-                  All_SD_Values = SDEachProbe)
+                  All_SD_Values = sort(SDEachProbe, decreasing = TRUE))
   
   class(RESULTS) <- "SDeviation_ASilva"
   return(RESULTS)
 }
+# [END]
