@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # 23 October 2019
 # Function: Detecting cell-type specific differential methylation. This function is under construction.
 # Ref: # https://bioconductor.org/packages/release/bioc/vignettes/TOAST/inst/doc/TOAST.html
@@ -17,7 +18,7 @@
 # Output: 
 # This function is under construction.
 
-ApplyingTOAST <- function(BetaMatrix,
+ApplyingTOAST29 <- function(BetaMatrix,
                           ClinicalFile,
                           NumCellTypes) {
   
@@ -85,7 +86,8 @@ ApplyingTOAST <- function(BetaMatrix,
   # 1  2  3  4  5 
   # 35 55  9 13 58
   
-  colnames(estProp_RF_improved_5) <- c("CellType1", "CellType2", "CellType3", "CellType4", "CellType5")
+  colnames(estProp_RF_improved_5) <- c("CellType1", "CellType2", 
+                                       "CellType3", "CellType4", "CellType5")
   
   boxplot(estProp_RF_improved_5)
   par(mfrow = c(2,3))
@@ -98,7 +100,9 @@ ApplyingTOAST <- function(BetaMatrix,
   
 
   # Detect cell type-specific and cross-cell type differential signals
-  TYPE_design <- data.frame(disease = factor(ClinicalFile$TYPE, levels = c("DLBCL", "FL", "RLN"), labels = c("0", "1", "2")))
+  TYPE_design <- data.frame(disease = factor(ClinicalFile$TYPE, 
+                                             levels = c("DLBCL", "FL", "RLN"), 
+                                             labels = c("0", "1", "2")))
   
   # Generate design matrix from input phenotypes and proportions.
   TYPE_Design_out <- TOAST::makeDesign(design = TYPE_design, Prop = estProp_RF_improved_5)
@@ -108,20 +112,24 @@ ApplyingTOAST <- function(BetaMatrix,
   #   system is computationally singular: reciprocal condition number = 1.02816e-36
   # Does not work
   
-  STAGE_original <- factor(ClinicalFile$STAGE, levels = c("ADVANCED", "LIMITED"), labels = c("1", "0"))
+  STAGE_original <- factor(ClinicalFile$STAGE, 
+                           levels = c("ADVANCED", "LIMITED"),
+                           labels = c("1", "0"))
   STAGE <- STAGE_original[! is.na(STAGE_original)]
   STAGE_design <- data.frame(stage = STAGE)
   ## columns of proportion matrix should have names
   
   # Make model design using the design (phenotype) data frame and proportion matrix.
-  STAGE_estProp_RF_improved_5_design_out <- TOAST::makeDesign(STAGE_design, estProp_RF_improved_5[! is.na(STAGE_original),])
+  STAGE_estProp_RF_improved_5_design_out <- TOAST::makeDesign(STAGE_design, 
+                                                              estProp_RF_improved_5[! is.na(STAGE_original),])
   names(STAGE_estProp_RF_improved_5_design_out)
   # "design_matrix"  "Prop"           "design"         "all_coefs"      "all_cell_types" "formula"   
   STAGE_estProp_RF_improved_5_design_out$all_cell_types # "CellType1" "CellType2" "CellType3" "CellType4" "CellType5"
   STAGE_estProp_RF_improved_5_design_out$Prop
   
   # Fit linear models for raw data and the design generated from Design_out().
-  STAGE_estProp_RF_improved_5_fitted_model <- TOAST::fitModel(STAGE_estProp_RF_improved_5_design_out, BetaMatrix[, ! is.na(STAGE_original)])
+  STAGE_estProp_RF_improved_5_fitted_model <- TOAST::fitModel(STAGE_estProp_RF_improved_5_design_out, 
+                                                              BetaMatrix[, ! is.na(STAGE_original)])
   # print all the cell type names
   names(STAGE_estProp_RF_improved_5_fitted_model)
   # "Design_out"     "N"              "coefs"          "coefs_var"      "Y"              "Ypred"         
@@ -195,8 +203,10 @@ ApplyingTOAST <- function(BetaMatrix,
   length(which(substr(colnames(Output_Remove_2_BetaMatrix), 4, 5) == "FL"))
   Output_Remove_2_BetaMatrix_editnames <- Output_Remove_2_BetaMatrix
   
-  colnames(Output_Remove_2_BetaMatrix_editnames)[which(substr(colnames(Output_Remove_2_BetaMatrix_editnames), 4, 5) == "FL")] <-
-    substr(colnames(Output_Remove_2_BetaMatrix_editnames)[which(substr(colnames(Output_Remove_2_BetaMatrix_editnames), 4, 5) == "FL")], 1, 9)
+  colnames(Output_Remove_2_BetaMatrix_editnames)[which
+    (substr(colnames(Output_Remove_2_BetaMatrix_editnames), 4, 5) == "FL")] <-
+    substr(colnames(Output_Remove_2_BetaMatrix_editnames)[which
+    (substr(colnames(Output_Remove_2_BetaMatrix_editnames), 4, 5) == "FL")], 1, 9)
   
   
   match_beta_bypurity <- match(colnames(Output_Remove_2_BetaMatrix_editnames), purity[, 1])
@@ -206,8 +216,10 @@ ApplyingTOAST <- function(BetaMatrix,
   purity_edited
   
   estProp_RF_improved_5_edited <- estProp_RF_improved_5 
-  rownames(estProp_RF_improved_5_edited)[which(substr(rownames(estProp_RF_improved_5_edited), 4, 5) == "FL")] <-
-    substr(rownames(estProp_RF_improved_5_edited)[which(substr(rownames(estProp_RF_improved_5_edited), 4, 5) == "FL")], 1, 9)
+  rownames(estProp_RF_improved_5_edited)[which
+    (substr(rownames(estProp_RF_improved_5_edited), 4, 5) == "FL")] <-
+    substr(rownames(estProp_RF_improved_5_edited)[which
+    (substr(rownames(estProp_RF_improved_5_edited), 4, 5) == "FL")], 1, 9)
   
   match_purity_byProp <- match(rownames(estProp_RF_improved_5_edited), purity_edited[,1])
   purity_edited <- purity_edited[match_purity_byProp, ]
@@ -311,5 +323,5 @@ ApplyingTOAST <- function(BetaMatrix,
   return(NULL)
   
 }
-  
+# [END]  
   
