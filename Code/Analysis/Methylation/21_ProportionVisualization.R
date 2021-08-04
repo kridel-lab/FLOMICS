@@ -58,7 +58,7 @@
 # 21_ggboxplot_MedianBetaValueAcrossProbes_ANOVA_,ClinicalCategory,.p*
 
 
-ProportionVisualization <- function(CategoryToVisualize = NA, 
+ProportionVisualization21 <- function(CategoryToVisualize = NA, 
                                     ClusterLabels = NA, 
                                     BetaMatrix, 
                                     AnnotationFile = NA, 
