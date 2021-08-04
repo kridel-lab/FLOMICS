@@ -1,4 +1,5 @@
-# Updated 10 May 2021
+# Updated 3 Aug 2021
+# Updated 10 June 2019
 # Function: Survival analysis
 # Author: Anjali Silva
 
@@ -282,15 +283,7 @@ SurvivalAnalysis15 <- function(BetaMatrix,
                                            event = event) ~ Cluster, 
                                       data = tablePatientsAll)
       
-      #  grDevices::dev.off()
-      # if (PNGorPDF == "png") {
-      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
-      # }
-      # if (PNGorPDF == "pdf") {
-      #   grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
-      # }
-      
-      kmTTPall <- survminer::ggsurvplot(survTTPall, 
+      survTTPallPlot <- survminer::ggsurvplot(survTTPall, 
                                         # title = "Disease−specific Survival",
                                         # title = "Overall Survival",
                                         title = "Time to Progression",
@@ -317,27 +310,100 @@ SurvivalAnalysis15 <- function(BetaMatrix,
                       width = 8, height = 5.5)  
       # dev.off() 
       cat("\n Printed All image")
+      
+      
+      
+      # making a table with information, seperating stages
+      ListAdvanced <- which(Stage == "ADVANCED")
+      CodeTTPadvanced <- as.numeric(CodeTTP[ListAdvanced])
+      TTPadvanced <- as.numeric(TTP[ListAdvanced])
+      ClusterAdvanced <- as.numeric(Cluster[ListAdvanced])
+      
+      tableTTPadvanced <- data.frame(event = as.numeric(CodeTTPadvanced), 
+                                     time = as.numeric(TTPadvanced), 
+                                     Cluster = ClusterAdvanced)
+      survTTPadvanced <- survival::survfit(Surv(time = time, 
+                                           event = event) ~ Cluster, 
+                                      data = tableTTPadvanced)
+      
+      survTTPadvancedPlot <- survminer::ggsurvplot(survTTPadvanced, 
+                                              # title = "Disease−specific Survival",
+                                              # title = "Overall Survival",
+                                              title = "Time to Progression - Advanced",
+                                              font.main = "bold", 
+                                              xlim = c(0, 10),
+                                              xlab = "Time (years)", 
+                                              ylab = "Proportion of Patients Surviving",
+                                              pval = TRUE, 
+                                              pval.coord = c(0, 0.05), 
+                                              conf.int = F,
+                                              break.time.by = 1, 
+                                              ncensor.plot = F,
+                                              risk.table = TRUE, # Add risk table
+                                              risk.table.pos = "out", 
+                                              censor = T, 
+                                              risk.table.y.text.col = TRUE,
+                                              risk.table.col = "strata", # Change risk table color by groups
+                                              palette = colourPalette,
+                                              risk.table.height = 0.25,
+                                              risk.table.y.text = FALSE,
+                                              legend = "top",
+                                              legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysisTTP_Advanced_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)  
+      
+
+      
+      ListLimited <- which(Stage == "LIMITED")
+      CodeTTPLimited <- as.numeric(CodeTTP[ListLimited])
+      TTPLimited <- as.numeric(TTP[ListLimited])
+      ClusterLimited <- as.numeric(Cluster[ListLimited])
+      
+      tableTTPLimited <- data.frame(event = as.numeric(CodeTTPLimited), 
+                                     time = as.numeric(TTPLimited), 
+                                     Cluster = ClusterLimited)
+      survTTPLimited <- survival::survfit(Surv(time = time, 
+                                                event = event) ~ Cluster, 
+                                           data = tableTTPLimited)
+      
+      survTTPLimitedPlot <- survminer::ggsurvplot(survTTPLimited, 
+                                                   # title = "Disease−specific Survival",
+                                                   # title = "Overall Survival",
+                                                   title = "Time to Progression - Limited",
+                                                   font.main = "bold", 
+                                                   xlim = c(0, 10),
+                                                   xlab = "Time (years)", 
+                                                   ylab = "Proportion of Patients Surviving",
+                                                   pval = TRUE, 
+                                                   pval.coord = c(0, 0.05), 
+                                                   conf.int = F,
+                                                   break.time.by = 1, 
+                                                   ncensor.plot = F,
+                                                   risk.table = TRUE, # Add risk table
+                                                   risk.table.pos = "out", 
+                                                   censor = T, 
+                                                   risk.table.y.text.col = TRUE,
+                                                   risk.table.col = "strata", # Change risk table color by groups
+                                                   palette = colourPalette,
+                                                   risk.table.height = 0.25,
+                                                   risk.table.y.text = FALSE,
+                                                   legend = "top",
+                                                   legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysisTTP_Limited_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)  
+      
     }
     
     # plot CodeOS and OS
     if (FigureGenerate == FigureGenerate) {
       
-      tablePatientsAll <- data.frame(event = as.numeric(CodeOS), 
+      tablePatientsOSAll <- data.frame(event = as.numeric(CodeOS), 
                                      time = as.numeric(OS), 
                                      Cluster = Cluster)
       survOSall <- survival::survfit(Surv(time = time, 
                                            event = event) ~ Cluster, 
-                                      data = tablePatientsAll)
-      
-      # grDevices::dev.off()
-      # 
-      # if (PNGorPDF == "png") {
-      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
-      # }
-      # if (PNGorPDF == "pdf") {
-      #  grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTP_", ImageName, ".", PNGorPDF))
-      # }
-      
+                                      data = tablePatientsOSAll)
+
       kmTTPall <- survminer::ggsurvplot(survOSall, 
                                         # title = "Disease−specific Survival",
                                         title = "Overall Survival",
@@ -364,26 +430,96 @@ SurvivalAnalysis15 <- function(BetaMatrix,
       ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_OS_", ImageName, ".", PNGorPDF), 
                       width = 8, height = 5.5)  
       # dev.off() 
-      cat("\n Printed All image")
+      
+      ListAdvanced <- which(Stage == "ADVANCED")
+      CodeOSadvanced <- as.numeric(CodeOS[ListAdvanced])
+      OSadvanced <- as.numeric(OS[ListAdvanced])
+      ClusterAdvanced <- as.numeric(Cluster[ListAdvanced])
+      
+      tableOSadvanced <- data.frame(event = as.numeric(CodeOSadvanced), 
+                                     time = as.numeric(OSadvanced), 
+                                     Cluster = ClusterAdvanced)
+      survOSadvanced <- survival::survfit(Surv(time = time, 
+                                                event = event) ~ Cluster, 
+                                           data = tableOSadvanced)
+      
+      survOSadvancedPlot <- survminer::ggsurvplot(survOSadvanced, 
+                                        # title = "Disease−specific Survival",
+                                        title = "Overall Survival - Advanced",
+                                        # title = "Time to Progression",
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Proportion of Patients Surviving",
+                                        pval = TRUE, 
+                                        pval.coord = c(0, 0.05), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_OS_Advanced_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5) 
+      
+      
+      ListLimited <- which(Stage == "LIMITED")
+      CodeOSlimited <- as.numeric(CodeOS[ListLimited])
+      OSlimited <- as.numeric(OS[ListLimited])
+      ClusterLimited <- as.numeric(Cluster[ListLimited])
+      
+      tableOSlimited <- data.frame(event = as.numeric(CodeOSlimited), 
+                                    time = as.numeric(OSlimited), 
+                                    Cluster = ClusterLimited)
+      survOSlimited <- survival::survfit(Surv(time = time, 
+                                               event = event) ~ Cluster, 
+                                          data = tableOSlimited)
+      
+      survOSlimitedPlot <- survminer::ggsurvplot(survOSlimited, 
+                                       # title = "Disease−specific Survival",
+                                       title = "Overall Survival - Limited",
+                                       # title = "Time to Progression",
+                                       font.main = "bold", 
+                                       xlim = c(0, 10),
+                                       xlab = "Time (years)", 
+                                       ylab = "Proportion of Patients Surviving",
+                                       pval = TRUE, 
+                                       pval.coord = c(0, 0.05), 
+                                       conf.int = F,
+                                       break.time.by = 1, 
+                                       ncensor.plot = F,
+                                       risk.table = TRUE, # Add risk table
+                                       risk.table.pos = "out", 
+                                       censor = T, 
+                                       risk.table.y.text.col = TRUE,
+                                       risk.table.col = "strata", # Change risk table color by groups
+                                       palette = colourPalette,
+                                       risk.table.height = 0.25,
+                                       risk.table.y.text = FALSE,
+                                       legend = "top",
+                                       legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_OS_Limited_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5) 
+      
     }
     
     # plot CODE_DSS and OS    
     if (FigureGenerate == FigureGenerate) {
       
-      tablePatientsAll <- data.frame(event = as.numeric(CodeDDS), 
+      tablePatientsDDSAll <- data.frame(event = as.numeric(CodeDDS), 
                                      time = as.numeric(OS), 
                                      Cluster = Cluster)
       survDDSall <- survival::survfit(Surv(time = time, 
                                            event = event) ~ Cluster, 
-                                      data = tablePatientsAll)
-      
-      # grDevices::dev.off()
-      # if (PNGorPDF == "png") {
-      #   grDevices::png(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_DSS_", ImageName, ".", PNGorPDF))
-      # }
-      # if (PNGorPDF == "pdf") {
-      #  grDevices::pdf(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_DSS_", ImageName, ".", PNGorPDF))
-      # }
+                                      data = tablePatientsDDSAll)
+
       
       kmTTPall <- survminer::ggsurvplot(survDDSall, 
                                         title = "Disease−specific Survival",
@@ -412,6 +548,84 @@ SurvivalAnalysis15 <- function(BetaMatrix,
                       width = 8, height = 5.5)      
       # dev.off() 
       cat("\n Printed All image")
+      
+      
+      ListAdvanced <- which(Stage == "ADVANCED")
+      CodeDDSadvanced <- as.numeric(CodeDDS[ListAdvanced])
+      OSadvanced <- as.numeric(OS[ListAdvanced])
+      ClusterAdvanced <- as.numeric(Cluster[ListAdvanced])
+      
+      tableDDSadvanced <- data.frame(event = as.numeric(CodeDDSadvanced), 
+                                    time = as.numeric(OSadvanced), 
+                                    Cluster = ClusterAdvanced)
+      survDDSadvanced <- survival::survfit(Surv(time = time, 
+                                               event = event) ~ Cluster, 
+                                          data = tableDDSadvanced)
+      
+      survDDSadvancedPlot <- survminer::ggsurvplot(survDDSadvanced, 
+                                        title = "Disease−specific Survival - Advanced",
+                                        # title = "Overall Survival",
+                                        # title = "Time to Progression",
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Proportion of Patients Surviving",
+                                        pval = TRUE, 
+                                        pval.coord = c(0, 0.05), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_DSS_Advanced_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5) 
+      
+      
+      ListLimited <- which(Stage == "LIMITED")
+      CodeDDSlimited <- as.numeric(CodeDDS[ListLimited])
+      OSlimited <- as.numeric(OS[ListLimited])
+      ClusterLimited <- as.numeric(Cluster[ListLimited])
+      
+      tableDDSlimited <- data.frame(event = as.numeric(CodeDDSlimited), 
+                                     time = as.numeric(OSlimited), 
+                                     Cluster = ClusterLimited)
+      survDDSlimited <- survival::survfit(Surv(time = time, 
+                                                event = event) ~ Cluster, 
+                                           data = tableDDSlimited)
+      
+      tableDDSlimitedPlot <- survminer::ggsurvplot(survDDSlimited, 
+                                                   title = "Disease−specific Survival - Limited",
+                                                   # title = "Overall Survival",
+                                                   # title = "Time to Progression",
+                                                   font.main = "bold", 
+                                                   xlim = c(0, 10),
+                                                   xlab = "Time (years)", 
+                                                   ylab = "Proportion of Patients Surviving",
+                                                   pval = TRUE, 
+                                                   pval.coord = c(0, 0.05), 
+                                                   conf.int = F,
+                                                   break.time.by = 1, 
+                                                   ncensor.plot = F,
+                                                   risk.table = TRUE, # Add risk table
+                                                   risk.table.pos = "out", 
+                                                   censor = T, 
+                                                   risk.table.y.text.col = TRUE,
+                                                   risk.table.col = "strata", # Change risk table color by groups
+                                                   palette = colourPalette,
+                                                   risk.table.height = 0.25,
+                                                   risk.table.y.text = FALSE,
+                                                   legend = "top",
+                                                   legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_DSS_Limited_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5) 
     }
     
     # plot CodeTRANSF and TTT       
@@ -457,6 +671,87 @@ SurvivalAnalysis15 <- function(BetaMatrix,
                                         legend.title = "Cluster")
       ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF), 
                       width = 8, height = 5.5)
+      
+      
+      ListAdvanced <- which(Stage == "ADVANCED")
+      CodeTRANSFadvanced <- as.numeric(CodeTRANSF[ListAdvanced])
+      TTTadvanced <- as.numeric(TTT[ListAdvanced])
+      ClusterAdvanced <- as.numeric(Cluster[ListAdvanced])
+      
+      tableTTTadvanced <- data.frame(event = as.numeric(CodeTRANSFadvanced), 
+                                     time = as.numeric(TTTadvanced), 
+                                     Cluster = ClusterAdvanced)
+      survTTTadvanced <- survival::survfit(Surv(time = time, 
+                                                event = event) ~ Cluster, 
+                                           data = tableTTTadvanced)
+      
+      survTTTadvancedPlot <- survminer::ggsurvplot(survTTTadvanced, 
+                                        title = "Cumulative Incidence of Transformation - Advanced",
+                                        data = tablePatientsAll, 
+                                        font.main = "bold", 
+                                        xlim = c(0, 10),
+                                        xlab = "Time (years)", 
+                                        ylab = "Cumulative Hazard",
+                                        pval = TRUE, 
+                                        fun = "cumhaz", 
+                                        ylim = c(0, 0.4),
+                                        pval.coord = c(0, 0.4), 
+                                        conf.int = F,
+                                        break.time.by = 1, 
+                                        ncensor.plot = F,
+                                        risk.table = TRUE, # Add risk table
+                                        risk.table.pos = "out", 
+                                        censor = T, 
+                                        risk.table.y.text.col = TRUE,
+                                        risk.table.col = "strata", # Change risk table color by groups
+                                        palette = colourPalette,
+                                        risk.table.height = 0.25,
+                                        risk.table.y.text = FALSE,
+                                        legend = "top",
+                                        legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)
+      
+      
+      ListLimited <- which(Stage == "LIMITED")
+      CodeTRANSFlimited <- as.numeric(CodeTRANSF[ListLimited])
+      TTTlimited <- as.numeric(TTT[ListLimited])
+      ClusterLimited <- as.numeric(Cluster[ListLimited])
+      
+      tableTTTlimited <- data.frame(event = as.numeric(CodeTRANSFlimited), 
+                                     time = as.numeric(TTTlimited), 
+                                     Cluster = ClusterLimited)
+      survTTTlimited <- survival::survfit(Surv(time = time, 
+                                                event = event) ~ Cluster, 
+                                           data = tableTTTlimited)
+      
+      survTTTlimitedPlot <- survminer::ggsurvplot(survTTTlimited, 
+                                                   title = "Cumulative Incidence of Transformation - Limited",
+                                                   data = tablePatientsAll, 
+                                                   font.main = "bold", 
+                                                   xlim = c(0, 10),
+                                                   xlab = "Time (years)", 
+                                                   ylab = "Cumulative Hazard",
+                                                   pval = TRUE, 
+                                                   fun = "cumhaz", 
+                                                   ylim = c(0, 0.4),
+                                                   pval.coord = c(0, 0.4), 
+                                                   conf.int = F,
+                                                   break.time.by = 1, 
+                                                   ncensor.plot = F,
+                                                   risk.table = TRUE, # Add risk table
+                                                   risk.table.pos = "out", 
+                                                   censor = T, 
+                                                   risk.table.y.text.col = TRUE,
+                                                   risk.table.col = "strata", # Change risk table color by groups
+                                                   palette = colourPalette,
+                                                   risk.table.height = 0.25,
+                                                   risk.table.y.text = FALSE,
+                                                   legend = "top",
+                                                   legend.title = "Cluster")
+      ggplot2::ggsave(paste0(pathNow, "/img/15_SurvivalAnalysis_survival_TTT_", ImageName, ".", PNGorPDF), 
+                      width = 8, height = 5.5)
+      
       
       
     }
@@ -980,8 +1275,6 @@ SurvivalAnalysis15 <- function(BetaMatrix,
     
     
     
-    
-    
     RESULTS <- list(TTPSurvivalAdvanced = survTTPadvanced,
                     TTPSurvivalLimited = survTTPlimited,
                     TTPAll = survTTPall
@@ -992,8 +1285,5 @@ SurvivalAnalysis15 <- function(BetaMatrix,
     class(RESULTS) <- "SurvivalAnalysis_ASilva"
     return(RESULTS)
     
-}
-
-
-
-
+ }
+ # [END]
