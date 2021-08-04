@@ -20,7 +20,7 @@
 #                          using lambda.min as the best lambda.
 # Probes: Probe names corresponding to non zero regression coefficients using lambda.min as the best lambda.
 
-GlmnetFeatureSelection <- function(BetaMatrix,
+GlmnetFeatureSelection20 <- function(BetaMatrix,
                                     MvalueMatrix, 
                                     FigureGenerate = "Yes", 
                                     PNGorPDF = "png") {
