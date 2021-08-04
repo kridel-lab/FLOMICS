@@ -56,17 +56,21 @@ MDSplots22 <- function(ClinicalCategoryToVisualize = "TYPE",
   vectorNames <- unique(na.omit(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]))
   
   # all probes and samples only corresponding to those specified in ClinicalCategoryToVisualize
-  average_cat11 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)),
-                                                                       which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[1])])
-  average_cat22 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)),
-                                                                       which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[2])])
+  average_cat11 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , 
+                                           which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)),
+                                           which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[1])])
+  average_cat22 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , 
+                                           which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)),
+                                           which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[2])])
   if (length(vectorNames) > 2) {
-    average_cat33 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile)==ClinicalCategoryToVisualize)]) == TRUE)),
-                                                                        which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[3])])
+    average_cat33 <- as.matrix(BetaMatrix[ , which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , 
+                                             which(colnames(ClinicalFile)==ClinicalCategoryToVisualize)]) == TRUE)),
+                                             which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[3])])
   }
   if (length(vectorNames) > 3) {
-    average_cat44 <- as.matrix(BetaMatrix[correspondingRows, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)), 
-                                                                                         which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[4])])
+    average_cat44 <- as.matrix(BetaMatrix[correspondingRows, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[ , 
+                                          which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == TRUE)), 
+                                          which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]) == vectorNames[4])])
   }
   
 
