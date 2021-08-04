@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Date: 15 October 2019
 # Function: Creates a venn diagram showing sample overlap. 
 # Author: Anjali Silva
@@ -19,7 +20,7 @@
 
 
 
-VennDiagramAnalysis <- function(MainList, 
+VennDiagramAnalysis28 <- function(MainList, 
                                  Labels,
                                  FigureGenerate = "Yes", 
                                  ImageName = NA, 
@@ -67,8 +68,10 @@ VennDiagramAnalysis <- function(MainList,
     VennSetUp <- list("A" = MainList[[1]], 
                        "B" = MainList[[2]],
                        "C" = MainList[[3]])
-    names(VennSetUp) <- Labels                           
-    VennPlot <- plot(eulerr::venn(VennSetUp))
+    names(VennSetUp) <- Labels      
+    setVenn <- eulerr::venn(VennSetUp)
+    VennPlot <- plot(setVenn,
+                     fontsize = 5)
       
   } else if (length(MainList) == 4) { 
     
@@ -117,3 +120,4 @@ VennDiagramAnalysis <- function(MainList,
   class(RESULTS) <- "VennDiagramAnalysis_ASilva"
   return(RESULTS)
 }
+# [END]
