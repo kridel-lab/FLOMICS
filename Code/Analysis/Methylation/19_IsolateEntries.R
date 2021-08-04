@@ -29,7 +29,7 @@
 # ProvideWithinCategories: Return if the input was "Yes" or "No".
 
 
-IsolateEntries <- function(CategoryToVisualize, 
+IsolateEntries19 <- function(CategoryToVisualize, 
                            BetaMatrix, 
                            MvalueMatrix,
                            AnnotationFile, 
