@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 3 April 2019
 # Function: Visualize proportion of data falling within a category or ClusterLabels. 
 #           - If PlotWithinCategories is set, but no ClusterLabels are provided, 
@@ -223,6 +224,8 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
       ggplot2::ggsave(paste0(pathNow,"/img/21_ggplotPoint_MeanBetaValue_Cluster_", 
                     ImageName, ".", PNGorPDF))
       
+      
+      
       # Plot median beta value for patients in each cluster 
       p0_median <- ggplot2::ggplot(data_patient_var, aes(x = Cluster, 
                                                          y = medians, 
@@ -275,7 +278,8 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
                                                        xlab = "institute", 
                                                        ylab = "Median Beta Values",
                                                        palette = coloursBarPlot[1:2]) + 
-                                                       stat_compare_means(comparisons = ComparisonOptionsInstitute) + 
+                                                       stat_compare_means(comparisons = 
+                                                       ComparisonOptionsInstitute) + 
                                                        # Add pairwise comparisons p-value
                                                        stat_compare_means(paired = FALSE)
       ggplot2::ggsave(paste0(pathNow,"/img/21_ggboxplot_MedianBetaValueAcrossClusters_Institute_", 
@@ -288,7 +292,8 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
                                                   color=factor(Cluster))) +
                                      # geom_point(size=3)+
                                      scale_y_continuous(name = "Varaince of Beta values") +
-                                     geom_jitter(aes(color = Cluster), size = 3, alpha = 1, width = 0.2) +
+                                     geom_jitter(aes(color = Cluster), size = 3, 
+                                                 alpha = 1, width = 0.2) +
                                      labs(x = "Cluster") +
                                      # annotate("text", x = 1.5, y = max(data_patient_var$variance) + 0.01, size = 7) +
                                      theme_bw() + 
@@ -1101,12 +1106,14 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
       
       # Shapiro-Wilk normality test for group 1
       group1_pvalue <- with(DataPatients0.2to0.8, 
-                            shapiro.test(proportion[cluster == unique(DataPatients0.2to0.8$cluster)[1]]))$p.value 
+                            shapiro.test(proportion[cluster == 
+                            unique(DataPatients0.2to0.8$cluster)[1]]))$p.value 
       # p-value = 0.3022, cannot reject null
       
       # Shapiro-Wilk normality test for group 2
       group2_pvalue <- with(DataPatients0.2to0.8, 
-                            shapiro.test(proportion[cluster == unique(DataPatients0.2to0.8$cluster)[2]]))$p.value 
+                            shapiro.test(proportion[cluster == 
+                            unique(DataPatients0.2to0.8$cluster)[2]]))$p.value 
       # p-value = 0.6608, cannot reject null
       
       # Only proceed if both p-values are not significant, which means that the distribution of the data
@@ -1377,17 +1384,20 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
       vectorNames <- unique(na.omit(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]))
       # Saving row means for first ClinicalCategory 
       average_cat1 <- rowMeans(as.matrix(BetaMatrix[correspondingRows,
-                                                    which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                 which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
+                                         which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
       # Saving row means for second ClinicalCategory 
       average_cat2 <- rowMeans(as.matrix(BetaMatrix[correspondingRows, 
-                                                    which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
-                                                                                 which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
+                               which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                               which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
+                               which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
       if (length(vectorNames) > 2) {
         # Saving row means for third ClinicalCategory 
         average_cat3 <- rowMeans(as.matrix(BetaMatrix[correspondingRows, 
-                                                      which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                   which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
+                                 which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                 which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                 which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
       }
       if (length(vectorNames) > 3) {
         stop("\nCode only support upto 3 Clinical Categories Please alter code");
@@ -1485,19 +1495,23 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
         # Violin plot 
        # calculating values across probes corresponding the the variable
        colMeanVariable1 <- colMeans(as.matrix(BetaMatrix[correspondingRows, 
-                                                         which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                      which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
+                                              which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                              which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                              which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
        colMeanVariable2 <- colMeans(as.matrix(BetaMatrix[correspondingRows, 
-                                                         which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                      which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
+                                              which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                              which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                              which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
        
        colMedianVariable1 <- colMedians(as.matrix(BetaMatrix[correspondingRows, 
-                                                         which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                      which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
+                                        which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
        
        colMedianVariable2 <- colMedians(as.matrix(BetaMatrix[correspondingRows, 
-                                                         which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                      which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
+                                        which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
        
        
        colMeanTable <- data.frame(cbind(Class = c(rep(vectorNames[1], length(colMeanVariable1)), 
@@ -1509,12 +1523,14 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
        
        if (length(vectorNames) == 3) {
          colMeanVariable3 <- colMeans(as.matrix(BetaMatrix[correspondingRows, 
-                                                           which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
+                                                which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                                which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                                which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
          
          colMedianVariable3 <- colMedians(as.matrix(BetaMatrix[correspondingRows, 
-                                                           which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
-                                                                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
+                                                    which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                                    which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)), 
+                                                    which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
          
          colMeanTable <- data.frame(cbind (
                                     Class = c(rep(vectorNames[1], length(colMeanVariable1)), 
@@ -1562,19 +1578,63 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
        } else if (ClinicalCategory == "SITE_BIOPSY") { 
          colour = c("#f1b6da", "#c51b7d")
        }
+       
+       
+       ViolinPlot <- ggplot2::ggplot(colMeanTable, 
+                                  aes(x = Class, y = Mean, fill = Class)) +
+         geom_violin(trim = FALSE) +
+         geom_jitter(aes(colour = Class)) +
+         # geom_boxplot() +
+         labs(y = "Mean Beta Value", 
+              fill = paste(AnnotationCategory), 
+              x = paste(AnnotationCategory)) +
+         scale_fill_manual(values = colour) +
+         theme_bw() + 
+         theme(panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               axis.text = element_text(size = rel(1.5)),
+               axis.title = element_text(size = rel(1.5))) +
+         theme(aspect.ratio = 1) +
+         ggpubr::stat_compare_means(size = 5.5)
+       # +
+       # geom_violin(trim=FALSE) # to get rid of boxplot inside
+       ggplot2::ggsave(paste0(pathNow, "/img/21_ggviolin_MeanBetaValueAcrossProbes_ANOVA_", 
+                              AnnotationCategory, "_", ClinicalCategory, ".", PNGorPDF))
+       
+       
 
 
        
 
-       ViolinPlot1 <- ggpubr::ggboxplot(colMeanTable, x = "Class", y = "Mean", fill = "Class",
+       ViolinPlot1 <- ggpubr::ggviolin(colMeanTable, x = "Class", y = "Mean", fill = "Class",
                                           add = "boxplot", 
                                           ylab = " Mean Beta Value", 
                                           title = paste0(AnnotationCategory),
+                                          font.label = list(size = 14, color = "black"),
                                           palette = colour) + 
                                           stat_compare_means(comparisons = ComparisonOptions) + # Add pairwise comparisons p-value
                                           stat_compare_means(paired = FALSE)
        ggsave(paste0(pathNow,"/img/21_ggboxplot_MeanBetaValueAcrossProbes_ANOVA_", 
                      AnnotationCategory, "_", ClinicalCategory, ".", PNGorPDF))
+       
+       
+       BoxPlot1 <- ggpubr::ggboxplot(colMeanTable, 
+                                     x = "Class", 
+                                     y = "Mean", 
+                                     width = 0.8,
+                                     size = 1,
+                                     ylab = " Mean Beta Value", 
+                                     font.label = list(size = 20, color = "black"),
+                                     color = "Class",
+                                     add = "jitter",
+                                     legend = "none",
+                                     palette = colour) +
+         ggpubr::stat_compare_means()
+       
+       ggsave(paste0(pathNow,"/img/21_ggboxplot_MeanBetaValueAcrossProbes_ANOVA_BoxPlot_", 
+                     AnnotationCategory, "_", ClinicalCategory, ".", PNGorPDF))
+       
+       
 
        
        ViolinPlot2 <- ggpubr::ggboxplot(colMeanTable, x = "Class", y = "Median", fill = "Class",
@@ -1627,13 +1687,16 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
       
       # looking at averge for all probes belonging to DMR  (average based on # of patietns)
       vectorNames <- unique(na.omit(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]))
-      average_cat1 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
-                                                                                   which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
-      average_cat2 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
-                                                                                   which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
+      average_cat1 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[1])]))
+      average_cat2 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
+                                         which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[2])]))
       if (length(vectorNames) > 2) {
-        average_cat3 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
-                                                                                    which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
+        average_cat3 <- rowMeans(as.matrix(BetaMatrix[, which(stri_trim(ClinicalFile[c(which(! is.na(ClinicalFile[, 
+                                           which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)),
+                                           which(colnames(ClinicalFile) == ClinicalCategory)]) == vectorNames[3])]))
       }
       
       # Looking at probes
@@ -1779,17 +1842,19 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
     Proportion0.2to0.8 <- Variance0.2to0.8 <- vector() # a vector to save proportion of each patient
     for (i in 1:ncol(BetaMatrix)) {
       Proportion0.2to0.8[i] <- length(BetaMatrix[ , i][between(BetaMatrix[ , i], 
-                                                               0.2000000000000, 0.8000000000000)]) / nrow(BetaMatrix)
+                                      0.2000000000000, 0.8000000000000)]) / nrow(BetaMatrix)
       Variance0.2to0.8[i]  <- var(BetaMatrix[ , i][between(BetaMatrix[ , i], 
-                                                          0.2000000000000, 0.8000000000000)])
+                                  0.2000000000000, 0.8000000000000)])
       
     }
     
     if (length(which(is.na(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)) > 0) {
       DataPatients0.2to0.8 <- 
-        data.frame(names = ClinicalFile[- which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE), 
-                                                                 which(colnames(ClinicalFile) == ClinicalCategory)],
-                   proportion = Proportion0.2to0.8[- which(is.na(ClinicalFile[, which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)])
+        data.frame(names = ClinicalFile[- which(is.na(ClinicalFile[, 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE), 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)],
+                   proportion = Proportion0.2to0.8[- which(is.na(ClinicalFile[, 
+                                        which(colnames(ClinicalFile) == ClinicalCategory)]) == TRUE)])
     } else {
       DataPatients0.2to0.8 <- 
         data.frame(names = ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategory)],
@@ -1815,13 +1880,13 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
       # Shapiro-Wilk normality test for group 1
       group1_pvalue <- with(DataPatients0.2to0.8, 
                             shapiro.test(proportion[names == 
-                                                      unique(DataPatients0.2to0.8$names)[1]]))$p.value 
+                                         unique(DataPatients0.2to0.8$names)[1]]))$p.value 
       # p-value = 0.3022, cannot reject null
       
       # Shapiro-Wilk normality test for group 2
       group2_pvalue <- with(DataPatients0.2to0.8, 
                             shapiro.test(proportion[names == 
-                                                      unique(DataPatients0.2to0.8$names)[2]]))$p.value 
+                                         unique(DataPatients0.2to0.8$names)[2]]))$p.value 
       # p-value = 0.6608, cannot reject null
       
       # Only proceed if both p-values are not significant, which means that the distribution of the data
@@ -2008,7 +2073,4 @@ ProportionVisualization <- function(CategoryToVisualize = NA,
   }
   return(NULL)
 }
-
-
-
-
+# [END]
