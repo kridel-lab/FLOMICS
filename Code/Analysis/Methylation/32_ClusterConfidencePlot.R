@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 10 Feb 2020
 # Function: Plot the probabilities of clusters for each sample. 
 #           Only support upto 5 cluster labels.
@@ -17,7 +18,7 @@
 # Visuals saved to img folder
 # 31_MeanSDPlot_ImageName.p*
 
-ClusterConfidencePlot <- function(ProbabilityMatrix, 
+ClusterConfidencePlot32 <- function(ProbabilityMatrix, 
                                   FigureGenerate = "Yes", 
                                   PNGorPDF ="png", 
                                   ImageName = "Sample1") {
@@ -138,6 +139,6 @@ ClusterConfidencePlot <- function(ProbabilityMatrix,
    
   return(NULL) # Only the plots are returned
 }
-  
+# [END]  
 
 
