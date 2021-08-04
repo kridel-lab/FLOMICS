@@ -1,17 +1,22 @@
+# Updated 3 Aug 2021
 # Updated 27 April 2019
 # Function: Obtain probes corresponding to CategoryToVisualize for Beta and Mvalue matrices.
 # Author: Anjali Silva
 
 # Input:
 # CategoryToVisualize: Specifies which column needs to be visualized from AnnotationFile.
-#                      Need exact spelling and caps/noCaps for CategoryToVisualize, e.g.: CategoryToVisualize="DMR"
+#                      Need exact spelling and caps/noCaps for CategoryToVisualize, 
+#                      e.g.: CategoryToVisualize="DMR"
 #                      Options "Relation_to_Island", "chr", "Regulatory_Feature_Group", "X450k_Enhancer", 
 #                      "Phantom4_Enhancers", "Phantom5_Enhancers".
 # BetaMatrix: A matrix of beta values for probes x patients, with probes in rows and patients as columns.
 # MvalueMatrix: A matrix of M values for probes x patients, with probes in rows and patients as columns.
-# AnnotationFile: Matrix of annotations for all the probes found in BetaMatrix. It is of size probes x annotations.
-# ClinicalFile:  File of patients and corresponding clinical category; matrix of size patients x clinical categories
-# ProvideWithinCategories: Should indicate "Yes" or "No", as to whether categories within each category need to be investigated.
+# AnnotationFile: Matrix of annotations for all the probes found in BetaMatrix. It is of size 
+#                 probes x annotations.
+# ClinicalFile: File of patients and corresponding clinical category; matrix of size patients x clinical
+#               categories
+# ProvideWithinCategories: Should indicate "Yes" or "No", as to whether categories within each category 
+#                          need to be investigated.
 
 # Output:
 # Matrix: A list containing BetaMatrix_CategoryToVisualize, MvalueMatrix_CategoryToVisualize, Category
@@ -75,17 +80,29 @@ IsolateEntries <- function(CategoryToVisualize,
       # Initialize average_cat3
       # average_cat3<-0
       
-      # Looking at all probes belonging to ClinicalCategory (e.g. if ClinicalCategory = STAGE, then look at both ADVANCED LIMITED )
-      # ClinicalCategory options "SEX","STAGE","SITE_BIOPSY","TYPE_BIOPSY","COO","TRANSLOC_14_18","INSTITUTION","EPIC_QC","TYPE"
+      # Looking at all probes belonging to ClinicalCategory (e.g. if ClinicalCategory = STAGE, then look 
+      # at both ADVANCED LIMITED )
+      # ClinicalCategory options "SEX","STAGE","SITE_BIOPSY","TYPE_BIOPSY","COO","TRANSLOC_14_18",
+      # "INSTITUTION","EPIC_QC","TYPE"
       
       # vectorNames<-unique(na.omit(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)]))
-      # average_cat1 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which(!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[1])])
-      # average_cat2 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which(!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[2])])
+      # average_cat1 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which
+      #                 (!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),
+      #                 which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[1])])
+      # average_cat2 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which
+      #                 (!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),
+      #                 which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[2])])
       # if(length(vectorNames)==3){
-      #   average_cat3 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which(!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[3])])
+      #   average_cat3 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which
+      #                   (!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),
+      #                   which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[3])])
       # }else if(length(vectorNames)==4){
-      #    average_cat3 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which(!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[3])])
-      # average_cat4 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which(!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[4])])
+      #    average_cat3 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which
+      #                    (!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),
+      #                    which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[3])])
+      # average_cat4 <- as.matrix(BetaMatrix[correspondingRows,which(stri_trim(ClinicalFile[c(which
+      #                 (!is.na(ClinicalFile[,which(colnames(ClinicalFile)==ClinicalCategory)])==TRUE)),
+      #                 which(colnames(ClinicalFile)==ClinicalCategory)])==vectorNames[4])])
       # }else if(length(vectorNames)>=5){
       #   stop("More than 4 categories under ClinicalCategory. Code needs to be updated")
       # }
@@ -112,3 +129,4 @@ IsolateEntries <- function(CategoryToVisualize,
   class(RESULTS) <- "IsolateEntries_ASilva"
   return(RESULTS)
 }
+# [END]
