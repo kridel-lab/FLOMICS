@@ -10,10 +10,10 @@
 # PNGorPDF: Output format of the image, options = "png" or "pdf"; default "png"
 
 
-LinePlot <- function(Dataset, 
-                     ClusterMembershipVector, 
-                     FigureGenerate = "Yes",
-                     PNGorPDF = "png") {
+LinePlot17 <- function(Dataset, 
+                       ClusterMembershipVector, 
+                       FigureGenerate = "Yes",
+                       PNGorPDF = "png") {
   
   # Checking/ Loading needed packages
   # LoadCheckPkg(RegularPckgs=c("pheatmap","gplots","RColorBrewer","MASS"))
