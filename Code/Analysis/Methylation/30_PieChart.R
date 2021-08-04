@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 16 January 2020
 # Function: Visualize pie chart of probes from beta matrix based on: probe type entries,
 #           CpG context entries,  CpG context type, Fantom5 entries, transcription binding
@@ -12,7 +13,7 @@
 # PNGorPDF: Output format of the image, options = "png" or "pdf"; default "png"
 # ImageName: Character string indicating the name for the image.
 
-PieCharts <- function(BetaMatrix, 
+PieCharts30 <- function(BetaMatrix, 
                       AnnotationFile = NA, 
                       ProduceImages = "Yes", 
                       PNGorPDF = "png", 
@@ -54,16 +55,20 @@ PieCharts <- function(BetaMatrix,
                                     textposition = 'outside', 
                                     textinfo = 'label+percent') %>%
                                     layout(title = '', showlegend = FALSE, 
-                                    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                                    xaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE),
+                                    yaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   if(ProduceImages == "Yes") {
     chromosomeType
      if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_chromosomeType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_",
+                            ImageName, "_chromosomeType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_chromosomeType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_chromosomeType.", PNGorPDF), width = 10, height = 20)
     }
   } 
  
@@ -80,10 +85,12 @@ PieCharts <- function(BetaMatrix,
   if(ProduceImages == "Yes") {
     probeType
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_probeType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_probeType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_probeType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_probeType.", PNGorPDF), width = 10, height = 20)
     }
   } 
   
@@ -92,64 +99,82 @@ PieCharts <- function(BetaMatrix,
   # Using plot_ly to create pie-chart for chromosomes
   CpGcontextType <- plotly::plot_ly(CpGcontextEntries, 
                                     labels = ~Var1, values = ~Freq, 
-                                    marker = list(colors = c("#a6cee3","#1f78b4","#fb9a99","#fdbf6f", "#ff7f00", "#cab2d6")),
+                                    marker = list(colors = c("#a6cee3", "#1f78b4", 
+                                                             "#fb9a99", "#fdbf6f", 
+                                                             "#ff7f00", "#cab2d6")),
                                     type = 'pie',
                                     textposition = 'outside', textinfo = 'label+percent') %>%
                                     layout(title = '', showlegend = FALSE, 
-                                    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                                    xaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE),
+                                    yaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-        grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_CpGcontextType.", PNGorPDF))
+        grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                              ImageName, "_CpGcontextType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_CpGcontextType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_CpGcontextType.", PNGorPDF), width = 10, height = 20)
     }
   }
   
   
   # Looking at probe Fantom5
   Fantom5entries <- AnnotationFile2$Phantom5_Enhancers
-  Fantom5entries[which(AnnotationFile2$Phantom5_Enhancers != "")] <- "Phantom 5 enhancer"
-  Fantom5entries[which(AnnotationFile2$Phantom5_Enhancers == "")] <- "No Phantom 5 enhancer"
+  Fantom5entries[which(AnnotationFile2$Phantom5_Enhancers != "")] <- 
+    "Phantom 5 enhancer"
+  Fantom5entries[which(AnnotationFile2$Phantom5_Enhancers == "")] <- 
+    "No Phantom 5 enhancer"
   Fantom5Breakdown <- data.frame(table(Fantom5entries))
   # Using plot_ly to create pie-chart for Fantom5
   Fantom5Type <- plotly::plot_ly(Fantom5Breakdown, labels = ~Fantom5entries, values = ~Freq, type = 'pie',
                          textposition = 'outside',textinfo = 'label+percent') %>%
                          layout(title = '', showlegend = FALSE, 
-                         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                         xaxis = list(showgrid = FALSE, 
+                                      zeroline = FALSE, showticklabels = FALSE),
+                         yaxis = list(showgrid = FALSE, 
+                                      zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_Fantom5Type.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_Fantom5Type.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_Fantom5Type.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_Fantom5Type.", PNGorPDF), width = 10, height = 20)
     }
   }
   
   
   # Looking at probe transcription factor binding sites (TFBS)
   TFBSentries <- AnnotationFile2$TFBS_NAME
-  TFBSentries[which(AnnotationFile2$Phantom5_Enhancers != "")] <- "Transcription binding site"
-  TFBSentries[which(AnnotationFile2$Phantom5_Enhancers == "")] <- "Outside transcription binding site"
+  TFBSentries[which(AnnotationFile2$Phantom5_Enhancers != "")] <- 
+    "Transcription binding site"
+  TFBSentries[which(AnnotationFile2$Phantom5_Enhancers == "")] <- 
+    "Outside transcription binding site"
   TFBSBreakdown <- data.frame(table(TFBSentries))
   # Using plot_ly to create pie-chart for TFBS
   TFBSBType <- plotly::plot_ly(TFBSBreakdown, labels = ~TFBSentries, values = ~Freq, type = 'pie',
                        textposition = 'outside',textinfo = 'label+percent') %>%
                        layout(title = '', showlegend = FALSE, 
-                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                       xaxis = list(showgrid = FALSE, 
+                                    zeroline = FALSE, showticklabels = FALSE),
+                       yaxis = list(showgrid = FALSE, 
+                                    zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_TFBSBType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_TFBSBType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_TFBSBType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_TFBSBType.", PNGorPDF), width = 10, height = 20)
     }
   }
   
@@ -161,41 +186,53 @@ PieCharts <- function(BetaMatrix,
   
   ChromatinBreakdown <- data.frame(table(ChromatinEntries))
   # Using plot_ly to create pie-chart for TFBS
-  ChromatinType <- plotly::plot_ly(ChromatinBreakdown, labels = ~ChromatinEntries, values = ~Freq, type = 'pie',
-                           textposition = 'outside',textinfo = 'label+percent') %>%
-                           layout(title = '', showlegend = FALSE, 
-                           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  ChromatinType <- plotly::plot_ly(ChromatinBreakdown, 
+                                   labels = ~ChromatinEntries, values = ~Freq, type = 'pie',
+                                   textposition = 'outside',textinfo = 'label+percent') %>%
+                                   layout(title = '', showlegend = FALSE, 
+                                   xaxis = list(showgrid = FALSE, 
+                                                zeroline = FALSE, showticklabels = FALSE),
+                                   yaxis = list(showgrid = FALSE, 
+                                                zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_ChromatinType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_ChromatinType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_ChromatinType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_ChromatinType.", PNGorPDF), width = 10, height = 20)
     }
   }
   
   
   # Looking at probe DNAse I hypersensitive region
   DNAseIHypEntries <- AnnotationFile2$DNase_Hypersensitivity_NAME
-  DNAseIHypEntries[which(AnnotationFile2$OpenChromatin_NAME != "")] <- "DNAse I hypersensitive region"
-  DNAseIHypEntries[which(AnnotationFile2$OpenChromatin_NAME == "")] <- "Outside a DNAse I hypersensitive region"
+  DNAseIHypEntries[which(AnnotationFile2$OpenChromatin_NAME != "")] <- 
+    "DNAse I hypersensitive region"
+  DNAseIHypEntries[which(AnnotationFile2$OpenChromatin_NAME == "")] <- 
+    "Outside a DNAse I hypersensitive region"
   DNAseIHypBreakdown <- data.frame(table(DNAseIHypEntries))
   # Using plot_ly to create pie-chart for TFBS
-  DNAseIHypType <- plotly::plot_ly(DNAseIHypBreakdown, labels = ~DNAseIHypEntries, values = ~Freq, type = 'pie',
-                           textposition = 'outside',textinfo = 'label+percent') %>%
-                           layout(title = '', showlegend = FALSE, 
-                           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  DNAseIHypType <- plotly::plot_ly(DNAseIHypBreakdown, 
+                                   labels = ~DNAseIHypEntries, values = ~Freq, type = 'pie',
+                                   textposition = 'outside',textinfo = 'label+percent') %>%
+                                   layout(title = '', showlegend = FALSE, 
+                                   xaxis = list(showgrid = FALSE, 
+                                                zeroline = FALSE, showticklabels = FALSE),
+                                   yaxis = list(showgrid = FALSE, 
+                                                zeroline = FALSE, showticklabels = FALSE))
   
   # Produce image 
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_DNAseIHypType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_DNAseIHypType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_DNAseIHypType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_DNAseIHypType.", PNGorPDF), width = 10, height = 20)
     }
   }
   
@@ -205,21 +242,28 @@ PieCharts <- function(BetaMatrix,
   geneRegion[which(geneRegion == "")] <- "NA"
   geneRegion_breakdown <- data.frame(table(geneRegion))
   # Using plot_ly to create pie-chart for gene region
-  geneRegionType <- plotly::plot_ly(geneRegion_breakdown, labels = ~geneRegion, values = ~Freq, 
-                                    marker = list(colors = c("#8dd3c7", "#ffffb3", "#bebada","#fb8072", 
-                                                             "#80b1d3", "#fdb462", "#fccde5", "#d9d9d9")),
+  geneRegionType <- plotly::plot_ly(geneRegion_breakdown, 
+                                    labels = ~geneRegion, values = ~Freq, 
+                                    marker = list(colors = c("#8dd3c7", "#ffffb3", 
+                                                             "#bebada","#fb8072", 
+                                                             "#80b1d3", "#fdb462", 
+                                                             "#fccde5", "#d9d9d9")),
                                     type = 'pie',
                                     textposition = 'outside',textinfo = 'label+percent') %>%
                                     layout(title = '', showlegend = FALSE, 
-                                    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                                    xaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE),
+                                    yaxis = list(showgrid = FALSE, 
+                                                 zeroline = FALSE, showticklabels = FALSE))
   # Produce image 
   if(ProduceImages == "Yes") {
     if (PNGorPDF == "png") {
-      grDevices::png(paste0(pathNow,"/img/30_PieChart_", ImageName, "_geneRegionType.", PNGorPDF))
+      grDevices::png(paste0(pathNow,"/img/30_PieChart_", 
+                            ImageName, "_geneRegionType.", PNGorPDF))
     }
     if (PNGorPDF == "pdf") { 
-      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, "_geneRegionType.", PNGorPDF), width = 10, height = 20)
+      pdf(paste0(pathNow,"/img/30_PieChart_", ImageName, 
+                 "_geneRegionType.", PNGorPDF), width = 10, height = 20)
     }
   }
   
@@ -227,3 +271,4 @@ PieCharts <- function(BetaMatrix,
   
   return(NULL)
 }
+# [END]
