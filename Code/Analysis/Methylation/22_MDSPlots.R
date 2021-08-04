@@ -1,3 +1,4 @@
+# Updated 3 Aug 2021
 # Updated 17 May 2019
 # Function: Generate MDS plots for a specified ClinicalCategoryToVisualize. 
 # Author: Anjali Silva
@@ -18,13 +19,13 @@
 # Visuals saved to img folder
 # 22_MvalueMDS_", ClinicalCategoryToVisualize,*
 
-MDSplots <- function(ClinicalCategoryToVisualize = "TYPE", 
-                     BetaMatrix, 
-                     AnnotationFile, 
-                     ClinicalFile, 
-                     SampleSheet, 
-                     FigureGenerate = "Yes", 
-                     PNGorPDF = "png") {
+MDSplots22 <- function(ClinicalCategoryToVisualize = "TYPE", 
+                       BetaMatrix, 
+                       AnnotationFile, 
+                       ClinicalFile, 
+                       SampleSheet, 
+                       FigureGenerate = "Yes", 
+                       PNGorPDF = "png") {
 
   # Loading needed packages
   # RegularPckgs=c("minfi","missMethyl","limma")
@@ -88,13 +89,15 @@ MDSplots <- function(ClinicalCategoryToVisualize = "TYPE",
     }
     limma::plotMDS(BetaMatrix, 
                    labels = substr(colnames(BetaMatrix), 4, 10), 
-                   col = as.integer(factor(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)])))
+                   col = as.integer(factor(ClinicalFile[ , 
+                   which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)])))
     graphics::legend("topright", legend = vectorNames, pch = 16, cex = 0.8, 
-                     col = unique(as.integer(factor(ClinicalFile[ , which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]))))
+                     col = unique(as.integer(factor(ClinicalFile[ , 
+                     which(colnames(ClinicalFile) == ClinicalCategoryToVisualize)]))))
     grDevices::dev.off()
   }
   
   return(NULL)
 }
-
+# [END]
 
