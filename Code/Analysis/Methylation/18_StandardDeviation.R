@@ -21,7 +21,7 @@
 #                           if provided as an argument MvalueMatrix. 
 # All_SD_Values: A vector specifying standard deviation value for each probe in the Beta Matrix.
 
-SDeviation <- function(BetaMatrix, 
+SDeviation18 <- function(BetaMatrix, 
                        MvalueMatrix = NA, 
                        CutOff = NA, 
                        NumberofProbes = NA) {
