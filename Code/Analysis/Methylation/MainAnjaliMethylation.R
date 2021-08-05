@@ -4,7 +4,7 @@
 # Source files
 # ** Visualizations are typically done using Beta values and statistical calculations are done using M-values. ***
 cat("\n Sourcing files")
-source("0_Package_check.R") # This needs to be run separately as of May 9, 2019, if running on cluster
+source("0_PackageCheck.R") # This needs to be run separately as of May 9, 2019, if running on cluster
 source("1_QCRemoveSamples.R")
 source("2_LoadingMethylData.R")
 source("3_DensityPlotMethylation.R")
@@ -14,7 +14,7 @@ source("6_SummaryStatistics.R")
 source("7_DifferentialMethylation.R")
 source("8_DifferentialVariability.R")
 source("9_DifferentiallyMethylatedRegions.R")
-source("10_BoxPlotsMethylation.R") # previously 10_ViolinPlotsMethylation.R.R
+source("10_BoxPlotsMethylationRNAseq.R") # previously 10_ViolinPlotsMethylation.R.R
 source("11_HeatPlotMethylation.R")
 source("12_EstimateCellCountsMethylation.R")
 source("13_tSNEPlot.R")
@@ -28,7 +28,7 @@ source("20_GlmnetFeatureSelection.R")
 source("21_ProportionVisualization.R") #* Under construction with bumphunter
 source("22_MDSPlots.R")
 source("23_BarplotMethylation.R")
-source("24_Tumor_purity_check.R")
+source("24_TumorPurityCheck.R")
 source("25_Variance.R")
 source("26_Gprofiler.R")
 source("27_CopyNumberAnalysis.R")
@@ -37,11 +37,18 @@ source("30_PieChart.R")
 source("31_MeanSDPlot.R")
 source("32_ClusterConfidencePlot.R")
 source("33_SNFClustering.R")
+# source("33_SNFClusteringScript.R")
+# source("33_SNFClusteringCytoscape.R")
 source("34_MedianAbsoluteDeviation.R")
 source("35_QCRNAseq.R")
 source("36_DifferentialExpressionRNAseq.R")
 source("37_ViolinPlotsRNAseq.R")
 source("38_RNAseqToMutationCalls01.R")
+source("39_RNAseqVsMethFC.R")
+#source("40_RESETRNAseqVsMethFCscript.R")
+#source("41_MethylMixRNAseqVsMethFCscript.R")
+source("43_epiCMIT.R")
+#ssource("44_AlluvialPlots.R")
 cat("\n Sourced files")
 
 
