@@ -1,0 +1,8 @@
+#create symlink
+ln -s /cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/rawdata/2022_OICR/220*/*.gz ./
+
+#rename the symlink
+sh rename_symlink.sh
+
+
+

@@ -1,0 +1,16 @@
+
+#ln -s /cluster/projects/kridelgroup/FLOMICS/DATA/E4402/RNAseq/GSC-1464_fastq/IX4*/*/*/*_chastity_passed.fastq.gz ./
+
+#create the symlink for R1 files
+sh create_symlink_rename_E4402_R1.sh
+#create the symlink for R2 files
+sh create_symlink_rename_E4402_R2.sh
+
+#convert the lane ids into sample ids
+#id_mapping.txt is the mapping file
+sh rename_rawsymlink_sampleid_R1.sh
+sh rename_rawsymlink_sampleid_R2.sh
+
+#run fastp and fastqc to QC the rawdata
+#sbatch fastp_parellel_sbatch.sh 
+ 
