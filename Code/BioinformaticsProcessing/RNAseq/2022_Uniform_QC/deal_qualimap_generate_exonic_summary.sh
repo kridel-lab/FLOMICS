@@ -1,8 +1,9 @@
 
 file=/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/RNA-seq_QC/RNAseqQC_out_path/*/rnaseq_qc_results.txt
-outfile='RNA_qualmap_summary.txt'
-rm RNA_qualmap_summary.txt
+outfile='RNA_qualimap_summary.txt'
+rm RNA_qualimap_summary.txt
 
+echo 'sample_id exonic_perct' >>$outfile
 for i in $file
 do
 #   echo $i
