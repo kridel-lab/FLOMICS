@@ -18,7 +18,7 @@ exon_perct_num=as.numeric(unlist(strsplit(rna_qc$exonic_perct, "%")))  #get rid 
 ##create new dataframe
 exonic_perct_num<-data.frame("sample_id"=rna_qc$sample_id, "exonic_perct_num"=exon_perct_num)
 #add picard coding pct cal
-picard_out=read.table("/Users/tingliu/Desktop/UHN_projects/FLOMICS/RNA_seq_2022_rerun/total_365_samples/sample_QC/all_picard_RnaMetrics_summary_PF_BASES.txt",header=T,sep = "\t")
+picard_out=read.table("/Users/tingliu/Desktop/UHN_projects/FLOMICS/RNA_seq_2022_rerun/total_365_samples/sample_QC/all_picard_RnaMetrics_summary_v2.txt",header=T,sep = "\t")
 
 #merge all tables
 all_qc_matrix= merge(merge(merge(merge(bam_qc, rrna_perct),exonic_perct_num),starlog),picard_out)
@@ -29,14 +29,24 @@ all_qc_matrix= merge(merge(merge(merge(bam_qc, rrna_perct),exonic_perct_num),sta
 #table((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_perct>=5))
 #table((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$exonic_perct_num>=20))
 
-#v2 add one col to indicate if pass the QC, picard_RnaMetrics_perct >= 5
-all_qc_matrix$qc<-ifelse((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_perct>=5),'Y','N')
-passed_qc_matrix<-all_qc_matrix[((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_perct >= 5)),]
-not_passed_qc_matrix<-all_qc_matrix[all_qc_matrix$qc=='N',]
+#add cols to indicate if pass the QC,rrna_contam_perct<=35 for all tiers
+#exonic_perct_num>20 for tier1, and get rid of an outliner, 250 samples were kept
+all_qc_matrix$qc_tier1<-ifelse((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$exonic_perct_num>20),'Y','N')
+all_qc_matrix$qc_tier1[2]="N"   #get rid of LY_DLC_002 as its median insert size is an outliner
+#picard_RnaMetrics_perct >= 5 for tier2, 290 samples in total 
+all_qc_matrix$qc_tier2<-ifelse((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_perct>=5),'Y','N')
+#picard_RnaMetrics_ALIGNED_perct >= 5 for tier3, 301 samples in total 
+all_qc_matrix$qc_tier3<-ifelse((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_ALIGNED_perct>=5),'Y','N')
+
+#passed_qc_matrix<-all_qc_matrix[((all_qc_matrix$rrna_contam_perct<=35)&(all_qc_matrix$picard_RnaMetrics_perct >= 5)),]
+#not_passed_qc_matrix<-all_qc_matrix[all_qc_matrix$qc=='N',]
 #passed_qc_matrix<-all_qc_matrix[all_qc_matrix$qc=='Y',]
 #write.table(passed_qc_matrix, paste(date,"_FLOMICS_passed_qc301_matrix.txt",sep = ""), quote=F, sep = "\t", row.names = F)
+#passed_qc_matrix$contm_lv<-ifelse((passed_qc_matrix$rrna_contam_perct<1),'Y','N')
+#passed_qc_matrix$cod_lv<-ifelse((passed_qc_matrix$picard_RnaMetrics_perct>10),'Y','N')
 
-write.table(all_qc_matrix, paste(date,"_FLOMICS_all_qc_matrix.txt",sep = ""), quote=F, sep = "\t", row.names = F)
+
+write.table(all_qc_matrix, paste(date,"_FLOMICS_all_qc_matrix_v2.txt",sep = ""), quote=F, sep = "\t", row.names = F)
 
 #all_qc_matrix %>% 
 #  filter(mean_insert_size > 150) %>% 
