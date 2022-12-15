@@ -1,10 +1,6 @@
-# Follicular Lymphoma Multiomics Project (FLOMICS) - integrating data from methylome, transcriptome and genome to discover new subtypes 
+# Follicular Lymphoma Multiomics Project (FLOMICS) - integrating data from targeted DNA sequencing, methylome profiling, bulk RNAseq and single nuclei RNAseq to discover new subtypes 
 
-Molecular classification or subtyping of cancers is becoming an essential step toward clinical practice of precision medicine. In follicular lymphoma (FL), molecular classification or subtyping has emerged as a major unmet need. This project focuses on the analysis of multi-omics data with integrative clustering techniques. The project aims to study the genome, transcriptome, epigenome of FL, to rigorously define and validate molecular subtypes by unravelling inter- and intra-patient heterogeneity.  Our hypotheses:
-
-- FL is not just one disease, but that it can be classified into biologically distinct subgroups.
-- Subclassification of FL using integrative clustering will identify FL subtypes that will open new avenues for tailoring treatment to individual patients.
-- Subclassification is best achieved using statistical inference from multi-omics data, e.g. genome, transcriptome, epigenome, etc. as it will give more power to detect underlying differences.
+Molecular classification or subtyping of cancers is becoming an essential step toward clinical practice of precision medicine. In follicular lymphoma (FL), molecular classification or subtyping has emerged as a major unmet need. This project focuses on the analysis of multi-omics data to subclassify FL. The project aims to study gene mutations, the transcriptome and the methylome of FL, to rigorously define and validate molecular subtypes by unravelling inter- and intra-patient heterogeneity. Our hypothesis is that FL is not just one disease, but that it can be classified into biologically distinct subgroups.
 
 ## Pilot Study
 
