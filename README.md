@@ -2,20 +2,19 @@
 
 Molecular classification or subtyping of cancers is becoming an essential step toward clinical practice of precision medicine. In follicular lymphoma (FL), molecular classification or subtyping has emerged as a major unmet need. This project focuses on the analysis of multi-omics data to subclassify FL. The project aims to study gene mutations, the transcriptome and the methylome of FL, to rigorously define and validate molecular subtypes by unravelling inter- and intra-patient heterogeneity. Our hypothesis is that FL is not just one disease, but that it can be classified into biologically distinct subgroups.
 
-## Pilot Study
+## Patient cohorts
 
-In November, 2018, data for 30 patients with advanced-stage FL, 17 of those who had early-progression and 13 who had late-no-progression were received from Ontario Institute for Cancer Research (OICR).  The samples were originally obtained from Centre for Lymphoid Cancer at British Columbia Cancer Agency (BCCA) and data were extracted from formalin-fixed paraffin-embedded (FFPE) samples. RNA sequencing and DNA methylation seq data were available for these 30 patients. See the [link](https://github.com/anjalisilva/FLOMICS) for pilot study scripts. 
+We adopted an inclusive approach, aiming to enrol primary FL patient samples from both population-based cohorts and from clinical trial series, and from patients with diverse clinical presentations. Overall, we included 4 cohorts:
+1. A retrospective, multicentre cohort of patients presenting with limited-stage disease and treated with radiation or with advanced-stage disease, and treated with immunochemotherapy, accrued from Toronto, Montreal, Kingston, Aarhus, Oslo and Brisbane (referred to as “retrospective” cohort);
+2. A retrospective cohort of existing data from a previously published study in which treatments were heterogeneous (referred to as “PLOSMED” cohort);
+3. The E2408 trial, a randomized phase II trial in which patients were treated with bendamustine and rituximab, with or without bortezomib, followed by maintenance with rituximab, with or without lenalidomide;
+4. The E4402 trial, a randomized phase III trial in which patients with low-tumor burden FL were treated with single-agent rituximab, followed by rituximab maintenance or re-treatment, as needed.
 
-## Expanded Study
+## Sample overview
 
-Currently, the project is in the process of receving more samples. All samples are shown below, as of 21 July 2020:
-
+All samples included, post QC, are shown below, as of 15 Dec 2022:
+(image to be updated)
 <img src="AllSamples_22July2020.png" alt="AllSamples_22July2020" width="400"/>
-
-Used samples are shown below, as of 21 July 2020:
-
-<img src="UsedSamples_22July2020.png" alt="UsedSamples_22July2020" width="400"/>
-
 
 ### Methylome: DNA methylation EPIC Microarray Data Analysis
 
