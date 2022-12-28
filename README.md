@@ -1,4 +1,4 @@
-# Follicular Lymphoma Multiomics Project (FLOMICS) - integrating data from targeted DNA sequencing, methylome profiling, bulk RNAseq and single nuclei RNAseq to discover new subtypes 
+# Follicular Lymphoma Multiomics Project (FLOMICS) - integrating data from targeted DNA sequencing, methylome profiling, bulk RNAseq and single nuclei RNAseq to discover new subtypes
 
 Molecular classification or subtyping of cancers is becoming an essential step toward clinical practice of precision medicine. In follicular lymphoma (FL), molecular classification or subtyping has emerged as a major unmet need. This project focuses on the analysis of multi-omics data to subclassify FL. The project aims to study gene mutations, the transcriptome and the methylome of FL, to rigorously define and validate molecular subtypes by unravelling inter- and intra-patient heterogeneity. Our hypothesis is that FL is not just one disease, but that it can be classified into biologically distinct subgroups.
 
@@ -22,7 +22,7 @@ In February 2019, DNA methylation data for another 147 patients using Illumina M
 - 10 diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
 - 5 reactive lymph node (RLN) = “normal” control
 - 132 FL = cases
-With the 30 FL samples from pilot dataset, a total of 177 samples and 162 FL cases. Of these, only 170 were used for downstream analysis based on QC. Copy number data was derived for 165 of these samples (170 - 5 RLN “normal” controls). 
+With the 30 FL samples from pilot dataset, a total of 177 samples and 162 FL cases. Of these, only 170 were used for downstream analysis based on QC. Copy number data was derived for 165 of these samples (170 - 5 RLN “normal” controls).
 
 #### Main Scripts
 
@@ -41,7 +41,13 @@ With the 30 FL samples from pilot dataset, a total of 177 samples and 162 FL cas
 In February 2020, RNAseq data for 136 samples were obtained. After removing T2 samples (3) and an unmatching sample with methyaltion data (1), 132 samples were available.  The breakdown of these samples were as follows:
 - 10 diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
 - 1 reactive lymph node (RLN) = “normal” control
-- 121 FL = cases 
+- 121 FL = cases
+
+OICR returned 19 samples that passed their QC in June 2022
+- 19 FL samples returned (rawdata:/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/rawdata/2022_OICR/)
+
+E4402 samples that were sequenced at BC Cancer in 2017 are also included in the 2022 uniform QC analyses
+- 210 FL samples (rawdata:/cluster/projects/kridelgroup/FLOMICS/DATA/E4402/RNAseq/GSC-1464_fastq/)
 
 #### Scripts
 
@@ -53,7 +59,7 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 - Pathway enrichment analysis [Code]
 
 
-#### Mutation profiling 
+#### Mutation profiling
 
 - Variant calling and annotation from RNA-seq alignments [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
 )
@@ -64,15 +70,15 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 
 ### Genome: Targeted DNAseq Data Analysis
 
-Intial data for 133 samples submitted for hybridization-based capture sequencing were received after 22 September 2019 from Centre for Lymphoid Cancer at British Columbia Cancer Agency (BCCA). Final raw data were obtained in July 2020. Of these, x were used for downstream analysis based on QC. 
+Intial data for 133 samples submitted for hybridization-based capture sequencing were received after 22 September 2019 from Centre for Lymphoid Cancer at British Columbia Cancer Agency (BCCA). Final raw data were obtained in July 2020. Of these, x were used for downstream analysis based on QC.
 - diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
 - reactive lymph node (RLN) = “normal” control
-- FL = cases 
-With the 30 patients from pilot dataset, a total of x samples. 
+- FL = cases
+With the 30 patients from pilot dataset, a total of x samples.
 
 #### Scripts
 
-#### Mutation profiling 
+#### Mutation profiling
 
 - Variant calling and annotation from RNA-seq alignments [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
 )
@@ -81,8 +87,7 @@ With the 30 patients from pilot dataset, a total of x samples.
 - Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
 
 ### Immune deconvolution
-- Seurat analysis using snRNAseq data [[Code]](Code/BioinformaticsProcessing/snRNAseq/) 
+- Seurat analysis using snRNAseq data [[Code]](Code/BioinformaticsProcessing/snRNAseq/)
 - Bisque analysis using seurat clusters and bulk rna-seq count matrix [[Code]](Code/Analysis/snRNAseq/)
 - Plotting estimated immune fractions [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque.R)
 - Estimated immune fractions versus mutation status [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-mutation-correlation-summary-results.R)
-
