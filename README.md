@@ -43,13 +43,20 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 - 1 reactive lymph node (RLN) = “normal” control
 - 121 FL = cases
 
-OICR returned 19 samples that passed their QC in June 2022
+OICR returned 19 samples that passed their QC criteria in June 2022
 - 19 FL samples returned (rawdata:/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/rawdata/2022_OICR/)
 
-E4402 samples that were sequenced at BC Cancer in 2017 are also included in the 2022 uniform QC analyses
+E4402 samples that were sequenced at BC Cancer in 2017 were also included in the 2022 uniform QC analyses
 - 210 FL samples (rawdata:/cluster/projects/kridelgroup/FLOMICS/DATA/E4402/RNAseq/GSC-1464_fastq/)
 
-#### Scripts
+#### Main QC steps
+
+- Screen for rRNA contamination [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
+- Calculate the percentage of aligned coding bases [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
+- Running qualimap bamqc to calculate the insert size [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/coding_bases_collectRnaSeqMetrics)
+- Collect the STAR log files
+
+#### RNAseq data processing
 
 - Alignment from RNA-seq and extracting gene counts [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/
 )
@@ -57,6 +64,11 @@ E4402 samples that were sequenced at BC Cancer in 2017 are also included in the 
 - Differential expression [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/36_DifferentialExpressionRNAseq.R)
 - SNF clustering [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/33_SNFClustering.R)
 - Pathway enrichment analysis [Code]
+
+
+#### RNAseq data processing
+
+
 
 
 #### Mutation profiling
