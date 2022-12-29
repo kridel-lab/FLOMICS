@@ -57,28 +57,35 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 - Collect the STAR log files [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/STAR_QC)
 
 Tier2: 290 sample passed
-rrna_contam_perct<=35
+rrna_contam_perct<=35 &&
 picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 
 
 #### RNAseq data processing
 
-- Alignment from RNA-seq and extracting gene counts [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/
-)
-- Preprocessing/QC [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/35_QCRNAseq.R)
-- Differential expression [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/36_DifferentialExpressionRNAseq.R)
-- SNF clustering [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/33_SNFClustering.R)
-- Pathway enrichment analysis [Code]
+- Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/trimmomatic-0.39-2_conda_QC_parallel.sh)
+- mapping: mapping against refence genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/STAR_parallel_sbatch_v37.sh)
+•	create a genome index (consistent with the software version)
+human genome build- “GRCh37.primary_assembly.genome.fa”
+annotation file  - “gencode.v37lift37.annotation.gtf”
+•	map reads to the genome
+[[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/)
+STAR_log files per sample were collected as well to evaluate the mapping quality
+- counting:use the resulting BAM files as input to count tools htseq-count /0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/htseq_parallel_sbatch_v3_grch37.sh)
 
 
-#### RNAseq data processing
-
-
-
+#### investigate and adjust the Batch-effect:
+- BactchQC was used to investigate the batch effect:
+Running BatchQC, you will need two files:
+•	A gene by sample matrix with gene IDs in the first column and sample IDs as column headers. The cells contain quantile normalized expression values.
+•	A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
+- ComBat-seq was used to adjust the batch effect:
+ComBat-seq takes untransformed, raw count matrix as input, and it requires a known batch variable.
+- filter out the low-exp genes (optional): filterByExpr function from edgeR automatically filter low exps genes
 
 #### Mutation profiling
 
-- Variant calling and annotation from RNA-seq alignments [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
+- Variant calling from RNA-seq aligned bam files [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
 )
 - Mutation association [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/38_RNAseqToMutationCalls01.R)
 - Visualization of mutations across clusters and stages [Code]
