@@ -51,7 +51,7 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 
 #### RNA-seq workflow
 
-<img src="RNAseq_2022_QC.png" alt="RNAseq_2022_QC" width="400"/>
+<img src="RNAseq_2022_QC.png" alt="RNAseq_2022_QC" width="600"/>
 
 #### Main QC steps
 
