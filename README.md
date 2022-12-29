@@ -49,6 +49,10 @@ OICR returned 19 samples that passed their QC criteria in June 2022
 E4402 samples that were sequenced at BC Cancer in 2017 were also included in the 2022 uniform QC analyses
 - 210 FL samples (rawdata:/cluster/projects/kridelgroup/FLOMICS/DATA/E4402/RNAseq/GSC-1464_fastq/)
 
+#### RNA-seq workflow
+
+<img src="RNAseq_2022_QC.png" alt="RNAseq_2022_QC" width="400"/>
+
 #### Main QC steps
 
 - Screen for rRNA contamination [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
