@@ -66,11 +66,11 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 - Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/trimmomatic-0.39-2_conda_QC_parallel.sh)
 - mapping: mapping against refence genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/STAR_parallel_sbatch_v37.sh)
 
-•	create a genome index (consistent with the software version)
+  - create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
 annotation file  - “gencode.v37lift37.annotation.gtf”
 
-•	map reads to the genome
+  - map reads to the genome
 [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/)
 STAR_log files per sample were collected as well to evaluate the mapping quality
 - counting:use the resulting BAM files as input to count tools htseq-count /0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/htseq_parallel_sbatch_v3_grch37.sh)
@@ -79,8 +79,8 @@ STAR_log files per sample were collected as well to evaluate the mapping quality
 #### investigate and adjust the Batch-effect:
 - BactchQC was used to investigate the batch effect:
 Running BatchQC, you will need two files:
-•	A gene by sample matrix with gene IDs in the first column and sample IDs as column headers. The cells contain quantile normalized expression values.
-•	A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
+  - A gene by sample matrix with gene IDs in the first column and sample IDs as column headers. The cells contain quantile normalized expression values.
+  - A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
 - ComBat-seq was used to adjust the batch effect:
 ComBat-seq takes untransformed, raw count matrix as input, and it requires a known batch variable.
 - filter out the low-exp genes (optional): filterByExpr function from edgeR automatically filter low exps genes
