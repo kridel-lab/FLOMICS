@@ -56,6 +56,11 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 - Running qualimap bamqc to calculate the insert size [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/coding_bases_collectRnaSeqMetrics)
 - Collect the STAR log files [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/STAR_QC)
 
+Tier2: 290 sample passed
+rrna_contam_perct<=35
+picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
+
+
 #### RNAseq data processing
 
 - Alignment from RNA-seq and extracting gene counts [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/
