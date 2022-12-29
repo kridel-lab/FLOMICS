@@ -65,9 +65,11 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 
 - Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/trimmomatic-0.39-2_conda_QC_parallel.sh)
 - mapping: mapping against refence genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/STAR_parallel_sbatch_v37.sh)
+
 •	create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
 annotation file  - “gencode.v37lift37.annotation.gtf”
+
 •	map reads to the genome
 [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/)
 STAR_log files per sample were collected as well to evaluate the mapping quality
