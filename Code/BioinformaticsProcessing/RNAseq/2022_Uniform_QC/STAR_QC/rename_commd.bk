@@ -1,0 +1,7 @@
+rename LY_ BC_LY_ LY*
+
+rename LY_FL OICR_LY_FL LY_FL_[0-9][0-9][0-9][0-9]_*
+rename LY_DLC TGL_LY_DLC LY_DLC_[0-9][0-9][0-9]_*
+rename LY_FL TGL_LY_FL LY_FL_[0-9][0-9][0-9]_*
+rename LY_RLN TGL_LY_RLN LY_RLN_[0-9][0-9][0-9]_*
+

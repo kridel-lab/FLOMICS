@@ -54,7 +54,7 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 - Screen for rRNA contamination [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
 - Calculate the percentage of aligned coding bases [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
 - Running qualimap bamqc to calculate the insert size [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/coding_bases_collectRnaSeqMetrics)
-- Collect the STAR log files
+- Collect the STAR log files [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/STAR_QC)
 
 #### RNAseq data processing
 
