@@ -15,7 +15,7 @@ library(stringr)
 # Read IDAT Files
 # ===============
 # set the working directory
-baseDir <- setwd("/home/rajesh/Dropbox/Documents/CAN_IMG/01_PMCRC/Projects/00_Projects/01_FLOMICS/01_DNA_Methylome_Analysis/02_minfi/02_FL_Samples/")
+baseDir <- setwd("/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/02_minfi/02_FL_Samples/")
 list.files(baseDir)
 
 # Read a sample sheet
