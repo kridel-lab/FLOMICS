@@ -3,4 +3,4 @@ __default__:
     mem:    60000M
     time:   "5-00:00"
     ncpus:  1
-    out:  "/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/CAPSEQ_Pipeline_OUTPUT/TROG_99.03/run001/slurm-outs/{rule}.{wildcards}-%j.out"
+    out:  "/CAPSEQ_Pipeline_OUTPUT/slurm-outs/{rule}.{wildcards}-%j.out"
