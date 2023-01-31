@@ -1,15 +1,14 @@
-#Victoria Shelton  - Last update: August 2021
-#This CAPSEQ pipeline is intended to run upon the BCAugust2020, BCJuly2021 and E2408 Tumor BAM Files.
-#The Analysis performed: coverage summary, Manta SV calling, CNVkit CNV calling,
-    #Mutect2 SNV calling & Annovar SNV annotation
+#Author: Victoria Shelton  - Last update: January 2023
+#This CAPSEQ pipeline is intended to run upon DNA Capture Sequencing Tumor BAM Files.
+#The Analysis performed: coverage summary, Mutect2 SNV calling & Annovar SNV annotation
 
 import pandas as pd
 from pathlib import Path
 import subprocess
 from os.path import join
 
-configfile: "/cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/cluster.yaml"
-configfile: "/cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/config_2.yaml"
+configfile: "/Calling_Variants_Pipeline/cluster.yaml"
+configfile: "/Calling_Variants_Pipeline/config.yaml"
 
 ### Globals ---------------------------------------------------------------------
 # A Snakemake regular expression matching BAM_symlinks files.
@@ -23,8 +22,6 @@ wildcard_constraints:
 # Pipeline output files.
 rule all:
     input:
-        expand(join(config["outputDIR"], "MANTA/MANTA_WORKDIR_nointervals_{sample}/runWorkflow.py"), sample=SAMPLES),
-        expand(join(config["outputDIR"], "CNVkit/CNVkit_WORKDIR_{sample}/CNVkit_amps_input_{sample}.bed"), sample=SAMPLES),
         expand(join(config["outputDIR"], "MUTECT2/{sample}.vcf.gz"), sample=SAMPLES),
         expand(join(config["outputDIR"], "MUTECT2/pileup_summaries/{sample}_getpileupsummaries.table"), sample=SAMPLES),
         expand(join(config["outputDIR"], "MUTECT2/pileup_summaries/{sample}_calculatecontamination.table"), sample=SAMPLES),
@@ -86,93 +83,6 @@ rule coverage_summary:
                         --AMPLICON_INTERVALS {output.amplicon_interval_list} \
                         --TARGET_INTERVALS {output.targets_interval_list}
             """
-
-#Run Manta to obtain SVs and indels
-rule run_Manta:
-    input:
-        sample_bam = rules.coverage_summary.input.sample_bam,
-        gtf_file = config["gencodehg19GTF"],
-        decom_fasta_file = config["Decomhg19Fasta"],
-        amps = config["amplicon_bed"],
-        MantaPath = config["MantaPath"],
-        MantaDir = config["MantaDir"],
-        rule1 = rules.coverage_summary.output.targets_interval_list,
-    output:
-        manta_outpath = directory(join(config["outputDIR"], "MANTA/MANTA_WORKDIR_nointervals_{sample}/")),
-        bed_index = join(config["outputDIR"], "MANTA/AMP_BED_ZIP/amp_bed_{sample}.gz"),
-        manta_out1 = join(config["outputDIR"], "MANTA/MANTA_WORKDIR_nointervals_{sample}/runWorkflow.py"),
-    wildcard_constraints:
-        sample = "\w+"
-    message:
-        "Configuring and Running Manta."
-    shell:
-            """
-            #load modules
-            module load strelka/2.9.10
-            module load python/3.4.3
-            module load manta/1.6.0
-            module load tabix/0.2.6
-
-            #index bed file
-            sort -k 1,1 -k 2,2n -k 3,3n {input.amps} | bgzip -c > {output.bed_index}
-            tabix -pbed -f {output.bed_index}
-
-            #configuration
-            {input.MantaPath} \
-            --tumorBam {input.sample_bam} \
-            --referenceFasta {input.decom_fasta_file} --exome \
-            --runDir {output.manta_outpath}
-
-            #After succesfful configuration run the following:
-            {output.manta_out1} -j 20
-
-            """
-
-#Run CNVkit to obtain copy number vraiants
-rule run_CNVkit:
-    input:
-        sample_bam = rules.coverage_summary.input.sample_bam,
-        gtf_file = config["gencodehg19GTF"],
-        decom_fasta_file = config["Decomhg19Fasta"],
-        amps = config["amplicon_bed"],
-        CNVkitPath = config["CNVkitPath"],
-        CNVkitDir = config["CNVkitDir"],
-        gene_anno = config["Gene_Anno"],
-        rule1 = rules.coverage_summary.output.targets_interval_list,
-    output:
-        CNVkit_outpath = directory(join(config["outputDIR"], "CNVkit/CNVkit_WORKDIR_{sample}/")),
-        bed_index = join(config["outputDIR"], "CNVkit/CNVkit_WORKDIR_{sample}/CNVkit_amps_input_{sample}.bed"),
-        CNVkit_flatref = join(config["outputDIR"], "CNVkit/CNVkit_WORKDIR_{sample}/flat_reference.cnn"),
-    wildcard_constraints:
-        sample = "\w+"
-    message:
-        "Running CNVkit."
-    shell:
-            """
-            #load modules
-            module load strelka/2.9.10
-            module load python/3.4.3
-            module load R/4.0.0
-            module load CNVkit/0.9.3
-
-            #preparing BED file of baited regions for use with CNVkit
-            {input.CNVkitPath} \
-            target  {input.amps} \
-            --annotate {input.gene_anno} \
-            -o {output.bed_index}
-
-            #running CNVkit
-            {input.CNVkitPath} \
-            batch {input.sample_bam} \
-            --normal \
-            -m amplicon \
-            --targets {output.bed_index} \
-            --fasta {input.decom_fasta_file} \
-            --output-reference {output.CNVkit_flatref} \
-            --output-dir {output.CNVkit_outpath}
-
-            """
-
 
 #Run MuTect2 to obtain SNV calls
 rule SNVs_mutect2_tumour_only:
