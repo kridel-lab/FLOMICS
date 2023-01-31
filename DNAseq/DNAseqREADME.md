@@ -1,3 +1,4 @@
-folder to contain DNAseq analysis code and results
+Author: Victoria Shelton
 
-2023-01-31: currently working on making scripts publication ready.
+Notes:
+2023-01-31 - Currently working to make scripts publication ready. 
