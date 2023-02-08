@@ -317,3 +317,5 @@ ggplot(bic_clus_num_freq_pro, aes(x = clus_num_bic, y = Proportion)) +
  geom_text(aes(label = Proportion), vjust = 1.6, color = "white", size = 3.5)
 dev.off()
 message("saved BIC cluster proportion plot")
+
+### add better axis labels to this!
