@@ -168,7 +168,7 @@ for (i in 1:numtries){
         }
       }
     tmp_mat[is.na(tmp_mat)] <- 0
-    assign(  paste0("aic_conn_mat_interim_", col_num2), tmp_mat)
+    assign(paste0("aic_conn_mat_interim_", col_num2), tmp_mat)
     aic_add_array <- array(c(aic_add_array, tmp_mat),
      dim = c(713, 713, (col_num2 + 1)))
     }
@@ -210,7 +210,7 @@ for (i in 1:numtries){
       }
     }
     tmp_mat[is.na(tmp_mat)] <- 0
-    assign(  paste0("bic_conn_mat_interim_", col_num2), tmp_mat )
+    assign(paste0("bic_conn_mat_interim_", col_num2), tmp_mat)
     bic_add_array <- array(c(bic_add_array, tmp_mat),
      dim = c(713, 713, (col_num2 + 1)))
   }
