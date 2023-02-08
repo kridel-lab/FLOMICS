@@ -116,7 +116,7 @@ capseq_merged_freq <- capseq_merged_mat %>%
   dplyr::distinct() %>%
   count(Hugo_Symbol) %>%
   arrange(desc(n)) %>%
-  mutate(proportion_mutated = n/ncol(capseq_merged_mat)) %>%
+  mutate(proportion_mutated = n / ncol(capseq_merged_mat)) %>%
   filter(proportion_mutated > 0.02) %>%
   select(Hugo_Symbol, n, proportion_mutated) %>%
   mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
@@ -140,7 +140,7 @@ genes__more_2perc <- capseq_merged_mat %>%
   dplyr::distinct() %>%
   count(Hugo_Symbol) %>%
   arrange(desc(n)) %>%
-  mutate(proportion_mutated = n/ncol(capseq_merged_mat)) %>%
+  mutate(proportion_mutated = n / ncol(capseq_merged_mat)) %>%
   filter(proportion_mutated > 0.02) %>%
   select(Hugo_Symbol, n, proportion_mutated) %>%
   mutate(Hugo_Symbol = factor(Hugo_Symbol, Hugo_Symbol)) %>%
@@ -158,11 +158,11 @@ capseq_merged_mat_plot <- capseq_merged_mat %>%
   dplyr::distinct() %>%
   group_by(cohort) %>%
   count(Hugo_Symbol) %>%
-  mutate(proportion_mutated = ifelse(cohort == "UHN", n/ncol(capseq_UHN),
-                              ifelse(cohort == "E4402", n/ncol(capseq_E4402),
-                              ifelse(cohort == "E2408", n/ncol(capseq_E2408),
-                              ifelse(cohort == "PLOSMED", n/ncol(capseq_PLOSMED)
-                              ))))) %>%
+  mutate(proportion_mutated = ifelse(cohort == "UHN", n / ncol(capseq_UHN),
+                              ifelse(cohort == "E4402", n / ncol(capseq_E4402),
+                              ifelse(cohort == "E2408", n / ncol(capseq_E2408),
+                              ifelse(cohort == "PLOSMED", n /
+                               ncol(capseq_PLOSMED)))))) %>%
   filter(Hugo_Symbol %in% genes__more_2perc) %>%
   mutate(Hugo_Symbol = factor(Hugo_Symbol, genes__more_2perc)) %>%
   ggplot(aes(x = Hugo_Symbol, y = proportion_mutated)) +
