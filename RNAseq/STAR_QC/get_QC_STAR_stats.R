@@ -2,7 +2,8 @@
 #get QC from STAR
 #----------------------------------------------------------------------------------
 
-#Karin Isaev
+#Karin Isaev created 
+#Ting Liu updated
 
 #----------------------------------------------------------------------------------
 #PACKAGES
@@ -22,15 +23,12 @@ source("extract_samples.R")
 #library(hciR)
 library(stringr)
 
-setwd("/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/STAR_QC/TGL_OICR_log_final_out")
-#setwd("/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/STAR_QC/E4402_log_final_out")
-#setwd("/cluster/projects/kridelgroup/RNAseq_cell_lines/220131_A00827_0499_AHTY3MDRXY_Kridel_Michael/STAR_out/log_final_out")
-#setwd("/cluster/projects/kridelgroup/RNAseq_cell_lines/211123_A00827_0459_BHNWW2DRXY_Kridel_Robert/STAR_log_final")
+setwd("/pwd/STAR_QC/log_final_out")
 #----------------------------------------------------------------------------------
 #DATA
 #----------------------------------------------------------------------------------
 
-results = list.files(pattern="_T1Log.final.out$")
+results = list.files(pattern="_Log.final.out$")
 
 star_summary = as.data.table(read_STAR(path = ".", pattern="Log.final.out", reshape = FALSE))
 star_summary$sample = sapply(star_summary$sample, function(x){ unlist(strsplit(x, "Log"))[1]})
