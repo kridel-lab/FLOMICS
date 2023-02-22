@@ -77,7 +77,7 @@ annotation file  - “gencode.v37lift37.annotation.gtf”
   - map reads to the genome
 [[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/)
 STAR_log files per sample were collected as well to evaluate the mapping quality
-- counting:use the resulting BAM files as input to count tools htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](https://github.com/kridel-lab/FLOMICS/RNAseq/004_collect_counts_2022.R)
+- counting:use the resulting BAM files as input to count tools htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](RNAseq/004_collect_counts_2022.R)
 
 
 #### investigate and adjust the Batch-effect:
