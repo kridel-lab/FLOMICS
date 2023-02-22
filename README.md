@@ -89,14 +89,6 @@ Running BatchQC, you will need two files:
 ComBat-seq takes untransformed, raw count matrix as input, and it requires a known batch variable.
 - filter out the low-exp genes (optional): filterByExpr function from edgeR automatically filter low exps genes
 
-#### Mutation profiling
-
-- Variant calling from RNA-seq aligned bam files [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
-)
-- Mutation association [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/38_RNAseqToMutationCalls01.R)
-- Visualization of mutations across clusters and stages [Code]
-- Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
-
 
 ### Genome: Targeted DNAseq Data Analysis
 
