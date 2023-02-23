@@ -1,6 +1,6 @@
 
 #--
-# This script executes first pass filtering upon variant calls
+# This script executes first-pass filtering upon variant calls
 # post Mutect2 and Annovar analysis and prepares a matrix of
 # variants calls for further filtering downstream.
 # Author: Victoria Shelton
