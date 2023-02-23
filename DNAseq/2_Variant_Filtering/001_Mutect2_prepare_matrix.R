@@ -1,7 +1,7 @@
 #--
-# This script filters variant calls post Mutect2 and Annovar analysis
-# and prepares a matrix of variants calls for further filtering
-# downstream.
+# This script executes first pass filtering upon variant calls
+# post Mutect2 and Annovar analysis and prepares a matrix of
+# variants calls for further filtering downstream.
 # Author: Victoria Shelton
 # Last modified: February 23rd, 2023
 # Tested on R/4.1.0
