@@ -55,10 +55,10 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 
 #### Main QC steps
 
-- Screen for rRNA contamination [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
-- Calculate the percentage of aligned coding bases [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/rRNA_cont_cal)
-- Running qualimap bamqc to calculate the insert size [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/coding_bases_collectRnaSeqMetrics)
-- Collect the STAR log files [[Code]](Code/BioinformaticsProcessing/RNAseq/2022_Uniform_QC/STAR_QC)
+- Screen for rRNA contamination 
+- Calculate the percentage of aligned coding bases 
+- Running qualimap bamqc to calculate the insert size 
+- Collect the STAR log files 
 
 Tier2: 290 sample passed
 rrna_contam_perct<=35 &&
@@ -67,17 +67,17 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 
 #### RNAseq data processing
 
-- Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/trimmomatic-0.39-2_conda_QC_parallel.sh)
-- mapping: mapping against refence genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/STAR_parallel_sbatch_v37.sh)
+- Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](RNAseq/)
+- mapping: mapping against refence genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
 
   - create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
 annotation file  - “gencode.v37lift37.annotation.gtf”
 
   - map reads to the genome
-[[Code]](Code/BioinformaticsProcessing/RNAseq/AlignmentGeneCounts/)
+[[Code]](RNAseq/)
 STAR_log files per sample were collected as well to evaluate the mapping quality
-- counting:use the resulting BAM files as input to count tools htseq-count /0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](https://github.com/kridel-lab/FLOMICS/Code/BioinformaticsProcessing/RNAseq/E4402/htseq_parallel_sbatch_v3_grch37.sh)
+- counting:use the resulting BAM files as input to count tools htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](RNAseq/)
 
 
 #### investigate and adjust the Batch-effect:
@@ -88,14 +88,6 @@ Running BatchQC, you will need two files:
 - ComBat-seq was used to adjust the batch effect:
 ComBat-seq takes untransformed, raw count matrix as input, and it requires a known batch variable.
 - filter out the low-exp genes (optional): filterByExpr function from edgeR automatically filter low exps genes
-
-#### Mutation profiling
-
-- Variant calling from RNA-seq aligned bam files [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
-)
-- Mutation association [[Code]](https://github.com/kridel-lab/FLOMICS/blob/master/Code/Analysis/RNAseq/38_RNAseqToMutationCalls01.R)
-- Visualization of mutations across clusters and stages [Code]
-- Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
 
 
 ### Genome: Targeted DNAseq Data Analysis
