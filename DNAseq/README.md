@@ -1,11 +1,14 @@
-# CAPSEQ/Targeted DNAseq Pipeline
+# CAPSEQDNAseq Pipeline
 
 > Author: Victoria Shelton
 
-This repository contains code for the analysis of Capture-Seq/Targeted DNAseq Pipeline (CAPSEQ Pipieline)
+This folder contains scripts for the analysis of Capture-Seq/Targeted DNAseq 
 
 --------------------------
 ### Folder Descriptions
+
+#### >[1_Calling_Variants_Pipeline](1_Calling_Variants_Pipeline/)
+
 
 #### >[Scripts](Scripts/)
 This folder contains the individual scripts/code on which the CAPSEQ Pipeline is based. Supplementary data analysis scripts are also stored here.
