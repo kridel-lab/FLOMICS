@@ -16,30 +16,76 @@ Scripts for filtering of variant calls.
 #### >[3_SNV_Clustering_Workflow](3_SNV_Clustering_Workfloww/)
 Scripts for executing the clustering of variant calls.
 
+
+#### >[Scripts](Scripts/)
+This folder contains the individual scripts/code on which the CAPSEQ Pipeline is based. Supplementary data analysis scripts are also stored here.
+
+#### >[TargetedDNAseq_pipeline](TargetedDNAseq_pipeline/)
+This folder contains the relevant scripts for executing the CAPSEQ pipeline.
+
+#### >[TargetedDNAseq_pipeline/snakemake-tests](TargetedDNAseq_pipeline/snakemake-tests/)
+Where all previous versions of the Snakemake pipeline are stored. These snakemake files were used when building and testing the CAPSEQ piepline. File *test003-pipeline.smk* is the final test version which spawned *CAPSEQ-PpielineBC.smk* and *CAPSEQ-Pipelilne_PLOS-E4402.smk*.
+
 --------------------------
-## 1_Calling_Variants_Pipeline Files:
-[All files described in this section are stored in the 1_Calling_Variants_Pipeline folder](1_Calling_Variants_Pipeline/)
+## Pipeline Files:
+[All files described in this section are stored in the TargetedDNAseq_pipeline folder](TargetedDNAseq_pipeline/)
 
-#### Snakemake file
+#### Snakemake file selection
+> Tumor-Only analysis (only requries Tumor sample BAM files)
 - CAPSEQ_Pipeline_BC.smk 
-  - Produces sample coverage summary, SNV calls via Mutect2, and SNV annotations via Annovar. 
-  - Requires inputs given in the config.yaml file
+  - Intended for the BC/UHN and E2408 cohorts.
+  - Produces sample coverage summary, SV calls via Manta, CNV calls via CNVkit, SNV calls via Mutect2, and SNV annotations via Annovar. 
+  - Requires both target AND amplicon probe coordinate bed files.
+- CAPSEQ_Pipeline_PLOSMED-E4402.smk 
+  -  Intended for the PLOSMED and E4402 cohorts.
+  -  Produces SNV calls via Mutect2 and SNV annotations via Annovar[^1]. 
+  -  Requires either target OR amplicon probe coorindate bed files.
+> Tumor-Normal analysis (requries both Tumor and Normal sample BAM files)
+- CAPSEQ_Pipeline_Tumor-Normal_rev2.smk[^2]
+  - Intended for the E2408 cohort.
+  - Produces sample coverage summary, SV calls via Manta, SV calls via Gridss, CNV calls via CNVkit, SNV calls via Mutect2, and SNV annotations via Annovar.
+  - Requires both target AND amplicon probe coordinate bed files.
+- CAPSEQ_Pipieline_PLOSMED_Tumor-Normal.cmk[^3]
+  - Intended for the PLOSMED cohort.
+  - Produces SNV calls via Mutect2 and SNV annotations via Annovar[^1].
+  - Requires either target OR amplicon probe coorindate bed files.
 
-#### Config file
-- config.yaml[^4]
-  - Holds the paths to input files required for running the CAPSEQ Pipeline for variant calling.
+[^1]: This pipeline will be updated to include CNVkit copy number variant calling of BAM files.
+[^2]: The name of this file will be changed to CAPSEQ_Pipeline_E2408_Tumor-Normal.smk
+[^3]: This pipeline has yet to be run and tested (2022-01-03)
 
-#### Shell excution file
+#### Config file selection
+> Tumor-Only analysis
+- config_2.yaml[^4]
+  - Intended for all Tumor-Only analyses
+- config.json[^4]
+  - Is the same as config_2.yaml, but in json format
+> Tumor-Normal analysis
+- config_Tumor_Normal.yaml
+  - Intended for E2408 Tumor-Normal analysis 
+- config_PLOSMED_Tumor_Normal.yaml
+  - Intended for PLOSMED Tumor-Normal analysis 
+
+[^4]: These config files were modifed before conducting variant calling upon a different/new cohort.
+
+#### Shell excution file selection
 - snakemake_CAPSEQ_analysis.sh
-  - File used to execute the CAPSEQ Pipeline 
+  - Used when conducting Tumor-Only analysis
+- snakemake_CAPSEQ_analysis_Tumor-Normal.sh 
+  - Used when conducting Tumor-Normal analysis
 
-#### Accompanying execution file
-- cluster.yaml
-  - File holding execution information to accompany snakemake_CAPSEQ_analysis.sh
+#### Preparing BAM files for the CAPSEQ pipeline (To be moved to a new folder)
+- Creating_symlinks.sh  
+  - For creating symlinks that point to the BAM files. Highly recommend to execute the CAPSEQ pipeline upon symlinks and not on the BAM files themseleves. 
+- renaming_BAMs.R 
+  - For renaming the BAM files to ensure they do not contain any "-"/hyphens/dashes in the filename. Otherwise the CAPSEQ pipeline will not execute.
 
-#### Preparing BAM files for the CAPSEQ pipeline
-- Highly recommend to execute the CAPSEQ pipeline upon symlinks and not on the raw/original BAM files themseleves. 
-- Ensure the BAM files to be input do not contain any "-"/hyphens/dashes in their filenames. Otherwise the CAPSEQ pipeline will not execute.
+###### Testing and Obselite files & scripts (To be moved into a new folder)
+- CAPSEW_Pipeline_PLOSMED_Tumor_Normal.smk
+- CAPSEQ_Pipeline_Tumor-Normal_rev1.smk
+- config.yaml
+- TargetedDNAseq-pipeline.smk
+
 
 ## Running the CAPSEQ Pipeline: 
 >Preparation:
