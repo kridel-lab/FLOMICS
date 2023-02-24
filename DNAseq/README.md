@@ -32,6 +32,7 @@ Scripts for executing the clustering of variant calls.
 #### Shell excution file
 - snakemake_CAPSEQ_analysis.sh
   - File used to execute the CAPSEQ Pipeline 
+  - Requires information given in the cluster.yaml file
 
 #### Accompanying execution file
 - cluster.yaml
@@ -43,50 +44,22 @@ Scripts for executing the clustering of variant calls.
 
 ## Running the CAPSEQ Pipeline: 
 >Preparation:
-1. Determine whether you are conducting Tumor-Only or Tumonr-Normal analysis, and whether target probe coordinates and/or amplicon probe coordinates are available for your cohort of samples. [Select the appropriate snakemake pipeline file.](https://github.com/kridel-lab/CapSeq_pipeline/blob/vic-test/README.md#snakemake-file-selection) 
-2. Prepare the necessary CAPSEQ Pipeline input files:
-    - BAM files (*.bam*) need to be stored together in a single directory. Tumor BAM files and Normal BAM files should be stored in separate directories.
-    - It is highly recommended to create a directories of symbolic links pointing to your BAM files, and to not execute the CAPSEQ Pipeline directly upon your BAM files.
-    - **!!!VERY IMPORTANT!!!** Ensure that the names of your sample BAM files do not contain any "-"/hyphens/dashes. Otherwise the CAPSEQ Pipeline will not be able to read your sample BAM files. See [Preparing BAM files for the CAPSEQ pipeline.](https://github.com/kridel-lab/CapSeq_pipeline/blob/vic-test/README.md#preparing-bam-files-for-the-capseq-pipeline-to-be-moved-to-a-new-folder)
-    - Determine which human reference genome was utilized to generate your sample BAM files and supply the paths to all other Pipeline inputs listed in [*config_2.yaml*](TargetedDNAseq_pipeline/config_2.yaml). This includes:
+1. Prepare the necessary CAPSEQ Pipeline input files:
+    - BAM files (*.bam*) need to be stored together in a single directory.
+    - It is highly recommended to create a directories of symbolic links pointing to your BAM files, and to not execute the CAPSEQ Pipeline directly upon your raw/original BAM files.
+    - Ensure that the names of your sample BAM files do not contain any "-"/hyphens/dashes. Otherwise the CAPSEQ Pipeline will not be able to read your sample BAM files.
+    - Determine which human reference genome was utilized to generate your sample BAM files and supply the paths to all other Pipeline inputs listed in [*config.yaml*](1_Calling_Variants_Pipeline/config.yaml). This includes:
       - The compressed and decompressed human reference genome fasta file
       - The gtf file of gene structure for the human reference genome
       - The raw sites file which contains population allele frequencies for human reference genome (*af-only-gnomad.raw.sites.b37.vcf.gz*)
-      - The Manta software directory and *configManta.py* script
-      - The CNVkit software directory, cnvkit.py and the gene annotations file used by CNVkit
       - The gene annotation directory utilized by Annovar. Ex.  `/../../../annovar/humandb`
       - The target and/or amplicon probe coordinate bed files
-3. Create and supply an output directory path within *config_2.yaml* (after `outputDIR`). This is where all CAPSEQ Pipeline output files will be stored and organized for you.
-- Example:
-   
-`outputDIR: /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/CAPSEQ_Pipeline_OUTPUT/E2408-Tumor-Only/run001/`
-
-4. Specify the path to an existing directory for the CAPSEQ Pipeline slurm files to be stored within *cluster.yaml* after `out:`, and within [the appropriate shell excution script](https://github.com/kridel-lab/CapSeq_pipeline/tree/vic-test#shell-excution-file-selection) after `#SBATCH -o`.
-- *cluster.yaml* example:
-
-` out:  "/cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/CAPSEQ_Pipeline_OUTPUT/E2408-Tumor-Normal/run001/slurm-outs/{rule}.{wildcards}-%j.out"`
-- Shell execution script example:
-
-`#SBATCH -o /cluster/projects/kridelgroup/FLOMICS/DATA/TargetedDNAseq/CAPSEQ_Pipeline_OUTPUT/E2408-Tumor-Only/run001/slurm-outs/%x-%j.out`
-
-5. Within the shell execution script, also supply the path to the desired execution directory after `cd` on line 18, the path to where the CAPSEQ Pipeline snakemake file is stored after `snakemake` on line 20, and the path to where the CAPSEQ *cluster.yaml*" file is stored after `  --cluster-config` on line 23. 
-- Example:
-
-`cd /cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline`
-
-`snakemake -s /cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/CAPSEQ_Pipeline_BC.smk \`
-
-`    --cluster-config /cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/cluster.yaml \`
+2. Create and supply an output directory path within *config.yaml* (after `outputDIR`). This is where all CAPSEQ Pipeline output files will be stored and organized for you.
+3. Specify the path to an existing directory for the CAPSEQ Pipeline slurm files to be stored within *cluster.yaml* after `out:`, and within shell excution script after `#SBATCH -o`.
+4. Within the shell execution script, also supply the path to the desired execution directory after `cd` on line 18, the path to where the CAPSEQ Pipeline snakemake file is stored after `snakemake` on line 20, and the path to where the CAPSEQ *cluster.yaml*" file is stored after `  --cluster-config` on line 23. 
   - Be sure to accurately name the job here as well. Example:
-  `#SBATCH -J ppE2408-CAPSEQ`
-  
-8. Within the CAPSEQ Pipeline snakemake file supply the path to where the *cluster.yaml* and *config.yaml* files are stored after each respective `configfile:` (either line 10 and 11, OR, line 11 and 12).
-- Example:
-
-`configfile: "/cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/cluster.yaml"`
-
-`configfile: "/cluster/home/vshelton/CapSeq_pipeline/TargetedDNAseq_pipeline/config_2.yaml"`
-
+  `#SBATCH -J testrun-CAPSEQ`
+5. Within the CAPSEQ Pipeline snakemake file (CAPSEQ_Pipeline_BC.smk) supply the path to where the *cluster.yaml* and *config.yaml* files are stored after each respective `configfile:` (line 10 and 11).
 
 >Execution:
 1. To execute the CAPSEQ Pipeline, modify the following command to indicate the shell execution script you will be using, and execute:
