@@ -66,105 +66,40 @@ Scripts for executing the clustering of variant calls.
       `sbatch snakemake_CAPSEQ_analysis.sh`
 2. To follow the progress of CAPSEQ Pipeline execute the `squeue` command and monitor the snakemake slurm files.
 
-------------------------------------------
-## Additional SV caller execution:
-[**Gridss**](https://github.com/PapenfussLab/gridss) is an additional SV caller used. High confidence SVs are determined by comparison of Gridss SV calls with Manta SV calls
-### Files
-[These files can be found in the Scripts folder](Scripts/)[^5]
+--------------------------
+## 2_Variant_Filtering_Workflow:
+[All files described in this section are stored in the 2_Variant_Filtering_Workflow folder](2_Variant_Filtering_Workflow/)
 
-***Note***: Files without a cohort indicated in the filename were utlized to process BCAugust2020 and BCJuly2021 cohorts under Tumor-Only analysis. Files with E2408 indicated in the filename were utilized to process the E2408 cohort under Tumor-Only analysis. All other files have cohort and analysis-type indicated in the filename.
-[^5]: All scripts used to run Gridss SV calling will be moved to a new folder within the respository.
-#### Script Execution Order 
-- 011_GRIDSS_order_commands_2021.sh
-#### Indivudal command scripts
-- 011_A_GRIDSS_image_file.sh
-- 011_B_GRIDSS_setupreference.sh
-- 011_C_GRIDSS_preprocess.sh
-- 011_D_GRIDSS_assebmle.sh
-- 011_E_GRIDSS_call.sh
-#### Grouped command scripts (convenient)
-- 011_C-E_GRIDSS_commands.sh
-- 011_C-E_GRIDSS_commands_E2408.sh
-- 011_C-E_GRIDSS_commands_E2408_Tumor-Normal.sh
-#### Additional Commands that must be run for Tumor-Normal analysis, but not Tumor-Only analysis
-- 011_GRIDSS_RepeatMasker_E2408_Tumor-Normal.sh
-- 011_GRIDSS_SomaticFiltering_E2408_Tumor-Normal.sh
-- 011_GRIDSS_SomaticFiltering_E2408_Tumor-Normal_1samp.sh
+#### Step 1: Gathering variant calls and first stage filtering
+- 001_Mutect2_prepare_matrix.R
+  - Gathers variants calls into a single matrix
+  - Excutes the first stage of filtering upon gathered variant calls
+  - This occurs after variant calls have been annotated with Annovar
+  - Requires "_annovar.vcf.gz.hg19_multianno.vcf" files
 
+#### Step 2: Second stage filtering
+- 002_filtering_Mutect2.R
+  - Excutes the second stage of filtering upon gathered variant calls
+  - This occurs after Step 1 of the 2_Variant_Filtering_Workflow
+  - Requires the "sample_based_coverage_summary.csv" output by 1_Calling_Variants_Pipeline, "variant_calls.txt" output by 001_Mutect2_prepare_matrix.R, and any sample annotation necessary for binding the coverage summary and variant calls together. 
 
-### Running Gridss SV calling
->Tumor-Only analysis
-1. Read the [order of commands](Scripts/011_GRIDSS_order_commands_2021.sh), execute [011_A](Scripts/011_A_GRIDSS_image_file.sh) and [011_B](Scripts/011_B_GRIDSS_setupreference.sh) if the mandatory Gridss files are not present. (This can take ~3 hours)
-   - You do not need to execute the order of commands script, instead use the individual batch scripts to run Gridss after reading the order of commands.
-2. Create a directory to store the Gridss output. Don't forget to specifiy this directory in each Gridss script.
-3. Modify and execute the appropriate [grouped command script](https://github.com/kridel-lab/CapSeq_pipeline/blob/vic-test/README.md#grouped-command-scripts-convenient).
+## Running the Variant Filtering Workflow: 
+>Preparation:
+1. Prepare the necessary CAPSEQ Pipeline input files:
+    - Ensure the "_annovar.vcf.gz.hg19_multianno.vcf" files of all sample variant calls you wish to be gathered into a single matrix are placed into a single folder. ( This is for 001_Mutect2_prepare_matrix.R )
+    - Know where the "sample_based_coverage_summary.csv" output by the 1_Calling_Variants_Pipeline is located, and where the "variant_calls.txt" output by 001_Mutect2_prepare_matrix.R is deposited. If additional information is required to connect the information in these two files by sample of origin is reuiqred, please provide this as well. ( This is for 002_filtering_Mutect2.R )
 
->Tumor-Normal analysis
-1. Follow the same steps as above. **Note:** CAPSEQ_Pipeline_Tumor-Normal_rev2.smk conducts these steps, you do not need to execute these scripts if you are using CAPSEQ_Pipeline_Tumor-Normal_rev2.smk
-2. After the grouped command script has completed generating output, execute the RepeatMasker script. 
-3. Once the RepeatMasker script has completed running, execute the appropriate Somatic Filtering script. (If conducting Gridss calling upon only 1 sample, use 011_GRIDSS_SomaticFiltering_E2408_Tumor-Normal_1samp.sh. If not, use 011_GRIDSS_SomaticFiltering_E2408_Tumor-Normal.sh).
+>Execution:
+1. Run Step 1 first via `Rscript 001_Mutect2_prepare_matrix.R`
+2. Run Step 2 via `Rscript 002_filtering_Mutect2.R`
 
-----------------------------------
-## Variant Analysis Files:
-[These files can be found in the Scripts folder](Scripts/)
->COVERAGE
-- 003A_summarize_probe_coverage_2021.R
-- 003B_summarize_probe_coverage_2021.R
->Mutect2
-- 008_Mutect2_prepare_matrix_July2021.R
-- 010_A_filtering_Mutect2_SNVs.R
-- 010_B_combining_SNV_matrices.R  (used to combine the BCJuly2021 and BCAugust2020 cohorts)
-- 010_C_gene_vs_sample_SNV_matrix.R
->Manta
-- 004_C_processing_manta_job_2021.R (executes 004_B_processing_manta_2021.R)
-- 004_D_make_matrix_manta_2021.R
-- counting_SVs.R
->Gridss
-#### Processing Gridss output
-- 011_F_processing_GRIDSS_2021.R
-- 011_F_processing_GRIDSS_E2408_2021.R
-- 011_F_processing_GRIDSS_Tumor-Normal_2021.R
-- 011_G_processing_GRIDSS_job_2021.sh
-- 011_G_processing_GRIDSS_job_E2408_2021.sh
-- 011_G_processing_GRIDSS_job_E2408_Tumor-Normal_2021.sh
-#### Wrangling the results into a utilizable matrix format
-- 011_H_make_matrix_GRIDSS_2021.R
-- 011_H_make_matrix_GRIDSS_E2408_2021.R
-- 011_H_make_matrix_GRIDSS_E2408_Tumor-Normal.R
-#### Filtering for the SV calls we are interested in, output as tables
-- 011_I_GRIDSS_sv_breakapart_predictions_BCAugust2020.R
-- 011_I_GRIDSS_sv_breakapart_predictions_BCJuly2021.R
-- 011_I_GRIDSS_sv_breakapart_predictions_E2408_2021.R
-- 011_I_GRIDSS_sv_breakapart_predictions_E2408_Tumor-Normal_2021.R
+--------------------------
+## 3_SNV_Clustering_Workflow:
+[All files described in this section are stored in the 3_SNV_Clustering_Workflow folder](3_SNV_Clustering_Workflow/)
 
->SV comparion
-
->SNV Clustering
-
-## Variant Analysis Steps:
->COVERAGE
-
->Mutect2
-
->Manta
-
->Gridss
-1. Modify both of the appropriate [011_F and 011_G files](https://github.com/kridel-lab/CapSeq_pipeline/tree/vic-test#processing-gridss-output) (two files in total for one cohort), and execute only the 011_G file. (011_G will execute 011_F).
-2. Modify and execute the appropriate [011_H file](https://github.com/kridel-lab/CapSeq_pipeline/tree/vic-test#wrangling-the-results-into-a-utilizable-matrix-format) to wrangle SV results into a matrix
-3. Use the correct [011_I file](https://github.com/kridel-lab/CapSeq_pipeline/tree/vic-test#filtering-for-the-sv-calls-we-are-interested-in-output-as-tables) to generate sv breakapart prediction tables. 
->SV comparion
-
->SNV Clustering
---------------------------------
---------------------------------
-#### Incoming additions:
-- [x] Write README description for CAPSEQ_Pipeline_Tumor-Normal_rev2.smk
-- [x] Add steps for Gridss execution.
-- [x] Add links to README sections.
-- [ ] Upload SV comparison and merging scripts.
-- [ ] Upload SNV Clustering scripts.
-- [ ] Change filename of CAPSEQ_Pipeline_Tumor-Normal.smk to CAPSEQ_Pipeline_E2408_Tumor-Normal.smk
-- [ ] Change filename of snakemake_CAPSEQ_analysis.sh to snakemake_CAPSEQ_Tumor-Only_analysis.sh
-- [ ] Move Gridss scripts to a new folder within the repository.
-- [ ] Write README descriptions and instructions for the remainder of Variant Analysis scripts.
-
+#### Step 1: Creating SNV matrix (clustering analysis input)
+- 001_make_SNV_matrix_and_plot.R
+  - Gathers variants calls into a single matrix
+  - Excutes the first stage of filtering upon gathered variant calls
+  - This occurs after variant calls have been annotated with Annovar
+  - Requires "_annovar.vcf.gz.hg19_multianno.vcf" files
