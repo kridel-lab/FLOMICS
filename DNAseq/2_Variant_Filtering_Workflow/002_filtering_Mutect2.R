@@ -34,7 +34,7 @@ dir <- "/your working directory/"
 
 coverage_info <- read.delim("sample_based_coverage_summary.csv",
  header = TRUE, sep = ",")
-snv_calls <- read.delim("MUTECT2_calls.txt", header = TRUE, sep = ";")
+snv_calls <- read.delim("variant_calls.txt", header = TRUE, sep = ";")
 samp_info <- read.delim("sample_annotations.csv", header = TRUE, sep = ",")
 
 
