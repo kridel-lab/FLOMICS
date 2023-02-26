@@ -43,7 +43,7 @@ genes_uhn <- read.csv("panel2.csv") %>%
 genes_common <- intersect(genes_plosmed, genes_uhn)
 
 ### Read in filtered exonic and splice-impacted SNV calls (excluding synonymous)
-capseq_var <- read.table("SNVcalls.txt", sep = ";", header = TRUE)
+capseq_var <- read.table("_exonic_filtered_MUTECT2_calls.txt", sep = ";", header = TRUE)
 
 #check if there are any missing genes from this SNV dataset
 dplyr::setdiff(genes_common$Gene.Name, capseq_var$Hugo_Symbol)
