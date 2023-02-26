@@ -58,6 +58,12 @@ dim(muts_df)
 # Consensus clustering following the method used in:
 # https://doi.org/10.1182/blood.2019003535
 #--
+
+### loading in functions
+source("script-plot-all-mutations-all-cohorts_to_be_loaded.R")
+message("loaded in plotting functions")
+
+
 tmpar <- matrix(0, 713, 713) #this is a temporary matrix
 
 #creating an array to store the inclusion matrices of each cluster run.
