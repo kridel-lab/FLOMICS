@@ -21,7 +21,7 @@ Scripts for executing the clustering of variant calls.
 [All files described in this section are stored in the 1_Calling_Variants_Pipeline folder](1_Calling_Variants_Pipeline/)
 
 #### Snakemake file
-- [CAPSEQ_Pipeline.smk](1_Calling_Variants_Pipeline/CAPSEQ_Pipeline.smkl)
+- [CAPSEQ_Pipeline.smk](1_Calling_Variants_Pipeline/CAPSEQ_Pipeline.smk)
   - Produces sample coverage summary, SNV calls via Mutect2, and SNV annotations via Annovar. 
   - Requires inputs given in the config.yaml file
 
