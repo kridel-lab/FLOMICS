@@ -65,18 +65,12 @@ genes_uhn <- read.csv("panel2.csv") %>%
 ### Determine the common genes between the two utilized gene panels
 genes_common <- intersect(genes_plosmed, genes_uhn)
 
-### load AIC and BIC consensus matrices
+### load AIC consensus matrices
 aic_consensus_mat_txt <- paste0("aic_consensus_mat.txt")
 aic_consensus_mat <- read.table(aic_consensus_mat_txt, header = TRUE, sep = ";")
 samples <- colnames(aic_consensus_mat)
 message("Number of samples in AIC Consensus Matrix")
 ncol(aic_consensus_mat)
-
-bic_consensus_mat_txt <- paste0("bic_consensus_mat.txt")
-bic_consensus_mat <- read.table(bic_consensus_mat_txt, header = TRUE, sep = ";")
-samples <- colnames(bic_consensus_mat)
-message("Number of samples in BIC Consensus Matrix")
-ncol(bic_consensus_mat)
 
 #--
 # Clustering
@@ -106,7 +100,9 @@ dim(muts_df)
 
 ### creating lists to store the cluster stability outputs
 tmpar <- matrix(0, 1, 7) #this is a temporary matrix
-aic_cluster_stab_arry_5 <- array(tmpar, dim = c(1, 5, 100)) #5 clusters
+aic_cluster_stab_arry_5 <- array(tmpar, dim = c(1, 5, 100)) 
+#clustering with k = 5 will be run, thus '5' is denoted in the above dimension
+#  and in the following sections
 
 ### creating lists to store the numbers of patients per cluster
 aic_cluster_patnum_arry_5 <- array(tmpar, dim = c(1, 5, 100))
@@ -164,7 +160,7 @@ genes <- colnames(muts_df)
 plt_aic <- heatmap_mutation_extended(muts_all,
  genes, 'ClusterAIC', y_order = 'group', idcol = 'SAMPLE_ID')
 grid.arrange(plt_aic)
-ggsave(file = paste0(date, "_", i, "_heatmap_aic.png"),
+ggsave(file = paste0(date, "_", i, "_clustermap_aic.png"),
  plt_aic, width = 25, height = 25, units = "cm")
 
 sig_long_out_path <- paste0(date, "_", i, "_sig_long_out_", criteria, ".txt")
@@ -186,10 +182,10 @@ aic_cluster_score_top_arry_5[, i] <- sig_long_out_mat_sort[1:10, ] %>%
 muts_all_sub <- muts_all %>%
   dplyr::mutate(PATIENT_ID = substr(SAMPLE_ID, 1, 9)) %>%
   dplyr::select(PATIENT_ID, SAMPLE_ID, ClusterAIC, ClusterBIC) %>%
-  dplyr::mutate(cohort = ifelse(SAMPLE_ID %in% UHNsamples, "UHN",
-                         ifelse(SAMPLE_ID %in% E4402samples, "E4402",
-                                ifelse(SAMPLE_ID %in% E2408samples, "E2408",
-                                       ifelse(SAMPLE_ID %in% PLOSMEDsamples,
+  dplyr::mutate(cohort = ifelse(SAMPLE_ID %in% uhn_samples, "UHN",
+                         ifelse(SAMPLE_ID %in% e4402_samples, "E4402",
+                                ifelse(SAMPLE_ID %in% e2408_samples, "E2408",
+                                       ifelse(SAMPLE_ID %in% plosmed_samples,
                                         "PLOSMED", SAMPLE_ID)))))
 
 write.csv(muts_all_sub,
