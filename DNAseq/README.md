@@ -25,8 +25,8 @@ Scripts for executing the clustering of variant calls.
   - Produces sample coverage summary, SNV calls via Mutect2, and SNV annotations via Annovar. 
   - Requires inputs given in the config.yaml file
 
-#### Config file
-- config.yaml
+#### Configuration file
+- [*config.yaml*](1_Calling_Variants_Pipeline/config.yaml)
   - Holds the paths to input files required for running the CAPSEQ Pipeline for variant calling.
 
 #### Shell excution file
