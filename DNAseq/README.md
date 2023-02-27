@@ -26,7 +26,7 @@ Scripts for executing the clustering of variant calls.
   - Requires inputs given in the config.yaml file
 
 #### Configuration file
-- [*config.yaml*](1_Calling_Variants_Pipeline/config.yaml)
+- [config.yaml](1_Calling_Variants_Pipeline/config.yaml)
   - Holds the paths to input files required for running the CAPSEQ Pipeline for variant calling.
 
 #### Shell excution file
