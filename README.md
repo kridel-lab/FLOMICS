@@ -44,10 +44,10 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 - 121 FL = cases
 
 OICR returned 19 samples that passed their QC criteria in June 2022
-- 19 FL samples returned (rawdata:/cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/rawdata/2022_OICR/)
+- 19 FL samples returned 
 
 E4402 samples that were sequenced at BC Cancer in 2017 were also included in the 2022 uniform QC analyses
-- 210 FL samples (rawdata:/cluster/projects/kridelgroup/FLOMICS/DATA/E4402/RNAseq/GSC-1464_fastq/)
+- 210 FL samples 
 
 #### RNA-seq workflow
 
