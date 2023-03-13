@@ -77,12 +77,12 @@ annotation file  - “gencode.v37lift37.annotation.gtf”
   - map reads to the genome
 [[Code]](RNAseq/)
 STAR_log files per sample were collected as well to evaluate the mapping quality
-- counting:use the resulting BAM files as input to count tools htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merge into the final expression matrix [[Code]](RNAseq/)
+- counting: using the resulting BAM files as input to htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merging per-sample read counts into the final expression matrix [[Code]](RNAseq/)
 
 
 #### investigate and adjust the Batch-effect:
 - BactchQC was used to investigate the batch effect:
-Running BatchQC, you will need two files:
+In order to run BatchQC, we created two files:
   - A gene by sample matrix with gene IDs in the first column and sample IDs as column headers. The cells contain quantile normalized expression values.
   - A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
 - ComBat-seq was used to adjust the batch effect:
