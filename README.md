@@ -92,21 +92,14 @@ ComBat-seq takes untransformed, raw count matrix as input, and it requires a kno
 
 ### Genome: Targeted DNAseq Data Analysis
 
-Intial data for 133 samples submitted for hybridization-based capture sequencing were received after 22 September 2019 from Centre for Lymphoid Cancer at British Columbia Cancer Agency (BCCA). Final raw data were obtained in July 2020. Of these, x were used for downstream analysis based on QC.
+Data for 803 FFPE samples were submitted for hybridization-based capture sequencing (271 from mutilcentre, 98 from E2408, 246 from BCCA/PLOSMED, 188 FROM E4402). Final raw data were obtained in November 2021. Of these, 713 samples (203 from multicenre, 83 from E2408, 242 from BCCA/PLOSMED, 185 from E4402) were used for downstream analysis based on QC.
 - diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
 - reactive lymph node (RLN) = “normal” control
-- FL = cases
-With the 30 patients from pilot dataset, a total of x samples.
+- follicular lymphoma (FL) = cases
 
 #### Scripts
+- Workflow outline and script descriptions can be found [[here]](DNAseq/README.md)
 
-#### Mutation profiling
-
-- Variant calling and annotation from RNA-seq alignments [[Code]](Code/BioinformaticsProcessing/RNAseq/VariantCalling/
-)
-- Mutation calling and annotation from targeted DNA sequencing [Code]
-- Visualization of mutations across clusters and stages [Code]
-- Extact BCL2 and BCL6 translocation info from Manta predictions and merge with previous data from BC [[Code]](Code/Analysis/DNAseq/xxx_script_extract_BCL2_BCL6_translocations_from_Manta.R)
 
 ### Immune deconvolution
 - Seurat analysis using snRNAseq data [[Code]](Code/BioinformaticsProcessing/snRNAseq/)
