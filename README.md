@@ -68,7 +68,7 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 #### RNAseq data processing
 
 - Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](RNAseq/)
-- mapping: mapping against reference genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
+- mapping: mapping against the reference genome GRCh37 – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which is a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
 
   - create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
