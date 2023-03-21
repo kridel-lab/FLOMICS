@@ -12,9 +12,8 @@ We adopted an inclusive approach, aiming to enrol primary FL patient samples fro
 
 ## Sample overview
 
-All samples included, post QC, are shown below, as of 15 Dec 2022:
-(image to be updated)
-<img src="AllSamples_22July2020.png" alt="AllSamples_22July2020" width="400"/>
+All samples included, post QC, are shown below, as of 21 Mar 2023:
+<img src="2023-03-21_AllSamples.png" alt="2023-03-21_AllSamples" width="400"/>
 
 ### Methylome: DNA methylation EPIC Microarray Data Analysis
 
@@ -105,3 +104,4 @@ Data for 803 FFPE samples were submitted for hybridization-based capture sequenc
 - Bisque analysis using seurat clusters and bulk rna-seq count matrix [[Code]](Code/Analysis/snRNAseq/)
 - Plotting estimated immune fractions [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque.R)
 - Estimated immune fractions versus mutation status [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-mutation-correlation-summary-results.R)
+
