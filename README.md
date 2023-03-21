@@ -68,7 +68,7 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 #### RNAseq data processing
 
 - Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](RNAseq/)
-- mapping: mapping against reference genome – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
+- mapping: mapping against the reference genome GRCh37 – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which is a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
 
   - create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
@@ -84,7 +84,7 @@ STAR_log files per sample were collected as well to evaluate the mapping quality
 - BactchQC was used to investigate the batch effect: In order to run BatchQC, we created two files:
   - A gene by sample matrix with gene IDs in the first column and sample IDs as column headers. The cells contain quantile normalized expression values.
   - A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
-- ComBat-seq was used to adjust the batch effect: it taken untransformed, raw count matrix as input, and a known batch variable.
+- ComBat-seq was used to adjust the batch effect: it took an untransformed raw count matrix and a known batch variable as input
 - filter out the low-exp genes (optional): filterByExpr function from edgeR can automatically filter low exps genes
 
 
