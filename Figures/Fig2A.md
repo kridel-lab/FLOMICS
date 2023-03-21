@@ -1,0 +1,2 @@
+The code for generating this figure is housed in [script-plot-all-mutations-all-cohorts_to_be_loaded.R](/FLOMICS/DNAseq/3_SNV_Clustering_Workflow/script-plot-all-mutations-all-cohorts_to_be_loaded.R) and requires the analysis and objects of [003_SNV_flexmix_GMM_Clustering_and_Stability_Analysis.R](/FLOMICS/DNAseq/3_SNV_Clustering_Workflow/003_SNV_flexmix_GMM_Clustering_and_Stability_Analysis.R).
+Both of these scripts can be found in [/FLOMICS/DNAseq/3_SNV_Clustering_Workflow/](/FLOMICS/DNAseq/3_SNV_Clustering_Workflow/)
