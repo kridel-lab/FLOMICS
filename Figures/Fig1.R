@@ -3,12 +3,13 @@
 # Author: Robert Kridel
 #---
 
-packages <- c("dplyr", "ggplot2", "maftools", "tidyverse", "gridExtra", "Rediscover")
+packages <- c("dplyr", "ggplot2", "maftools", "tidyverse", "gridExtra",
+ "Rediscover")
 lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
 
-setwd("~/github/FLOMICS/")
+setwd("~/your working directory/FLOMICS/")
 
 #--
 # Read in data
@@ -351,78 +352,3 @@ data %>% mutate(cohort = factor(cohort, levels = c("Combined", "E4402", "E2408",
         strip.text = element_text(face = "italic", size = 5)) +
   ylab("Odds Ratio")
 ggsave(paste0("img/",  date, " Fig1B_OR.pdf"), width = 8, height = 6, units = "cm")
-
-### ---
-
-# 
-# x1 <- fisher.test(table(capseq_T1_mat["GNA13",UHN.cases_T1], capseq_T1_mat["MEF2B",UHN.cases_T1], useNA = "ifany"))
-# x2 <- fisher.test(table(capseq_T1_mat["GNA13",E4402.cases_T1], capseq_T1_mat["MEF2B",E4402.cases_T1], useNA = "ifany"))
-# x3 <- fisher.test(table(capseq_T1_mat["GNA13",E2408.cases_T1], capseq_T1_mat["MEF2B",E2408.cases_T1], useNA = "ifany"))
-# x4 <- fisher.test(table(capseq_T1_mat["GNA13",PLOSMED.cases_T1], capseq_T1_mat["MEF2B",PLOSMED.cases_T1], useNA = "ifany"))
-# x5 <- fisher.test(table(capseq_T1_mat["GNA13",], capseq_T1_mat["MEF2B",], useNA = "ifany"))
-# 
-# y1 <- fisher.test(table(capseq_T1_mat["CREBBP",UHN.cases_T1], capseq_T1_mat["EP300",UHN.cases_T1], useNA = "ifany"))
-# y2 <- fisher.test(table(capseq_T1_mat["CREBBP",E4402.cases_T1], capseq_T1_mat["EP300",E4402.cases_T1], useNA = "ifany"))
-# y3 <- fisher.test(table(capseq_T1_mat["CREBBP",E2408.cases_T1], capseq_T1_mat["EP300",E2408.cases_T1], useNA = "ifany"))
-# y4 <- fisher.test(table(capseq_T1_mat["CREBBP",PLOSMED.cases_T1], capseq_T1_mat["EP300",PLOSMED.cases_T1], useNA = "ifany"))
-# y5 <- fisher.test(table(capseq_T1_mat["CREBBP",], capseq_T1_mat["EP300",], useNA = "ifany"))
-# 
-# z1 <- fisher.test(table(capseq_T1_mat["CARD11",UHN.cases_T1], capseq_T1_mat["EZH2",UHN.cases_T1], useNA = "ifany"))
-# z2 <- fisher.test(table(capseq_T1_mat["CARD11",E4402.cases_T1], capseq_T1_mat["EZH2",E4402.cases_T1], useNA = "ifany"))
-# z3 <- fisher.test(table(capseq_T1_mat["CARD11",E2408.cases_T1], capseq_T1_mat["EZH2",E2408.cases_T1], useNA = "ifany"))
-# z4 <- fisher.test(table(capseq_T1_mat["CARD11",PLOSMED.cases_T1], capseq_T1_mat["EZH2",PLOSMED.cases_T1], useNA = "ifany"))
-# z5 <- fisher.test(table(capseq_T1_mat["CARD11",], capseq_T1_mat["EZH2",], useNA = "ifany"))
-# 
-# u1 <- fisher.test(table(capseq_T1_mat["HVCN1",UHN.cases_T1], capseq_T1_mat["MEF2B",UHN.cases_T1], useNA = "ifany"))
-# u2 <- fisher.test(table(capseq_T1_mat["HVCN1",E4402.cases_T1], capseq_T1_mat["MEF2B",E4402.cases_T1], useNA = "ifany"))
-# u3 <- fisher.test(table(capseq_T1_mat["HVCN1",E2408.cases_T1], capseq_T1_mat["MEF2B",E2408.cases_T1], useNA = "ifany"))
-# u4 <- fisher.test(table(capseq_T1_mat["HVCN1",PLOSMED.cases_T1], capseq_T1_mat["MEF2B",PLOSMED.cases_T1], useNA = "ifany"))
-# u5 <- fisher.test(table(capseq_T1_mat["HVCN1",], capseq_T1_mat["MEF2B",], useNA = "ifany"))
-# 
-# dat <- rbind(c("Multicentre", x1$estimate, x1$conf.int, x1$p.value, "individual", "GNA13-MEF2B"),
-#              c("E4402", x2$estimate, x2$conf.int, x2$p.value, "individual", "GNA13-MEF2B"),
-#              c("E2408", x3$estimate, x3$conf.int, x3$p.value, "individual", "GNA13-MEF2B"),
-#              c("PLOSMED", x4$estimate, x4$conf.int, x4$p.value, "individual", "GNA13-MEF2B"),
-#              c("Combined", x5$estimate, x5$conf.int, x5$p.value, "combined", "GNA13-MEF2B"),
-#              c("Multicentre", y1$estimate, y1$conf.int, y1$p.value, "individual", "CREBBP-EP300"),
-#              c("E4402", y2$estimate, y2$conf.int, y2$p.value, "individual", "CREBBP-EP300"),
-#              c("E2408", y3$estimate, y3$conf.int, y3$p.value, "individual", "CREBBP-EP300"),
-#              c("PLOSMED", y4$estimate, y4$conf.int, y4$p.value, "individual", "CREBBP-EP300"),
-#              c("Combined", y5$estimate, y5$conf.int, y5$p.value, "combined", "CREBBP-EP300"),
-#              c("Multicentre", z1$estimate, z1$conf.int, z1$p.value, "individual", "CARD11-EZH2"),
-#              c("E4402", z2$estimate, z2$conf.int, z2$p.value, "individual", "CARD11-EZH2"),
-#              c("E2408", z3$estimate, z3$conf.int, z3$p.value, "individual", "CARD11-EZH2"),
-#              c("PLOSMED", z4$estimate, z4$conf.int, z4$p.value, "individual", "CARD11-EZH2"),
-#              c("Combined", z5$estimate, z5$conf.int, z5$p.value, "combined", "CARD11-EZH2"),
-#              c("Multicentre", u1$estimate, u1$conf.int, u1$p.value, "individual", "HVCN1-MEF2B"),
-#              c("E4402", u2$estimate, u2$conf.int, u2$p.value, "individual", "HVCN1-MEF2B"),
-#              c("E2408", u3$estimate, u3$conf.int, u3$p.value, "individual", "HVCN1-MEF2B"),
-#              c("PLOSMED", u4$estimate, u4$conf.int, u4$p.value, "individual", "HVCN1-MEF2B"),
-#              c("Combined", u5$estimate, u5$conf.int, u5$p.value, "combined", "HVCN1-MEF2B"))
-# colnames(dat) <- c("cohort", "OR", "lower", "higher", "P", "color", "interaction")
-# dat <- data.frame(dat)
-# dat$OR <- as.numeric(dat$OR)
-# dat$lower <- as.numeric(dat$lower)
-# dat$higher <- as.numeric(dat$higher)
-# 
-# dat %>% mutate(cohort = factor(cohort, levels = c("Combined", "E4402", "E2408", "PLOSMED", "Multicentre"))) %>%
-#   mutate(interaction = factor(interaction, levels = c("CREBBP-EP300", "GNA13-MEF2B","CARD11-EZH2", "HVCN1-MEF2B"))) %>%
-#   ggplot(aes(x = cohort, y = OR, ymin = lower, ymax = higher, color = color)) +
-#   geom_pointrange(aes(col = color), lwd = 0.4) +
-#   geom_hline(aes(fill = cohort), yintercept = 1, linetype = 2) +
-#   coord_flip() + theme_bw() + theme(legend.position = "none") +
-#   scale_colour_manual(values = c("individual" = "#878787", "combined" = "#d6604d")) +
-#   scale_y_continuous(trans = "log2", labels = function(x) ifelse(x == 0, "0", x)) +
-#   scale_x_discrete(position = "top") +
-#   facet_wrap(~interaction, strip.position = "left", nrow = 2) +
-#   theme(axis.title.y = element_blank(),
-#         axis.title.x = element_text(size = 5),
-#         axis.text.x = element_text(size = 5),
-#         axis.text.y = element_text(size = 5),
-#         strip.background = element_blank(),
-#         strip.text = element_text(face = "italic", size = 5)) +
-#   ylab("Odds Ratio (95% Confidence Interval)")
-# ggsave(paste0("img/",  date, " Fig1B_OR.pdf"), width = 8, height = 6, units = "cm")
-# 
-# scale_fill_manual(values = c("Nonsense mutation" = "#b2182b", "Frame shift indel" = "#d6604d", "Splice site" = "#fddbc7",
-#                              "In frame indel" = "#bababa", "Missense mutation" = "#878787")) +
