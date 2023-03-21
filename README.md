@@ -13,7 +13,7 @@ We adopted an inclusive approach, aiming to enrol primary FL patient samples fro
 ## Sample overview
 
 All samples included, post QC, are shown below, as of 21 Mar 2023:
-<img src="2023-03-21_AllSamples.png" alt="2023-03-21_AllSamples" width="400"/>
+<img src="2023-03-21_AllSamples.png" alt="2023-03-21_AllSamples" width="800"/>
 
 ### Methylome: DNA methylation EPIC Microarray Data Analysis
 
