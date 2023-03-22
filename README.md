@@ -15,6 +15,18 @@ We adopted an inclusive approach, aiming to enrol primary FL patient samples fro
 All samples included, post QC, are shown below, as of 21 Mar 2023:
 <img src="2023-03-21_AllSamples.png" alt="2023-03-21_AllSamples" width="800"/>
 
+
+### Genome: Targeted DNAseq Data Analysis
+
+Data for 803 FFPE samples were submitted for hybridization-based capture sequencing (271 from mutilcentre, 98 from E2408, 246 from BCCA/PLOSMED, 188 FROM E4402). Final raw data were obtained in November 2021. Of these, 713 samples (203 from multicenre, 83 from E2408, 242 from BCCA/PLOSMED, 185 from E4402) were used for downstream analysis based on QC.
+- diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
+- reactive lymph node (RLN) = “normal” control
+- follicular lymphoma (FL) = cases
+
+#### Scripts
+- Workflow outline and script descriptions can be found [[here]](DNAseq/README.md)
+
+
 ### Methylome: DNA methylation EPIC Microarray Data Analysis
 
 In February 2019, DNA methylation data for another 147 patients using Illumina MethylationEpic BeadChip were received. The breakdown of these samples were as follows:
@@ -85,18 +97,6 @@ STAR_log files per sample were collected as well to evaluate the mapping quality
   - A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
 - ComBat-seq was used to adjust the batch effect: it took an untransformed raw count matrix and a known batch variable as input
 - filter out the low-exp genes (optional): filterByExpr function from edgeR can automatically filter low exps genes
-
-
-### Genome: Targeted DNAseq Data Analysis
-
-Data for 803 FFPE samples were submitted for hybridization-based capture sequencing (271 from mutilcentre, 98 from E2408, 246 from BCCA/PLOSMED, 188 FROM E4402). Final raw data were obtained in November 2021. Of these, 713 samples (203 from multicenre, 83 from E2408, 242 from BCCA/PLOSMED, 185 from E4402) were used for downstream analysis based on QC.
-- diffuse large B-cell lymphoma (DLBCL) = “aggressive” control
-- reactive lymph node (RLN) = “normal” control
-- follicular lymphoma (FL) = cases
-
-#### Scripts
-- Workflow outline and script descriptions can be found [[here]](DNAseq/README.md)
-
 
 
 ### Immune deconvolution
