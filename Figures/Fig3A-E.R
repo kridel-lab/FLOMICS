@@ -142,9 +142,9 @@ surv_plots[[1]] <- ggsurvplot(fit, data = clusters_clinical,
                                ggtheme = theme_classic2(base_size = 7))
 
 fit <- survfit(Surv(TTP, CODE_TTP) ~ ClusterAIC,
- data = clusters_clinical_R_CHEMO)
+ data = clusters_clinical_r_chemo)
 names(fit$strata) <- gsub("ClusterAIC=", "", names(fit$strata))
-surv_plots[[2]] <- ggsurvplot(fit, data = clusters_clinical_R_CHEMO,
+surv_plots[[2]] <- ggsurvplot(fit, data = clusters_clinical_r_chemo,
                               xlim = c(0, 10), xlab = "Time (years)",
                                break.time.by = 2,
                               size = 0.5, censor.size = 2.5,
