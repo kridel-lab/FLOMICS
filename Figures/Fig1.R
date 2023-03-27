@@ -236,7 +236,7 @@ plosmed_maf <- read.maf(maf = plosmed_capseq_T1_maf)
 #--
 
 #load in the modified funtion
-source("2023-03-11_modifed_discoversomaticInteractions_VS.R")
+source("modifed_discoversomaticInteractions_VS.R")
 
 #please desginate which cohort we are plotting here,
  #and the directory for the output table
