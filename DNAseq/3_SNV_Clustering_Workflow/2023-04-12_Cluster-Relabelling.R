@@ -41,7 +41,6 @@ new_subtype_labels_2 <- new_subtype_labels %>%
   dplyr::select(PATIENT_ID, SAMPLE_ID, ClusterAIC, cohort)
 
 #write out the new labels
-dir <- "~/Kridel Lab/"
 write.csv(new_subtype_labels_2,
  file = paste0(dir, date, "_GMM_Subtype_Labels_flexmix_clusters.csv"),
   row.names = FALSE)
