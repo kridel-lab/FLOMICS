@@ -13,7 +13,7 @@ We adopted an inclusive approach, aiming to enrol primary FL patient samples fro
 ## Sample overview
 
 All samples included, post QC, are shown below, as of 21 Mar 2023:
-<img src="2023-03-21_AllSamples.png" alt="2023-03-21_AllSamples" width="800"/>
+<img src="2023-05-12_overview_samples_cohorts_profiling.png" alt="2023-05-12_overview_samples_cohorts" width="800"/>
 
 
 ### Genome: Targeted DNAseq Data Analysis
