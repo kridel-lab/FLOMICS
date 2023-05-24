@@ -25,7 +25,7 @@ genes_uhn <- read.csv(
   "DNAseq/Final_target_files/coding_gene_panel_PLOSMED_FLOMICS.csv") %>%
   filter(FLOMICS_PANEL == "YES") %>%
    .$Gene.Name
-genes_common <- intersect(genes_PLOSMED, genes_UHN)
+genes_common <- intersect(genes_plosmed, genes_uhn)
 
 # Read in list of all mutations
 capseq_t1 <- read.csv("filtered_MUTECT2_calls.csv") %>%
@@ -44,7 +44,7 @@ capseq_t1_maf <- capseq_t1 %>%
 # Read in mutation matrix
 capseq_t1_mat <- read.table("gene_vs_sample_SNV_matrix.txt",
                             sep = ";", header = TRUE)
-capseq_t1_mat <- capseq_t1_mat[, !(names(capseq_T1_mat) %in%
+capseq_t1_mat <- capseq_t1_mat[, !(names(capseq_t1_mat) %in%
  c("LY_FL_1135_T1", "LY_FL_1156_T1"))]
 
 # Read in cluster information
@@ -55,7 +55,7 @@ clusters <- read.csv("GMM_Cluster_Labels_flexmix_clusters.csv")
 #--
 
 hg19_genome <- BSgenome.Hsapiens.UCSC.hg19
-seqnames(hg19_genome) <- gsub("chr", "", seqnames(hg19.genome))
+seqnames(hg19_genome) <- gsub("chr", "", seqnames(hg19_genome))
 
 rgyw_motif <- DNAString("RGYW")
 wrcy_motif <- DNAString("WRCY")
@@ -76,20 +76,20 @@ snvs_wrcy_gr <- capseq_t1_maf %>%
   GRanges(chr, IRanges(start = pos - 2, end = pos + 1),
    id = str_c(chr, ":", pos))
 
-snvs_rgyw_seq <- getSeq(hg19.genome, snvs_rgyw_gr)
+snvs_rgyw_seq <- getSeq(hg19_genome, snvs_rgyw_gr)
 names(snvs_rgyw_seq) <- mcols(snvs_rgyw_gr)[, "id"]
 
-snvs_wrcy_seq <- getSeq(hg19.genome, snvs_wrcy_gr)
+snvs_wrcy_seq <- getSeq(hg19_genome, snvs_wrcy_gr)
 names(snvs_wrcy_seq) <- mcols(snvs_wrcy_gr)[, "id"]
 
 snvs_rgyw_seq_df <- data.table(posID = names(snvs_rgyw_seq),
- RGYWMotif = as.character(snvs_rgyw_seq))
+ RGYW.Motif = as.character(snvs_rgyw_seq))
 snvs_wrcy_seq_df <- data.table(posID = names(snvs_wrcy_seq),
- WRCYMotif = as.character(snvs_wrcy_seq))
+ WRCY.Motif = as.character(snvs_wrcy_seq))
 
 # Check if any of the SNVs overlap with a SHM motifs
-snvs_rgyw_vmatch <- vmatchPattern(RGYW.motif, snvs_rgyw_seq, fixed = FALSE)
-snvs_wrcy_vmatch <- vmatchPattern(WRCY.motif, snvs_wrcy_seq, fixed = FALSE)
+snvs_rgyw_vmatch <- vmatchPattern(rgyw_motif, snvs_rgyw_seq, fixed = FALSE)
+snvs_wrcy_vmatch <- vmatchPattern(wrcy_motif, snvs_wrcy_seq, fixed = FALSE)
 
 capseq_t1_maf_motif <- capseq_t1_maf %>%
   mutate(posID = str_c(Chromosome, ":", Start_Position)) %>%
@@ -124,8 +124,8 @@ gg_color_hue <- function(n) {
 }
 colors <- gg_color_hue(5)
 
-my_comparisons <- list(c("C3", "C1"), c("C3", "C2"),
- c("C3", "C4"), c("C3", "C5"))
+my_comparisons <- list(c("GM", "CS"), c("GM", "TT"),
+                       c("GM", "Q"), c("GM", "AR"))
 
 p1 <- capseq_t1_maf %>%
   group_by(Tumor_Sample_Barcode) %>%
@@ -133,7 +133,7 @@ p1 <- capseq_t1_maf %>%
   left_join(clusters[, c("SAMPLE_ID", "ClusterAIC")],
    by = c("Tumor_Sample_Barcode" = "SAMPLE_ID")) %>%
   mutate(ClusterAIC = factor(ClusterAIC,
-   levels = c("C1", "C2", "C3", "C4", "C5"))) %>%
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
   ggboxplot("ClusterAIC", "count", color = "ClusterAIC",
    ncol = 5, lwd = 0.3, add = "jitter",
     add.params = list(size = 0.001, jitter = 0.2)) +
@@ -157,7 +157,7 @@ p2 <- capseq_t1_mat %>%
   summarize(count = n()) %>%
   left_join(clusters[, c("SAMPLE_ID", "ClusterAIC")]) %>%
   mutate(ClusterAIC = factor(ClusterAIC,
-   levels = c("C1", "C2", "C3", "C4", "C5"))) %>%
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
   ggboxplot("ClusterAIC", "count", color = "ClusterAIC",
    ncol = 5, lwd = 0.3, add = "jitter",
     add.params = list(size = 0.001, jitter = 0.2)) +
@@ -183,7 +183,7 @@ p3 <- capseq_t1_maf_motif %>%
   right_join(clusters[, c("SAMPLE_ID", "ClusterAIC")]) %>%
   replace(is.na(.), 0) %>%
   mutate(ClusterAIC = factor(ClusterAIC,
-   levels = c("C1", "C2", "C3", "C4", "C5"))) %>%
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
   ggboxplot("ClusterAIC", "count", color = "ClusterAIC",
    ncol = 5, lwd = 0.3, add = "jitter",
     add.params = list(size = 0.001, jitter = 0.2)) +
@@ -202,6 +202,8 @@ p3 <- capseq_t1_maf_motif %>%
 p4 <- data.frame(ClusterAIC = c("C1", "C2", "C3", "C4", "C5"),
                  Stability = c(0.619217706, 0.585277076, 0.865382864,
                   1.005451774, 1.062214523)) %>%
+                  mutate(ClusterAIC = factor(ClusterAIC,
+                             levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
   ggplot(aes(x = ClusterAIC, y = Stability, fill = ClusterAIC)) +
   geom_bar(stat = "identity") +
   theme_bw() +
