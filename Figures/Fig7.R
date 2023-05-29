@@ -36,8 +36,10 @@ ecotyper.abundance.boxplots <- ecotyper.abundance %>%
  reshape2::melt() %>%
   select(SAMPLE_ID = ID, Ecotype = variable, value) %>%
   inner_join(clusters, by = "SAMPLE_ID") %>%
-  mutate(ClusterAIC = factor(ClusterAIC, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  ggboxplot("ClusterAIC", "value", color = "ClusterAIC", facet.by = "Ecotype", ncol = 9,
+  mutate(ClusterAIC = factor(ClusterAIC,
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+  ggboxplot("ClusterAIC", "value", color = "ClusterAIC",
+   facet.by = "Ecotype", ncol = 9,
             add = "jitter", add.params = list(size = 0.05, jitter = 0.2)) +
   theme(legend.position = "none", strip.background = element_blank(),
         axis.text.x = element_text(size = 5),
@@ -51,8 +53,10 @@ ecotyper.abundance.boxplots <- ecotyper.abundance %>%
   select(SAMPLE_ID = ID, Ecotype = variable, value) %>%
   inner_join(clusters, by = "SAMPLE_ID") %>%
   filter(Ecotype %in% c("LE1", "LE8")) %>%
-  mutate(ClusterAIC = factor(ClusterAIC, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  ggboxplot("ClusterAIC", "value", color = "ClusterAIC", facet.by = "Ecotype", ncol = 1,
+  mutate(ClusterAIC = factor(ClusterAIC,
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+  ggboxplot("ClusterAIC", "value", color = "ClusterAIC",
+   facet.by = "Ecotype", ncol = 1,
             add = "jitter", add.params = list(size = 0.05, jitter = 0.2)) +
   theme_bw() +
   theme(legend.position = "none", strip.background = element_blank(),
@@ -61,7 +65,8 @@ ecotyper.abundance.boxplots <- ecotyper.abundance %>%
         axis.title.y = element_text(size = 7),
         axis.title.x = element_text(size = 7),
         strip.text.x = element_text(size = 7, hjust = 0, vjust = -1.5)) +
-  stat_compare_means(method = "kruskal.test", size = 2, label.y.npc = 0.9, label.x.npc = 0.1) +
+  stat_compare_means(method = "kruskal.test",
+   size = 2, label.y.npc = 0.9, label.x.npc = 0.1) +
   ylab("Abundance") + xlab("Subtype")
 ecotyper.abundance.boxplots
 
@@ -70,11 +75,12 @@ ecotyper.abundance.stacked.barplot <- ecotyper.abundance %>%
   group_by(ID, variable) %>%
   summarize(mean = mean(value)) %>%
   inner_join(clusters, by = c("ID" = "SAMPLE_ID")) %>%
-  mutate(ClusterAIC = factor(ClusterAIC, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+  mutate(ClusterAIC = factor(ClusterAIC,
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
   ggplot(aes(fill = variable, y = mean, x = ClusterAIC)) + 
   geom_bar(position = "fill", stat = "identity") +
-  scale_fill_manual(values = c("#3E2883", "#76A2E4", "#8E549F", "#458833", "#BBD058",
-                               "#FFFD61", "#F8D25D", "#F3A83B", "#EC5428")) +
+  scale_fill_manual(values = c("#3E2883", "#76A2E4", "#8E549F", "#458833",
+   "#BBD058", "#FFFD61", "#F8D25D", "#F3A83B", "#EC5428")) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 5),
         axis.text.y = element_text(size = 5),
@@ -92,7 +98,8 @@ ecotyper.abundance.stacked.barplot
 # B cell states
 #--
 
-b.cell.states.assignment <- read.table(file = "B.cells_Cell_State_Assignment.txt", sep = "\t", header = TRUE)
+b.cell.states.assignment <- read.table(file = "B.cells_Cell_State_Assignment.txt",
+ sep = "\t", header = TRUE)
 
 b.cell.states.assignment %>%
   inner_join(clusters, by = c("ID" = "SAMPLE_ID")) %>%
@@ -101,13 +108,17 @@ b.cell.states.assignment %>%
   mutate(prop = prop.table(n)) %>%
   print(n = 100)
 
-b.cell.states.abundance <- read.table(file = "B.cells_Cell_State_Abundance.txt", sep = "\t", header = TRUE)
+b.cell.states.abundance <- read.table(file = "B.cells_Cell_State_Abundance.txt",
+ sep = "\t", header = TRUE)
 
-p <- b.cell.states.abundance %>% reshape2::melt() %>%
+p <- b.cell.states.abundance %>%
+ reshape2::melt() %>%
   select(SAMPLE_ID = ID, Ecotype = variable, value) %>%
   inner_join(clusters, by = "SAMPLE_ID") %>%
-  mutate(ClusterAIC = factor(ClusterAIC, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  ggboxplot("ClusterAIC", "value", color = "ClusterAIC", facet.by = "Ecotype", ncol = 5,
+  mutate(ClusterAIC = factor(ClusterAIC,
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+  ggboxplot("ClusterAIC", "value", color = "ClusterAIC",
+   facet.by = "Ecotype", ncol = 5,
             add = "jitter", add.params = list(size = 0.05, jitter = 0.2)) +
   theme(legend.position = "none", strip.background = element_blank(),
         axis.text.x = element_text(size = 5),
@@ -121,10 +132,12 @@ b.cell.states.abundance.stacked.barplot <- b.cell.states.abundance %>%
   group_by(ID, variable) %>%
   summarize(mean = mean(value)) %>%
   inner_join(clusters, by = c("ID" = "SAMPLE_ID")) %>%
-  mutate(ClusterAIC = factor(ClusterAIC, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  ggplot(aes(fill = variable, y = mean, x = ClusterAIC)) + 
+  mutate(ClusterAIC = factor(ClusterAIC,
+   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+  ggplot(aes(fill = variable, y = mean, x = ClusterAIC)) +
   geom_bar(position = "fill", stat = "identity") +
-  scale_fill_manual(values = c("#EB7D5B", "#FED23F", "#B5D33D", "#6CA2EA", "#442288")) +
+  scale_fill_manual(values = c("#EB7D5B", "#FED23F",
+   "#B5D33D", "#6CA2EA", "#442288")) +
   theme_bw() +
   theme(axis.text.x = element_text(size = 5),
         axis.text.y = element_text(size = 5),
@@ -133,8 +146,10 @@ b.cell.states.abundance.stacked.barplot <- b.cell.states.abundance %>%
         legend.title = element_text(size = 7),
         legend.key.height = unit(0.2, "cm"),
         legend.key.width = unit(0.2, "cm"),
-        legend.box.margin = margin(-10,-10,-10,-10)) +
-  labs(fill = "B cell states") + ylab("Relative mean abundance") + xlab("Subtype")
+        legend.box.margin = margin(-10, -10, -10, -10)) +
+  labs(fill = "B cell states") +
+  ylab("Relative mean abundance") +
+  xlab("Subtype")
 b.cell.states.abundance.stacked.barplot
 
 #--
@@ -145,7 +160,8 @@ g <- gridExtra::arrangeGrob(b.cell.states.abundance.stacked.barplot,
                             ecotyper.abundance.stacked.barplot,
                             ecotyper.abundance.boxplots,
                             ncol = 3)
-ggsave(file = paste0("img/",  date, " ecotyper.pdf"), g, width = 16, height = 7, units = "cm")
+ggsave(file = paste0("img/",  date, " ecotyper.pdf"),
+ g, width = 16, height = 7, units = "cm")
 
 
 #--
@@ -178,7 +194,8 @@ b_cell_exp_combined_sct <- subset(exp_combined_sct, idents = c(0, 1, 8, 11))
 
 # Read in Attaf GC and memory genes
 attaf_gc_up <- read.csv("Attaf_GC_up.csv") %>%
- filter(avg_logFC > 1) %>% .$Gene
+ filter(avg_logFC > 1) %>%
+  .$Gene
 attaf_mem_up <- read.csv("Attaf_Mem_up.csv") %>%
  filter(avg_logFC < -1) %>%
   .$Gene
@@ -252,8 +269,8 @@ passing_rnaseq_qc <-
 # Prepare expression matrix
 # bulk gene expression matrix is not normalized
 ## as the analysis is based on proportion of given populations/sample
-bulk_matrix <- read.table("RNA_seq_analysis_combined_2022_2023_2023-05-01_df_counts_adj_filtered.txt", sep = " ",
- header = TRUE)
+bulk_matrix <- read.table("RNA_seq_analysis_combined_2022_2023_2023-05-01_df_counts_adj_filtered.txt",
+ sep = " ",header = TRUE)
 bulk_matrix <- bulk_matrix[, passing_rnaseq_qc$sample_id]
 
 bulk_matrix$ensgene <- row.names(bulk_matrix)
