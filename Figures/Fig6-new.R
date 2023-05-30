@@ -216,6 +216,11 @@ IHC_results <- IHC_results %>%
   left_join(clusters[, c("SAMPLE_ID", "ClusterAIC")], by = c("SAMPLE_ID"))
 
 nrow(IHC_results)
+IHC_results_undetermined <- IHC_results %>%
+  dplyr::filter(IGM == "UNDETERMINED") %>%
+  nrow()
+#11 samples are undetermined
+
 table(IHC_results$IGM, useNA = "ifany")
 
 table(IHC_results$IGG, useNA = "ifany")
