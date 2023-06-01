@@ -13,8 +13,10 @@ setwd("~/your working directory/TRUST4/")
 # Read in RNAseq QC
 rnaseq_samples_passing_qc <-
   read.table("metadata_all_22_23.txt", "\t", header = TRUE) %>%
-  dplyr::filter(qc_tier2 == "Y") %>% #321 samples
+  dplyr::filter(squence_core != "TGL_23") %>%
+  dplyr::filter(qc_tier2 == "Y") %>% #290 samples
   .$sample_id #selecting only sample names
+
 # Read in clusters
 clusters <- read.csv("GMM_Subtype_Labels_flexmix_clusters.csv") %>%
   select(SAMPLE_ID, ClusterAIC, cohort)
@@ -39,20 +41,15 @@ airr_tgl_ocir <- read_tsv("TGL_OICR_IMGT_airr_merged.tsv") %>%
       paste0(sample_id, "_T1"), sample_id))
 length(unique(airr_tgl_ocir$sample_id)) #153 samples
 
-airr_31_more <- read_tsv("IMGT_airr_merged_report.tsv")
-airr_31_more_cleaned <- read_tsv("IMGT_airr_merged_report_cleanfq.tsv",
- col_names = col_names_trst4)
-length(unique(airr_31_more$sample_id)) #31 samples
-
 airr_e4402 <- read_tsv("E4402_IMGT_airr_merged.tsv")
 length(unique(airr_e4402$sample_id)) #209 samples
 
 # Combine and retain only those cases for which RNAseq data passed QC
-airr <- rbind(airr_tgl_ocir, airr_31_more_cleaned, airr_e4402) %>%
+airr <- rbind(airr_tgl_ocir, airr_e4402) %>%
  filter(sample_id %in% rnaseq_samples_passing_qc)
 
 # Number of cases
-length(unique(airr$sample_id)) #321 samples in total
+length(unique(airr$sample_id)) #290 samples in total
 
 # Read in IHC information
 IHC_results <- read_csv("Isotype_analysis_IHC.csv")
@@ -103,6 +100,10 @@ df <- clonotypes_igh_fl_vdjgrouped_dominant %>%
   dplyr::summarize(n = n()) %>%
   tidyr::spread(ClusterAIC, n) %>%
   replace(is.na(.), 0)
+paste0("CS samples: ", sum(df$CS), " ; ", "TT samples: ", sum(df$TT), " ; ", "GM samples: ", sum(df$GM), " ; ", "Q samples: ", sum(df$Q), " ; ","AR samples: ", sum(df$AR))
+ #CS samples: 73 ; TT samples: 39 ; GM samples: 45 ; Q samples: 42 ; AR samples: 34"
+paste0("total samples: ", sum(df$AR, df$CS, df$GM, df$Q, df$TT)) #233 samples
+
 
 b1 <- binom.test(as.numeric(df[2, "CS"]), colSums(df[, "CS"]), p = 0.5,
  alternative = c("two.sided"), conf.level = 0.95)$p.value
@@ -374,7 +375,7 @@ p4 <- df2 %>% mutate(ClusterAIC = factor(ClusterAIC,
 #----
 
 img_plot <- gridExtra::grid.arrange(im_A, im_B, p2,
- widths = c(1, 1, 0.8), ncol = 3, nrow = 1)
+ widths = c(1, 1, 0.95), ncol = 3, nrow = 1)
 
 gg4 <- gridExtra::grid.arrange(p1,
                                gridExtra::arrangeGrob(img_plot, widths = 0.8),
@@ -384,5 +385,5 @@ gg4 <- gridExtra::grid.arrange(p1,
 
 dir <- "/figures/"
 
-ggsave(file = paste0(dir, date, " Fig6.pdf"), gg4, width = 17,
+ggsave(file = paste0(dir, date, " Fig6.pdf"), gg4, width = 20,
        height = 20, units = "cm")
