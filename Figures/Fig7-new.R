@@ -17,7 +17,7 @@ packages <- c("dplyr", "ggplot2", "Seurat", "patchwork", "annotables", "IOBR",
 lapply(packages, require, character.only = TRUE)
 
 #date
-date = Sys.Date()
+date <- Sys.Date()
 
 #--
 # Read genetic clusters in
@@ -49,9 +49,10 @@ exp.combined.sct <- readRDS("FL_qc_integrated_clusters_3_samples_0.3_snn_res.rds
 
 passing.RNAseq.QC <- read.table("metadata_all_22_23.txt",sep = "\t", header = TRUE) %>%
   filter(!sample_id %in% c(paste("LY_DLC_00", seq(1:9), sep = ""), "LY_DLC_010")) %>%
-  filter(qc_tier2 == "Y")
+  filter(qc_tier2 == "Y") %>%
+  filter(squence_core != "TGL_23") #282 samples
 
-bulk.matrix <- read.table("RNA_seq_analysis_combined_2022_2023_2023-05-01_df_counts_adj.txt",
+bulk.matrix <- read.table("RNA_seq_analysis_combined_2022_2023_2023-05-01_df_counts_total.txt",
  sep = " ", header = TRUE)
 bulk.matrix <- bulk.matrix[, passing.RNAseq.QC$sample_id]
 
