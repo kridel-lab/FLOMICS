@@ -1,9 +1,10 @@
 #---
-# This script analyzes TRUST4 data and generated Figure 6 - new
+# This script analyzes TRUST4 data and generates Figure 5 - Panels G-J
 # Author: Robert Kridel & Victoria Shelton
 #---
 
-packages <- c("dplyr", "readr", "ggpubr", "ijtiff", "png")
+packages <- c("dplyr", "readr", "ggpubr", "ijtiff", "png",
+ "patchwork", "magick")
 lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
@@ -100,8 +101,11 @@ df <- clonotypes_igh_fl_vdjgrouped_dominant %>%
   dplyr::summarize(n = n()) %>%
   tidyr::spread(ClusterAIC, n) %>%
   replace(is.na(.), 0)
-paste0("CS samples: ", sum(df$CS), " ; ", "TT samples: ", sum(df$TT), " ; ", "GM samples: ", sum(df$GM), " ; ", "Q samples: ", sum(df$Q), " ; ","AR samples: ", sum(df$AR))
- #CS samples: 73 ; TT samples: 39 ; GM samples: 45 ; Q samples: 42 ; AR samples: 34"
+paste0("CS samples: ", sum(df$CS), " ; ", "TT samples: ", sum(df$TT),
+ " ; ", "GM samples: ", sum(df$GM), " ; ", "Q samples: ", sum(df$Q),
+  " ; ", "AR samples: ", sum(df$AR))
+ #CS samples: 73 ; TT samples: 39 ; GM samples: 45 ; Q samples: 42 ;
+ # AR samples: 34"
 paste0("total samples: ", sum(df$AR, df$CS, df$GM, df$Q, df$TT)) #233 samples
 
 
@@ -172,19 +176,17 @@ p1 <- p1 %>% ggplot(aes(x = isotype, y = n, fill = isotype, label = n)) +
 #--
 # Panels B & C - reading in images
 #--
-img1 <- readPNG("IGM EAB2953 A6 100x.png")
-img2 <- readPNG("IGM EAB2953 A6 200x.png")
+img1 <- image_read("IGM EAB2953 A6 100x.svg")
+img2 <- image_read("IGM EAB2953 A6 200x.svg")
 
 im_A <- ggplot() +
   background_image(img1) +
   # This ensures that the image leaves some space at the edges
   theme(plot.margin = margin(t = 1, l = 0.6,
-                             r = 0.2,
-                             b = 1.5, unit = "cm"))
+                             r = 0.2, b = 1.5, unit = "cm"))
 
 im_B <- ggplot() + background_image(img2) +
-  theme(plot.margin = margin(t = 1,
-                             l = 0.2,
+  theme(plot.margin = margin(t = 1, l = 0.2,
                              r = 0.4, b = 1.5, unit = "cm"))
 
 #--
@@ -294,84 +296,9 @@ p2 <- p2 + theme(plot.margin = margin(t = 0.6, l = 0.00,
                                       r = 0.2,
                                       b = 0.8, unit = "cm"))
 
-#--
-# Panel E - Plot the V gene identity in IgM and IgG-expressing cases
-#--
-
-df2 <- clonotypes_igh_fl %>%
-  mutate(v_call = sub("\\*.*", "", v_call)) %>%
-  mutate(d_call = substr(d_call, 1, 5)) %>%
-  mutate(j_call = substr(j_call, 1, 5)) %>%
-  mutate(c_call = sub("\\*.*", "", c_call)) %>%
-  group_by(sample_id, v_call, d_call, j_call, c_call, v_identity) %>%
-  summarize(count = sum(consensus_count)) %>%
-  group_by(sample_id) %>%
-  slice_max(n = 1, order_by = count) %>%
-  filter(!is.na(c_call)) %>%
-  left_join(clonotypes_igh_fl_tot) %>%
-  mutate(rel.prop.dom = count / count.tot) %>%
-  left_join(clusters[, c("SAMPLE_ID", "ClusterAIC")],
-   by = c("sample_id" = "SAMPLE_ID")) %>%
-  filter(ClusterAIC == factor(ClusterAIC,
-   levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  filter(!is.na(ClusterAIC)) %>%
-  data.frame()
-
-df2 %>% mutate(c_call = ifelse(c_call %in%
-                         c("IGHG1", "IGHG2", "IGHG3", "IGHG4"), "IGHG",
-                        ifelse(c_call %in%
-                         c("IGHA1", "IGHA2"), "IGHA", c_call))) %>%
-  filter(c_call %in% c("IGHM", "IGHG")) %>%
-  group_by(c_call) %>%
-   summarize(mean(v_identity))
-
-p3 <- df2 %>% mutate(c_call = ifelse(c_call %in%
-                               c("IGHG1", "IGHG2", "IGHG3", "IGHG4"), "IGHG",
-                              ifelse(c_call %in%
-                               c("IGHA1", "IGHA2"), "IGHA", c_call))) %>%
-  filter(c_call %in% c("IGHM", "IGHG")) %>%
-  ggboxplot("c_call", "v_identity", color = "c_call",
-   palette = c("#a6dba0", "#c2a5cf"), ncol = 5, lwd = 0.5, add = "jitter",
-    add.params = list(size = 0.1, jitter = 0.2)) +
-  stat_compare_means(method = "wilcox.test", size = 2, label.x.npc = 0.25,
-   label.y.npc = 0.95) +
-  theme_bw() +
-  theme(axis.title.x = element_text(size = 7),
-        axis.text.x = element_text(size = 7),
-        axis.title.y = element_text(size = 7),
-        axis.text.y = element_text(size = 7),
-        legend.position = "none") +
-  ylab("V gene identity (%)") + xlab("Isotype") + ylim(70, 110)
-
-#--
-# Panel F - Plot the V gene identity
-#--
-
-my_comparisons <- list(
-  c("GM", "CS"), c("GM", "TT"), c("GM", "Q"), c("GM", "AR"))
-
-p4 <- df2 %>% mutate(ClusterAIC = factor(ClusterAIC,
- levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
-  select(Cluster = ClusterAIC, v_identity) %>%
-  ggboxplot("Cluster", "v_identity", color = "Cluster", ncol = 5, lwd = 0.3,
-   add = "jitter", add.params = list(size = 0.1, jitter = 0.2)) +
-  stat_compare_means(comparisons = my_comparisons,
-                     method = "wilcox.test",
-                     size = 2, label.y = c(100, 103, 106, 109)) +
-  stat_compare_means(method = "kruskal.test",
-                     size = 2,
-                     label.x.npc = 0.01, label.y.npc = 0.01) +
-  theme_bw() +
-  theme(axis.title.x = element_text(size = 7),
-   axis.text.x = element_text(size = 7),
-        axis.title.y = element_text(size = 7),
-         axis.text.y = element_text(size = 7),
-        legend.position = "none") +
-  ylab("V gene identity (%)") +
-  xlab("Subtype")
 
 #----
-# Save Figure 6 plots
+# Save Figure 5G-J plots
 #----
 
 img_plot <- gridExtra::grid.arrange(im_A, im_B, p2,
@@ -379,11 +306,9 @@ img_plot <- gridExtra::grid.arrange(im_A, im_B, p2,
 
 gg4 <- gridExtra::grid.arrange(p1,
                                gridExtra::arrangeGrob(img_plot, widths = 0.8),
-                               gridExtra::arrangeGrob(p3, p4,
-                                ncol = 2, heights = c(1), widths = c(0.8, 1)),
-                               ncol = 1, heights = c(1, 1, 1))
+                               ncol = 1, heights = c(1.3, 1))
 
 dir <- "/figures/"
 
-ggsave(file = paste0(dir, date, " Fig6.pdf"), gg4, width = 20,
-       height = 20, units = "cm")
+ggsave(file = paste0(dir, date, " Fig5G-J.pdf"), gg4, width = 17.5,
+       height = 12, units = "cm")

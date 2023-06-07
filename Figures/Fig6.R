@@ -63,7 +63,7 @@ bulk.matrix <- bulk.matrix[, passing.RNAseq.QC$sample_id]
 b.cell.states.abundance.stacked.barplot <- b.cell.states.abundance %>%
   pivot_longer(!ID, names_to = "B_cell_state", values_to = "abundance") %>%
   inner_join(clusters, by = c("ID" = "SAMPLE_ID")) %>%
-  ggplot(aes(fill = B_cell_state, y = abundance, x = ClusterAIC)) + 
+  ggplot(aes(fill = B_cell_state, y = abundance, x = ClusterAIC)) +
   geom_bar(position = "fill", stat = "identity") +
   scale_fill_manual(values = c("#EB7D5B", "#FED23F",
    "#B5D33D", "#6CA2EA", "#442288")) +
@@ -191,7 +191,7 @@ bulk.matrix <- remove_duplicate_genes(eset = bulk.matrix,
 summary(duplicated(rownames(bulk.matrix)))
 bulk.matrix <- data.matrix(bulk.matrix)
 bulk.matrix <- bulk.matrix[, !(colnames(bulk.matrix) %in% c("ensgene", "chr"))]
-z = which(colnames(bulk.matrix) %in% c("LY_FL_062_T1", "LY_FL_064_T1", "LY_FL_076_T1"))
+z <- which(colnames(bulk.matrix) %in% c("LY_FL_062_T1", "LY_FL_064_T1", "LY_FL_076_T1"))
 colnames(bulk.matrix)[z] <- c(1, 2, 3)
 
 bulk.eset <- Biobase::ExpressionSet(assayData = bulk.matrix)
@@ -216,7 +216,7 @@ cases_noP0_noP1 <- df %>%
 
 ref.based.estimates$Population <- paste0("Population ",
  row.names(ref.based.estimates))
-ref.based.estimates <- ref.based.estimates[ , !names(ref.based.estimates) %in% cases_noP0_noP1] 
+ref.based.estimates <- ref.based.estimates[, !names(ref.based.estimates) %in% cases_noP0_noP1]
 
 # Generate plots
 
@@ -271,7 +271,7 @@ p1 <- ref.based.estimates %>%
   ylab("Estimated proportion") +
   ylim(-0.001, 0.6)
 
-p8 <- ref.based.estimates %>% 
+p8 <- ref.based.estimates %>%
   pivot_longer(!Population, names_to = "SAMPLE_ID",
    values_to = "estimated_proportion") %>%
   filter(Population == "Population 8") %>%
@@ -328,7 +328,7 @@ exp.combined.sct <- NormalizeData(exp.combined.sct)
 B.cell.exp.combined.sct <- subset(exp.combined.sct, idents = c(0, 1, 8, 11))
 
 diffexp.markers <- FindAllMarkers(B.cell.exp.combined.sct, only.pos = TRUE,
- min.pct = 0.1,logfc.threshold = 0.25, return.thresh = 0.01)
+ min.pct = 0.1, logfc.threshold = 0.25, return.thresh = 0.01)
 diffexp.markers <- as.data.table(diffexp.markers)
 diffexp.markers <- diffexp.markers %>%
   filter(!grepl("RP", gene)) %>%
@@ -340,7 +340,7 @@ top20 <- diffexp.markers %>%
    .$gene %>%
     unique()
 pdf(paste0("img/", date, " dotplot_3_samples_0.3_all.marker_genes.pdf"),
- width = 17/2.54, height = 5/2.54)
+ width = 17 / 2.54, height = 5 / 2.54)
 DotPlot(B.cell.exp.combined.sct, features = top20,
         cols = c("#91bfdb", "#fc8d59"),
         cluster.idents = FALSE, dot.scale = 3) + RotatedAxis() +
