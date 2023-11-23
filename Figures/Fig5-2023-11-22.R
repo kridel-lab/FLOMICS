@@ -12,8 +12,8 @@ setwd("~/your working directory/GALLIUM/")
 
 # Read in R objects of the Gallium cohort
 p1 <- readRDS("MutationsClustermapGALLIUM.rds")
-p2 <- readRDS("2023-05-19_PFS_all_GALLIUM.rds")
-p3 <- readRDS("PFS_ForestPlot_GALLIUM.rds")
+p2 <- readRDS("KMcurve_TT_vs_Other.rds")
+p3 <- readRDS("MultivariateCox_TT_vs_Other.rds")
 
 #Saving plot 1 -  the clustermap
 ggsave(file = paste0(date, "_GALLIUM_Clustermap_aic.png"), p1,
@@ -21,7 +21,7 @@ ggsave(file = paste0(date, "_GALLIUM_Clustermap_aic.png"), p1,
 
 # Updating plot 2 labels
 p2[["plot"]][["labels"]][["x"]] <- "Time (years)"
-p2[["plot"]][["labels"]][["title"]] <- "GALLIUM - PFS - all patients"
+p2[["plot"]][["labels"]][["title"]] <- "GALLIUM - overall cohort"
 p2[["table"]][["labels"]][["x"]] <- "Time (years)"
 p2[["table"]][["labels"]][["title"]] <- "Number at risk"
 
@@ -41,9 +41,9 @@ p2$table <- p2$table + theme_survminer(
 )
 
 #Saving plot 2 -  progrssion free survival & plot 3 - hazard ratio
-gg4 <- gridExtra::grid.arrange(gridExtra::arrangeGrob(p2$plot, p2$table,
+gg <- gridExtra::grid.arrange(gridExtra::arrangeGrob(p2$plot, p2$table,
                                 heights = c(0.9, 0.4), ncol = 1, nrow = 2),
-  p4, nrow = 1, ncol = 2, widths = c(0.60, 1))
+  p3, nrow = 1, ncol = 2, widths = c(0.60, 1))
 
-ggsave(file = paste0(date, "_PFS_all_GALLIUM_plot.pdf"), gg4,
+ggsave(file = paste0(date, "_GALLIUM_plots_TT_vs_Other.pdf"), gg,
  width = 25, height = 15, units = "cm")
