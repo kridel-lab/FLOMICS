@@ -8,7 +8,6 @@ packages <- c("dplyr", "readr", "ggpubr", "ijtiff", "png", "forcats",
 lapply(packages, require, character.only = TRUE)
 
 date <- Sys.Date()
-
 setwd("~/your working directory/TRUST4/")
 
 # Read in RNAseq QC
