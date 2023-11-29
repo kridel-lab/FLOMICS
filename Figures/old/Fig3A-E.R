@@ -1,6 +1,6 @@
 #---
 # This script generates plots for Figures 4, panels A to E
-# Author: Robert Kridel
+# Author: Robert Kridel 
 #---
 
 packages <- c("dplyr", "ggplot2", "survival", "survminer")

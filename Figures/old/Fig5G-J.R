@@ -1,6 +1,6 @@
 #---
 # This script analyzes TRUST4 data and generates Figure 5 - Panels G-J
-# Author: Robert Kridel & Victoria Shelton
+# Author: Robert Kridel & Victoria Shelton 
 #---
 
 packages <- c("dplyr", "readr", "ggpubr", "ijtiff", "png",

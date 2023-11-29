@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # This script reads in the processed snRNAseq data and produces Fig 7 panels
-# Author: Robert Kridel
+# Author: Robert Kridel 
 #-------------------------------------------------------------------------------
 
 setwd("~/your working directory/FLOMICS/")
