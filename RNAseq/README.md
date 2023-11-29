@@ -30,17 +30,17 @@ picard_RnaMetrics_perct>=5 (PF_BASES/PF_ BASES)
 
 #### RNAseq data processing
 
-- Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](RNAseq/)
-- mapping: mapping against the reference genome GRCh37 – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which is a splice-aware alignment tool with two-step process: [[Code]](RNAseq/)
+- Pre-processing: merging or renaming the samples (TGL 136, OICR 19, E4402 210); remove adapters and low-quality bases (trimmomatic-0.39) [[Code]](001_trimmomatic-0.39-2_conda_QC_parallel.sh)
+- mapping: mapping against the reference genome GRCh37 – STAR/2.7.9a (Spliced Transcripts Alignment to a Reference), which is a splice-aware alignment tool with two-step process: 
 
   - create a genome index (consistent with the software version)
 human genome build- “GRCh37.primary_assembly.genome.fa”
 annotation file  - “gencode.v37lift37.annotation.gtf”
 
   - map reads to the genome
-[[Code]](RNAseq/)
+[[Code]](002_STAR_parallel_sbatch_v37.sh)
 STAR_log files per sample were collected as well to evaluate the mapping quality
-- counting: using the resulting BAM files as input to htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merging per-sample read counts into the final expression matrix [[Code]](RNAseq/)
+- counting: using the resulting BAM files as input to htseq-count/0.11.0 to obtain the raw counts per gene per sample, then merging per-sample read counts into the final expression matrix [[Code]](003_htseq_parallel_sbatch_v3_grch37.sh)
 
 
 #### investigate and adjust the Batch-effect:
@@ -49,10 +49,3 @@ STAR_log files per sample were collected as well to evaluate the mapping quality
   - A metadata file with sample IDs in the first column and information about the samples in the remainder It should include the suspected batch variables, such as Sequencing Platform, Data, Biopsy Site, etc., as well as your classifier (e.g. tumor type).
 - ComBat-seq was used to adjust the batch effect: it took an untransformed raw count matrix and a known batch variable as input
 - filter out the low-exp genes (optional): filterByExpr function from edgeR can automatically filter low exps genes
-
-
-### Immune deconvolution
-- Seurat analysis using snRNAseq data [[Code]](Code/BioinformaticsProcessing/snRNAseq/)
-- Bisque analysis using seurat clusters and bulk rna-seq count matrix [[Code]](Code/Analysis/snRNAseq/)
-- Plotting estimated immune fractions [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-bisque.R)
-- Estimated immune fractions versus mutation status [[Code]](Code/Analysis/RNAseq/RNAseq-immune-deconvolution-mutation-correlation-summary-results.R)
