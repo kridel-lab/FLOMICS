@@ -1,4 +1,0 @@
-ln -s /cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/E4402/STAR_out/*Aligned.sortedByCoord.out.bam ./
-ln -s /cluster/projects/kridelgroup/FLOMICS/2022_combined_RNA-Seq_analysis/TGL_n_OICR2022/STAR_out/*Aligned.sortedByCoord.out.bam ./
-
-
