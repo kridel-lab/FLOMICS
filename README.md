@@ -56,10 +56,10 @@ In February 2020, RNAseq data for 136 samples were obtained. After removing T2 s
 - 121 FL = cases
 
 OICR returned 19 samples that passed their QC criteria in June 2022
-- 19 FL samples returned 
+- 19 FL samples returned
 
 E4402 samples that were sequenced at BC Cancer in 2017 were also included in the 2022 uniform QC analyses
-- 210 FL samples 
+- 210 FL samples
 
 #### RNA-seq workflow
 
@@ -67,10 +67,10 @@ E4402 samples that were sequenced at BC Cancer in 2017 were also included in the
 
 #### Main QC steps
 
-- Screen for rRNA contamination 
-- Calculate the percentage of aligned coding bases 
-- Running qualimap bamqc to calculate the insert size 
-- Collect the STAR log files 
+- Screen for rRNA contamination
+- Calculate the percentage of aligned coding bases
+- Running qualimap bamqc to calculate the insert size
+- Collect the STAR log files
 
 Tier2: 290 sample passed
 rrna_contam_perct<=35 &&
