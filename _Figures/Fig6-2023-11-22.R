@@ -20,7 +20,7 @@ date <- Sys.Date()
 set.seed(1234)
 
 # Change directory
-setwd("/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/01_Summary/00_Victoria_Paper/Paper_Figure/")
+setwd("~/your working directory/")
 
 # Get the 850k annotation data
 ann850k <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
@@ -32,14 +32,14 @@ CpG_islands <- EPIC_Annotations %>% filter(Relation_to_Island == "Island") %>% d
 OpenSea <- EPIC_Annotations %>% filter(Relation_to_Island == "OpenSea") %>% data.frame() %>% .$Name
 
 # Load epiCMIT Data
-load("../../../00_minfi/db/Estimate.epiCMIT.RData")
+load("Estimate.epiCMIT.RData")
 
 # Read in methylation data
-bval <- readRDS("../../../00_minfi/minfi_run_archive_march_2023/preprocessQuantile/rds/beta_combat.rds")
-mval <- readRDS("../../../00_minfi/minfi_run_archive_march_2023/preprocessQuantile/rds/mval_combat.rds")
+bval <- readRDS("beta_combat.rds")
+mval <- readRDS("mval_combat.rds")
 
 # Read in sample annotations
-Sample_Annotations <- read.table(file = "../../../00_minfi/db/20221228_sample_annotations.txt",
+Sample_Annotations <- read.table(file = "20221228_sample_annotations.txt",
                                  sep = "\t", header = TRUE, na.strings=c("","NA")) %>% 
 subset(TYPE!="TFL") %>%
 subset(TIME_POINT!="T2") %>%
@@ -50,13 +50,13 @@ bval <- bval[, Sample_Annotations$SAMPLE_ID]
 mval <- mval[, Sample_Annotations$SAMPLE_ID]
 
 # Read in cluster information
-flexmix_clust <- read.table(file = "../../../00_minfi/db/2023-05-06_14_GMM_Cluster_Labels_flexmix_clusters.txt",
+flexmix_clust <- read.table(file = "2023-05-06_14_GMM_Cluster_Labels_flexmix_clusters.txt",
                             sep = "\t",
                             header = TRUE, na.strings=c("","NA")) %>%
                             dplyr::select(SAMPLE_ID, ClusterAIC)
 
 # Read in sample sheet with batch information
-targets <- read.csv(file = "../../../00_minfi/db/SampleSheet.csv",
+targets <- read.csv(file = "SampleSheet.csv",
                     skip = 1, header = TRUE, na.strings=c("","NA"))
 
 targets$ID <- gsub(" ", "", paste(targets$Sample_Name,".",targets$Sentrix_Position))
@@ -77,7 +77,7 @@ targets$Batch[targets$Batch == 'PM-Genomics-Centre'] <- 'PMGC'
 targets$Batch[targets$Batch == 'Genome-Quebec'] <- 'GQ'
 
 # Read in clinical data
-clinical_data <- read.csv(file = "../../../00_minfi/db/20231024_clinical_data.csv",
+clinical_data <- read.csv(file = "20231024_clinical_data.csv",
                           header = TRUE, na.strings=c("","NA")) %>%
 dplyr::select(LY_FL_ID, ANN_ARBOR_STAGE)
 
@@ -149,7 +149,7 @@ epiCMIT.Illumina <- epiCMIT(DNAm.epiCMIT = DNAm.epiCMIT,
                             return.epiCMIT.annot = FALSE,
                             export.results = TRUE,
                             export.results.dir = "",
-                            export.results.name = "/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/01_Summary/00_Victoria_Paper/Paper_Figure/")
+                            export.results.name = "~/your working directory/")
 
 head(epiCMIT.Illumina$epiCMIT.scores)
 epiCMIT.Illumina$epiCMIT.run.info
