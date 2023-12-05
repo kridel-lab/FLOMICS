@@ -100,7 +100,7 @@ length(uhn_cases_t1)
 e4402_cases_t1 <- sample_annot %>% filter(cohort == "E4402") %>% .$SAMPLE_ID
 length(e4402_cases_t1)
 e2408_cases_t1 <- sample_annot %>% filter(cohort == "E2408") %>% .$SAMPLE_ID
-length(e2408.cases_t1)
+length(e2408_cases_t1)
 plosmed_cases_t1 <- sample_annot %>%
  filter(cohort == "PLOSMED") %>%
  .$SAMPLE_ID
