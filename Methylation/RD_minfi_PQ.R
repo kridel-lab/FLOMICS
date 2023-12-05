@@ -66,7 +66,7 @@ targets <- merge(x = targets,
 
 ## Set Working Current Directory
 ## =============================
-setwd("/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/00_minfi/02_FL_Samples/")
+setwd("~/your working directory/")
 
 # Filter Samples By p-value
 # =========================
