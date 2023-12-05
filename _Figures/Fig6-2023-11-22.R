@@ -20,7 +20,7 @@ date <- Sys.Date()
 set.seed(1234)
 
 # Change directory
-setwd("<working directory path>")
+setwd("/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/01_Summary/00_Victoria_Paper/Paper_Figure/")
 
 # Get the 850k annotation data
 ann850k <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
@@ -32,14 +32,14 @@ CpG_islands <- EPIC_Annotations %>% filter(Relation_to_Island == "Island") %>% d
 OpenSea <- EPIC_Annotations %>% filter(Relation_to_Island == "OpenSea") %>% data.frame() %>% .$Name
 
 # Load epiCMIT Data
-load("Estimate.epiCMIT.RData")
+load("../../../00_minfi/db/Estimate.epiCMIT.RData")
 
 # Read in methylation data
-bval <- readRDS("beta_combat.rds")
-mval <- readRDS("mval_combat.rds")
+bval <- readRDS("../../../00_minfi/minfi_run_archive_march_2023/preprocessQuantile/rds/beta_combat.rds")
+mval <- readRDS("../../../00_minfi/minfi_run_archive_march_2023/preprocessQuantile/rds/mval_combat.rds")
 
 # Read in sample annotations
-Sample_Annotations <- read.table(file = "20221228_sample_annotations.txt",
+Sample_Annotations <- read.table(file = "../../../00_minfi/db/20221228_sample_annotations.txt",
                                  sep = "\t", header = TRUE, na.strings=c("","NA")) %>% 
 subset(TYPE!="TFL") %>%
 subset(TIME_POINT!="T2") %>%
@@ -50,13 +50,13 @@ bval <- bval[, Sample_Annotations$SAMPLE_ID]
 mval <- mval[, Sample_Annotations$SAMPLE_ID]
 
 # Read in cluster information
-flexmix_clust <- read.table(file = "2023-01-19_14_GMM_Cluster_Labels_flexmix_clusters.txt",
+flexmix_clust <- read.table(file = "../../../00_minfi/db/2023-05-06_14_GMM_Cluster_Labels_flexmix_clusters.txt",
                             sep = "\t",
                             header = TRUE, na.strings=c("","NA")) %>%
                             dplyr::select(SAMPLE_ID, ClusterAIC)
 
 # Read in sample sheet with batch information
-targets <- read.csv(file = "SampleSheet.csv",
+targets <- read.csv(file = "../../../00_minfi/db/SampleSheet.csv",
                     skip = 1, header = TRUE, na.strings=c("","NA"))
 
 targets$ID <- gsub(" ", "", paste(targets$Sample_Name,".",targets$Sentrix_Position))
@@ -73,9 +73,11 @@ targets <- targets[ ! targets$ID %in% rep_rm_samples, ]
 targets$Sample_Name <- str_replace(targets$Sample_Name, "LY_FL_159_T1_rep", "LY_FL_159_T1")
 targets <- targets %>% dplyr::select(Sample_Name, Batch)
 colnames(targets)[1]  <- "SAMPLE_ID"
+targets$Batch[targets$Batch == 'PM-Genomics-Centre'] <- 'PMGC'
+targets$Batch[targets$Batch == 'Genome-Quebec'] <- 'GQ'
 
 # Read in clinical data
-clinical_data <- read.csv(file = "20220525_clinical_data.csv",
+clinical_data <- read.csv(file = "../../../00_minfi/db/20231024_clinical_data.csv",
                           header = TRUE, na.strings=c("","NA")) %>%
 dplyr::select(LY_FL_ID, ANN_ARBOR_STAGE)
 
@@ -111,23 +113,31 @@ Sample_Annotations$ANN_ARBOR_STAGE_TYPE[Sample_Annotations$ANN_ARBOR_STAGE_TYPE 
 
 row.names(Sample_Annotations) <- Sample_Annotations$SAMPLE_ID
 
-## bval - All CpGs
-# bval_sub <- bval[sample(nrow(bval), 10000), ] # Change For Subset
+# subset matrix
+#set.seed(1234)
+#probe_num = "10000"  # Change For Subset
+
+# subset random probes
+#bval_sub <- bval[sample(nrow(bval), probe_num), ]
+#mval_sub <- mval[intersect(rownames(bval_sub), rownames(mval)), ]
+#dim(bval_sub)
+#dim(mval_sub)
 bval_sub <- bval
+mval_sub <- mval
+
+# bval - All CpGs
 bval_sub_t <- t(bval_sub)
 bval_sub_t <- merge(bval_sub_t, Sample_Annotations, by=0)
 names(bval_sub_t)[1] <- ""
 bval_sub_t <- data.frame(bval_sub_t[,-1], row.names=bval_sub_t[,1])
-bval_sub_t_df <- bval_sub_t[1:765769] # Change For Subset
+bval_sub_t_df <- bval_sub_t[1:765769]
 
-## mval - All CpGs
-# mval_sub <- mval[sample(nrow(mval), 10000), ] # Change For Subset
-mval_sub <- mval
+# mval - All CpGs
 mval_sub_t <- t(mval_sub)
 mval_sub_t <- merge(mval_sub_t, Sample_Annotations, by=0)
 names(mval_sub_t)[1] <- ""
 mval_sub_t <- data.frame(mval_sub_t[,-1], row.names=mval_sub_t[,1])
-mval_sub_t_df <- mval_sub_t[1:765769] # Change For Subset
+mval_sub_t_df <- mval_sub_t[1:765769]
 
 # epiCMIT Analysis
 DNAm.epiCMIT <- DNAm.to.epiCMIT(DNAm = data.frame(bval),
@@ -139,7 +149,7 @@ epiCMIT.Illumina <- epiCMIT(DNAm.epiCMIT = DNAm.epiCMIT,
                             return.epiCMIT.annot = FALSE,
                             export.results = TRUE,
                             export.results.dir = "",
-                            export.results.name = "<working directory path>")
+                            export.results.name = "/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/01_Summary/00_Victoria_Paper/Paper_Figure/")
 
 head(epiCMIT.Illumina$epiCMIT.scores)
 epiCMIT.Illumina$epiCMIT.run.info
@@ -169,8 +179,8 @@ P1 <- autoplot(pca_res,
       ggtitle("Methylation - All CpGs") +
       theme(plot.title = element_text(hjust = 0.5)) +
       geom_point(aes(colour = factor(ClusterAIC_TYPE)), size = 1.5) +
-      scale_color_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
-      scale_fill_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
+      scale_color_manual(values = c(RLN="orange", CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3", DLBCL="grey20")) +
+      scale_fill_manual(values = c(RLN="orange", CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3", DLBCL="grey20")) +
       coord_cartesian(clip = 'off') +
       theme(plot.margin = margin(0.4, 0.8, 0.4, 0.4, "cm")) +
       labs(fill='Cluster') +
@@ -180,14 +190,12 @@ P1 <- autoplot(pca_res,
 ## PLOT - B
 ## ========
 # Mean methylation flexmix - All probes
-my_comparisons <- list( c("RLN", "DLBCL"), 
-                        c("RLN", "C5"), 
-                        c("RLN", "C4"),
-                        c("RLN", "C3"),
-                        c("RLN", "C2"),
-                        c("RLN", "C1"))
+my_comparisons <- list( c("Q", "AR"),
+                        c("Q", "GM"),
+                        c("Q", "TT"),
+                        c("Q", "CS"))
 
-# pdf("Mean-Methylation-All-CpGs-ClusterAIC.pdf")
+#pdf("Mean-Methylation-All-CpGs-ClusterAIC.pdf")
 df <- bval_sub %>%
       data.frame() %>%
       mutate(probe = row.names(.)) %>%
@@ -198,12 +206,13 @@ df <- bval_sub %>%
       left_join(Sample_Annotations[,c("SAMPLE_ID", "TYPE")], by = c("variable" = "SAMPLE_ID")) %>%
       left_join(Sample_Annotations, by = c("variable" = "SAMPLE_ID")) %>%
       filter(!is.na(ClusterAIC_TYPE)) %>%
-      mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("RLN", "C1", "C2", "C3", "C4", "C5", "DLBCL")))
+      mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+      drop_na(ClusterAIC_TYPE)
 
-      P2 <- ggboxplot(df, x = "ClusterAIC_TYPE", y = "mean", color = "ClusterAIC_TYPE", add = "jitter", size = 0.5) +
+        P2 <- ggboxplot(df, x = "ClusterAIC_TYPE", y = "mean", color = "ClusterAIC_TYPE", add = "jitter", size = 0.5) +
         # geom_hline(yintercept = mean(df$mean), linetype="dashed", color="blue2", linewidth=0.8) +
-        scale_color_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
-        scale_fill_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
+        scale_color_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
+        scale_fill_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
         theme_bw() +
         theme(title = element_text(size=20, face='bold'),
               axis.title.x = element_text(size = 20),
@@ -216,29 +225,25 @@ df <- bval_sub %>%
         theme(plot.title = element_text(hjust = 0.5)) +
         stat_compare_means(size = 6, comparisons = my_comparisons,
                            label.y = c(max(df$mean),
-                                       max(df$mean) + 0.002,
-                                       max(df$mean) + 0.004,
-                                       max(df$mean) + 0.006,
-                                       max(df$mean) + 0.0085,
-                                       max(df$mean) + 0.0105)) +
-        stat_compare_means(size = 7, label.x = 3.8, label.y = max(df$mean) + 0.011) +
+                                       max(df$mean) + 0.0025,
+                                       max(df$mean) + 0.005,
+                                       max(df$mean) + 0.0075)) +
+        stat_compare_means(size = 7, label.x = 2.8, label.y = max(df$mean) + 0.011) +
         coord_cartesian(clip = 'off') +
         theme(plot.margin = margin(0.4, 1, 0.4, 0.4, "cm")) +
         scale_x_discrete(name ="Cluster") +
         scale_y_continuous(limits=c(min(df$mean) - 0.002, max(df$mean) + 0.012))
-# dev.off()
+#dev.off()
 
 ## PLOT - C
 ## ========
 # Mean methylation flexmix - CpG probes
-my_comparisons <- list( c("RLN", "DLBCL"), 
-                        c("RLN", "C5"), 
-                        c("RLN", "C4"),
-                        c("RLN", "C3"),
-                        c("RLN", "C2"),
-                        c("RLN", "C1"))
+my_comparisons <- list( c("Q", "AR"), 
+                        c("Q", "GM"),
+                        c("Q", "TT"),
+                        c("Q", "CS"))
 
-# pdf("Mean-Methylation-CpG-Islands-ClusterAIC.pdf")
+#pdf("Mean-Methylation-CpG-Islands-ClusterAIC.pdf")
 df <- bval_sub[intersect(CpG_islands, row.names(bval_sub)),] %>%
         data.frame() %>%
         mutate(probe = row.names(.)) %>%
@@ -249,12 +254,13 @@ df <- bval_sub[intersect(CpG_islands, row.names(bval_sub)),] %>%
         left_join(Sample_Annotations[,c("SAMPLE_ID", "TYPE")], by = c("variable" = "SAMPLE_ID")) %>%
         left_join(Sample_Annotations, by = c("variable" = "SAMPLE_ID")) %>%
         filter(!is.na(ClusterAIC_TYPE)) %>%
-        mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("RLN", "C1", "C2", "C3", "C4", "C5", "DLBCL")))
-  
+        mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
+        drop_na(ClusterAIC_TYPE)
+
         P3 <- ggboxplot(df, x = "ClusterAIC_TYPE", y = "mean", color = "ClusterAIC_TYPE", add = "jitter", size = 0.5) +
           # geom_hline(yintercept = mean(df$mean), linetype="dashed", color="blue2", linewidth=0.8) +
-          scale_color_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
-          scale_fill_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3", DLBCL="grey20")) +
+          scale_color_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
+          scale_fill_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
           theme_bw() +
           theme(title = element_text(size=20, face='bold'),
                 axis.title.x = element_text(size = 20),
@@ -266,18 +272,16 @@ df <- bval_sub[intersect(CpG_islands, row.names(bval_sub)),] %>%
           theme(plot.title = element_text(hjust = 0.5))+
           stat_compare_means(size = 6, comparisons = my_comparisons,
                                label.y = c(max(df$mean),
-                                           max(df$mean) + 0.004,
-                                           max(df$mean) + 0.008,
-                                           max(df$mean) + 0.013,
-                                           max(df$mean) + 0.018,
-                                           max(df$mean) + 0.023)) +
-          stat_compare_means(size = 7, label.x = 3.8, label.y = max(df$mean) + 0.024) +
+                                           max(df$mean) + 0.0045,
+                                           max(df$mean) + 0.0095,
+                                           max(df$mean) + 0.015)) +
+          stat_compare_means(size = 7, label.x = 2.8, label.y = max(df$mean) + 0.024) +
           ggtitle("CpG Islands") +
           coord_cartesian(clip = 'off') +
           theme(plot.margin = margin(0.4, 1, 0.4, 0.4, "cm")) +
           scale_x_discrete(name ="Cluster") +
           scale_y_continuous(limits=c(min(df$mean) - 0.002, max(df$mean) + 0.026))
-# dev.off()
+#dev.off()
 
 ## PLOT - D
 ## ========
@@ -318,21 +322,21 @@ P4 <- epiCMIT.Illumina$epiCMIT.scores %>%
 
 ## PLOT - E
 ## ========
-my_comparisons <- list( c("RLN", "C5"),
-                        c("RLN", "C4"), 
-                        c("RLN", "C3"),
-                        c("RLN", "C2"),
-                        c("RLN", "C1"))
+my_comparisons <- list( c("Q", "AR"),
+                        c("Q", "GM"),
+                        c("Q", "TT"),
+                        c("Q", "CS"))
 
-# pdf("epiCMIT_ClusterAIC.pdf")
+#pdf("epiCMIT_ClusterAIC.pdf")
 P5 <- epiCMIT.Illumina$epiCMIT.scores %>%
           inner_join(Sample_Annotations, by = c("Samples" = "SAMPLE_ID")) %>%
           filter(!is.na(ClusterAIC_TYPE)) %>%
           filter(!grepl("DLBCL", ClusterAIC_TYPE)) %>%
-          mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("RLN", "C1", "C2", "C3", "C4", "C5"))) %>%
+          filter(!grepl("RLN", ClusterAIC_TYPE)) %>%
+          mutate(ClusterAIC_TYPE = factor(ClusterAIC_TYPE, levels = c("CS", "TT", "GM", "Q", "AR"))) %>%
           ggpubr::ggboxplot(x = "ClusterAIC_TYPE", y = "epiCMIT", add = "jitter", palette = "jco", color = "ClusterAIC_TYPE", size = 0.5) +
-          scale_color_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3")) +
-          scale_fill_manual(values = c(RLN="orange", C1="#F8766D", C2="#A3A500", C3="#00BF7D", C4="#00B0F6", C5="#E76BF3")) +
+          scale_color_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
+          scale_fill_manual(values = c(CS="#F8766D", TT="#A3A500", GM="#00BF7D", Q="#00B0F6", AR="#E76BF3")) +
           theme_bw() +
           theme(title = element_text(size=20, face='bold'),
                 axis.title.x = element_text(size = 20),
@@ -348,15 +352,14 @@ P5 <- epiCMIT.Illumina$epiCMIT.scores %>%
                              label.y = c(max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT),
                                          max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT) + 0.04,
                                          max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT) + 0.08,
-                                         max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT) + 0.12,
-                                         max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT) + 0.16)) +
-          stat_compare_means(size = 7, label.x = 3.6, label.y = max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT)+0.16) +
+                                         max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT) + 0.12)) +
+          stat_compare_means(size = 7, label.x = 2.6, label.y = max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT)+0.18) +
           coord_cartesian(clip = 'off') +
           theme(plot.margin = margin(0.4, 0.4, 0.4, 0.4, "cm")) +
           scale_y_continuous(limits=c(min(epiCMIT.Illumina$epiCMIT.scores$epiCMIT)-0.02,
                                       max(epiCMIT.Illumina$epiCMIT.scores$epiCMIT)+0.18)) +
           scale_x_discrete(name ="Cluster")
-# dev.off()
+#dev.off()
 
 ## PLOT - F
 ## ========
@@ -400,7 +403,7 @@ P6 <- epiCMIT.Illumina$epiCMIT.scores %>%
 
 ## Arrange Plots
 ## =============
-pdf("Fig4.pdf", width = 21.02, height = 14.01)
+pdf("Methylation.pdf", width = 21.02, height = 14.01)
 ggarrange(P1, P2, P3, P4, P5, P6,
           labels = c("A", "B", "C", "D", "E", "F"),
           font.label = list(size = 32, face = "bold"),
