@@ -15,7 +15,7 @@ library(stringr)
 # Read IDAT Files
 # ===============
 # set the working directory
-baseDir <- "/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/00_minfi/02_FL_Samples/"
+baseDir <- "~/your raw data directory/"
 list.files(baseDir)
 
 # Read a sample sheet
@@ -51,7 +51,7 @@ dim(RGset)
 annotation(RGset)
 
 # Read in the sample annotation
-sample_ann <- read.table(file = "/cluster/home/t110989uhn/kridelgroup/rajesh/01_DNA_Methylome_Analysis/00_minfi/db/20221228_sample_annotations.txt",
+sample_ann <- read.table(file = "20221228_sample_annotations.txt",
                          sep = "\t",
                          header = TRUE,
                          na.strings=c("","NA"))
