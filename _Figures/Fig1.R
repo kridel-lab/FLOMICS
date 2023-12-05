@@ -96,7 +96,7 @@ capseq_t1_maf <- capseq_t1 %>%
 #--
 
 uhn_cases_t1 <- sample_annot %>% filter(cohort == "UHN") %>% .$SAMPLE_ID
-length(uhn.cases_t1)
+length(uhn_cases_t1)
 e4402_cases_t1 <- sample_annot %>% filter(cohort == "E4402") %>% .$SAMPLE_ID
 length(e4402_cases_t1)
 e2408_cases_t1 <- sample_annot %>% filter(cohort == "E2408") %>% .$SAMPLE_ID
