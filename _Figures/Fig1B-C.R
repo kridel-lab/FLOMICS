@@ -108,7 +108,7 @@ length(plosmed_cases_t1) #242
 length(c(uhn_cases_t1, e4402_cases_t1, e2408_cases_t1, plosmed_cases_t1))
 
 #--
-# Generate Fig 1 panel A
+# Generate Fig 1 panel B
 #--
 
 # Plot mutation frequency in all cohorts
@@ -232,7 +232,7 @@ plosmed_capseq_t1_maf <- capseq_t1_maf_2 %>%
 plosmed_maf <- read.maf(maf = plosmed_capseq_T1_maf)
 
 #--
-# Generate Fig 1 panel B - somatic interactions
+# Generate Fig 1 panel C - somatic interactions
 #--
 
 #load in the modified funtion
@@ -256,7 +256,7 @@ all_somatic_interactions$fdr <- p.adjust(all_somatic_interactions$pValue,
  method = "fdr")
 
 #--
-# Generate Fig 1 panel B - Odds ratios
+# Generate Fig 1 panel C - Odds ratios
 #--
 
 ### collect odds ratios for the individual cohorts
