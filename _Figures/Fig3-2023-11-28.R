@@ -62,7 +62,7 @@ p_grade <- clusters_clinical %>%
         legend.key.height = unit(0.2, "cm"),
         legend.key.width = unit(0.2, "cm"),
         legend.box.margin = margin(-10, -10, -10, -10)) +
-  guides(fill = guide_legend(title = "Grade")) + ylab("Proportion")
+  guides(fill = guide_legend(title = "Grade")) + ylab("Proportion") + xlab("Cluster")
 
 p_14_18 <- clusters_clinical %>%
   group_by(ClusterAIC, T_14_18) %>%
@@ -89,7 +89,7 @@ p_14_18 <- clusters_clinical %>%
         legend.key.height = unit(0.2, "cm"),
         legend.key.width = unit(0.2, "cm"),
         legend.box.margin = margin(-10, -10, -10, -10)) +
-  guides(fill = guide_legend(title = "t(14;18)")) + ylab("Proportion")
+  guides(fill = guide_legend(title = "t(14;18)")) + ylab("Proportion") + xlab("Cluster")
 p_14_18
 
 p_stage <- clusters_clinical %>%
@@ -115,7 +115,7 @@ p_stage <- clusters_clinical %>%
         legend.key.height = unit(0.2, "cm"),
         legend.key.width = unit(0.2, "cm"),
         legend.box.margin = margin(-10, -10, -10, -10)) +
-  guides(fill = guide_legend(title = "Ann Arbor stage")) + ylab("Proportion")
+  guides(fill = guide_legend(title = "Ann Arbor stage")) + ylab("Proportion") + xlab("Cluster")
 p_stage
 
 g <- gridExtra::arrangeGrob(p_grade, p_14_18, p_stage, nrow = 1,
