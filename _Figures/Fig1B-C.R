@@ -44,7 +44,7 @@ capseq_t1_mat <- capseq_t1_mat[,
 samples_nomuts_goodcoverage <- read.table(
    "samples_without_SNVs_with_high_coverage_in_gene_vs_sample_mat.txt",
     sep = "\t", header = TRUE)
-samples_nomuts <- names(capseq_T1_mat[, (colSums(capseq_T1_mat) == 0)])
+samples_nomuts <- names(capseq_t1_mat[, (colSums(capseq_t1_mat) == 0)])
 
 # Read in sample annotations
 sample_annot <- read.table(
