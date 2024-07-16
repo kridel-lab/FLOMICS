@@ -49,7 +49,7 @@ samples_nomuts <- names(capseq_t1_mat[, (colSums(capseq_t1_mat) == 0)])
 # Read in sample annotations
 sample_annot <- read.table(
    "metadata/20221228_sample_annotations.txt", sep = "\t", header = TRUE) %>%
-  filter(SAMPLE_ID %in% capseq_T1$SAMPLE_ID | SAMPLE_ID %in% samples_nomuts) %>%
+  filter(SAMPLE_ID %in% capseq_t1$SAMPLE_ID | SAMPLE_ID %in% samples_nomuts) %>%
   mutate(cohort = ifelse(INSTITUTION %in%
    c("AARHUS", "JGH", "KINGSTON", "OSLO", "PAH", "UHN"), "UHN",
                   ifelse(INSTITUTION == "E4402", "E4402",
@@ -149,8 +149,8 @@ order_genes <- capseq_t1_mat %>%
 plot.mut.freq.all.cohorts.all.muts <- capseq_t1_maf %>%
   group_by(Hugo_Symbol, Variant_Classification) %>%
   summarize(count = n()) %>%
-  filter(Hugo_Symbol %in% order.genes) %>%
-  mutate(Hugo_Symbol = factor(Hugo_Symbol, levels = order.genes)) %>%
+  filter(Hugo_Symbol %in% order_genes) %>%
+  mutate(Hugo_Symbol = factor(Hugo_Symbol, levels = order_genes)) %>%
   mutate(Variant_Classification =
    ifelse(Variant_Classification %in%
    c("Frame_Shift_Del", "Frame_Shift_Ins"), "Frame shift indel",
@@ -214,22 +214,22 @@ maf <- read.maf(maf = capseq_t1_maf_2)
 #multicentre
 uhn_capseq_t1_maf <- capseq_t1_maf_2 %>%
   dplyr::filter(Tumor_Sample_Barcode %in% uhn_cases_t1)
-uhn_maf <- read.maf(maf = uhn_capseq_T1_maf)
+uhn_maf <- read.maf(maf = uhn_capseq_t1_maf)
 
 #E4402
 e4402_capseq_t1_maf <- capseq_t1_maf_2 %>%
   dplyr::filter(Tumor_Sample_Barcode %in% e4402_cases_t1)
-e4402_maf <- read.maf(maf = e4402_capseq_T1_maf)
+e4402_maf <- read.maf(maf = e4402_capseq_t1_maf)
 
 #E2408
 e2408_capseq_t1_maf <- capseq_t1_maf_2 %>%
   dplyr::filter(Tumor_Sample_Barcode %in% e2408_cases_t1)
-e2408_maf <- read.maf(maf = e2408_capseq_T1_maf)
+e2408_maf <- read.maf(maf = e2408_capseq_t1_maf)
 
 #PLOSMED
 plosmed_capseq_t1_maf <- capseq_t1_maf_2 %>%
-  dplyr::filter(Tumor_Sample_Barcode %in% plosmed_cases_1)
-plosmed_maf <- read.maf(maf = plosmed_capseq_T1_maf)
+  dplyr::filter(Tumor_Sample_Barcode %in% plosmed_cases_t1)
+plosmed_maf <- read.maf(maf = plosmed_capseq_t1_maf)
 
 #--
 # Generate Fig 1 panel C - somatic interactions
@@ -304,92 +304,92 @@ plosmed_somatic_interactions$fdr <- p.adjust(
 
 ### extract the odds ratios from each somatic interactions analysis
 gna13_mef2b_dat <- rbind(
-  (all_cohorts_somatic_interactions %>%
+  (all_somatic_interactions %>%
   dplyr::filter(gene1 == "GNA13", gene2 == "MEF2B") %>%
       dplyr::mutate(cohort = "Combined", color = "combined",
          interaction = paste0(gene1, "-", gene2))),
-         (uhn_somaticInteractions %>%
+         (uhn_somatic_interactions %>%
   dplyr::filter(gene1 == "GNA13", gene2 == "MEF2B") %>%
       dplyr::mutate(cohort = "Multicentre",  color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (e4402_somaticInteractions %>%
+         (e4402_somatic_interactions %>%
   dplyr::filter(gene1 == "GNA13", gene2 == "MEF2B") %>%
       dplyr::mutate(cohort = "E4402", color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (e2408_somaticInteractions %>%
+         (e2408_somatic_interactions %>%
   dplyr::filter(gene1 == "GNA13", gene2 == "MEF2B") %>%
       dplyr::mutate(cohort = "E2408",  color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (plosmed_somaticInteractions %>%
+         (plosmed_somatic_interactions %>%
   dplyr::filter(gene1 == "GNA13", gene2 == "MEF2B") %>%
       dplyr::mutate(cohort = "PLOSMED",  color = "individual",
          interaction = paste0(gene1, "-", gene2)))
    )
 
 crebbp_ep300_dat <- rbind(
-  (all_cohorts_somaticInteractions %>%
+  (all_somatic_interactions %>%
      dplyr::filter(gene1 == "EP300", gene2 == "CREBBP") %>%
      dplyr::mutate(cohort = "Combined", color = "combined",
          interaction = paste0(gene2, "-", gene1))),
-         (uhn_somaticInteractions %>%
+         (uhn_somatic_interactions %>%
      dplyr::filter(gene1 == "EP300", gene2 == "CREBBP") %>%
      dplyr::mutate(cohort = "Multicentre",  color = "individual",
          interaction = paste0(gene2, "-", gene1))),
-         (e4402_somaticInteractions %>%
+         (e4402_somatic_interactions %>%
      dplyr::filter(gene1 == "EP300", gene2 == "CREBBP") %>%
      dplyr::mutate(cohort = "E4402", color = "individual",
          interaction = paste0(gene2, "-", gene1))),
-         (e2408_somaticInteractions %>%
+         (e2408_somatic_interactions %>%
      dplyr::filter(gene1 == "EP300", gene2 == "CREBBP") %>%
      dplyr::mutate(cohort = "E2408",  color = "individual",
          interaction = paste0(gene2, "-", gene1))),
-         (plosmed_somaticInteractions %>%
+         (plosmed_somatic_interactions %>%
      dplyr::filter(gene1 == "EP300", gene2 == "CREBBP") %>%
      dplyr::mutate(cohort = "PLOSMED",  color = "individual",
          interaction = paste0(gene2, "-", gene1)))
    )
 
 card11_ezh2_dat <- rbind(
-  (all_cohorts_somaticInteractions %>%
+  (all_somatic_interactions %>%
      dplyr::filter(gene1 == "CARD11", gene2 == "EZH2") %>%
      dplyr::mutate(cohort = "Combined", color = "combined",
          interaction = paste0(gene1, "-", gene2))),
-         (uhn_somaticInteractions %>%
+         (uhn_somatic_interactions %>%
      dplyr::filter(gene1 == "CARD11", gene2 == "EZH2") %>%
      dplyr::mutate(cohort = "Multicentre",  color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (e4402_somaticInteractions %>%
+         (e4402_somatic_interactions %>%
      dplyr::filter(gene1 == "CARD11", gene2 == "EZH2") %>%
      dplyr::mutate(cohort = "E4402", color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (e2408_somaticInteractions %>%
+         (e2408_somatic_interactions %>%
      dplyr::filter(gene1 == "CARD11", gene2 == "EZH2") %>%
      dplyr::mutate(cohort = "E2408",  color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (plosmed_somaticInteractions %>%
+         (plosmed_somatic_interactions %>%
      dplyr::filter(gene1 == "CARD11", gene2 == "EZH2") %>%
      dplyr::mutate(cohort = "PLOSMED",  color = "individual",
          interaction = paste0(gene1, "-", gene2)))
    )
 
 hvcn1_mef2b_dat <- rbind(
-  (all_cohorts_somaticInteractions %>%
+  (all_somatic_interactions %>%
      dplyr::filter(gene1 == "HVCN1", gene2 == "MEF2B") %>%
      dplyr::mutate(cohort = "Combined", color = "combined",
          interaction = paste0(gene1, "-", gene2))),
-         (uhn_somaticInteractions %>%
+         (uhn_somatic_interactions %>%
      dplyr::filter(gene1 == "HVCN1", gene2 == "MEF2B") %>%
      dplyr::mutate(cohort = "Multicentre",  color = "individual",
          interaction = paste0(gene1, "-", gene2))),
-         (e4402_somaticInteractions %>%
+         (e4402_somatic_interactions %>%
      dplyr::filter(gene1 == "MEF2B", gene2 == "HVCN1") %>%
      dplyr::mutate(cohort = "E4402", color = "individual",
          interaction = paste0(gene2, "-", gene1))),
-         (e2408_somaticInteractions %>%
+         (e2408_somatic_interactions %>%
      dplyr::filter(gene1 == "MEF2B", gene2 == "HVCN1") %>%
      dplyr::mutate(cohort = "E2408",  color = "individual",
          interaction = paste0(gene2, "-", gene1))),
-         (plosmed_somaticInteractions %>%
+         (plosmed_somatic_interactions %>%
      dplyr::filter(gene1 == "HVCN1", gene2 == "MEF2B") %>%
      dplyr::mutate(cohort = "PLOSMED",  color = "individual",
          interaction = paste0(gene1, "-", gene2)))
