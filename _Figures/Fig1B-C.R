@@ -24,7 +24,7 @@ genes_uhn <- read.csv(
    "DNAseq/Final_target_files/coding_gene_panel_PLOSMED_FLOMICS.csv") %>%
     filter(FLOMICS_PANEL == "YES") %>%
      .$Gene.Name
-genes_common <- intersect(genes_PLOSMED, genes_UHN)
+genes_common <- intersect(genes_plosmed, genes_uhn)
 
 # Read in list of all mutations
 capseq_t1 <- read.csv("filtered_MUTECT2_calls.csv") %>%
