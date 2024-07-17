@@ -129,9 +129,13 @@ MODdiscoversomaticInteractions <- function (maf, top = 25, genes = NULL, pvalue 
   miPM <- PM_new[ffx,]
   interactions <- getMutex(A = t(as.matrix(mutMat[,topgenes])), PM = miPM,
                            lower.tail = T,method = getMutexMethod,
-                           mixed = getMutexMixed)
+                           mixed = getMutexMixed) # evaluate if genes are mutually exclusive.
+  # From the probability matrix and the number of samples in which two genes are co-mutated, p-values can be estimated using the Poisson-Binomial distribution. That is, the probability of two genes being mutually exclusive is obtained. The p-values obtained are stored in a Matrix class in order to be memory efficient.
+  # As explained below, the p-values can be estimated using the Poisson-Binomial distribution.
+  # We are using the ShiftedBinomial apporach to the Poisson-Binomial distribution that correspond to a shifted Binomial with three parameters (Peköz, Shwartz, Christiansen, & Berlowitz, 2010).
   
   rownames(interactions) <- colnames(interactions) <- topgenes
+  # this interaction table is a table of poisson probabilities of the co-occurrence/mutually exclusivity of mutations in gene1 and gene2
   
   interactions <- log10(interactions * .5) *(interactions <.5) - 
     log10((1-interactions) * .5) *(interactions >=.5)
